@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from '../hooks/useNavigate';
+import BackButton from '../components/BackButton';
 
 export default function Profile() {
   const { user, logout, updateProfile } = useContext(AuthContext);
@@ -104,7 +105,12 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
-      <div className="max-w-4xl mx-auto p-8">
+      {/* Back Button */}
+      <div className="absolute top-6 left-6 z-10 md:static md:relative">
+        <BackButton variant="round" />
+      </div>
+
+      <div className="max-w-4xl mx-auto p-8 pt-20 md:pt-8">
         {/* Header */}
         <div className="flex items-center gap-6 mb-8">
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center border-4 border-purple-400 text-3xl font-bold shadow-lg">
