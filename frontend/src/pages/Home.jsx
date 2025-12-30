@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from '../hooks/useNavigate';
+import Logo from '../components/Logo';
 
 export default function Home() {
   const { user, logout } = useContext(AuthContext);
@@ -16,7 +17,12 @@ export default function Home() {
       {/* Navigation */}
       <nav className="bg-gray-900 border-b border-purple-500 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="text-3xl font-bold text-white">🎬 Cinema Booking</div>
+          <div className="flex items-center gap-4">
+            <Logo size={48} className="flex-shrink-0" />
+            <div className="text-2xl font-bold text-white">
+              Enimate
+            </div>
+          </div>
           <div className="flex items-center gap-4">
             {user ? (
               <>
