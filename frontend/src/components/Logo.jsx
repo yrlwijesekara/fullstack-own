@@ -13,7 +13,6 @@ export default function Logo({ size = 64, className = "" }) {
         draggable={false}
         style={{ maxWidth: size, maxHeight: size }}
       />
-      {/* Brand text removed as requested */}
     </div>
   );
 }
