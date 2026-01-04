@@ -6,6 +6,7 @@ const connectDB = require('./config/db');
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const snackRoutes = require('./routes/snackRoute');
 
 // Connect to MongoDB
 connectDB();
@@ -23,6 +24,7 @@ app.use(cookieParser()); // Parse cookies
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/snacks', snackRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

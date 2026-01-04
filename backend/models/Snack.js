@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const snackSchema = new mongoose.Schema(
     {
@@ -45,5 +45,5 @@ const snackSchema = new mongoose.Schema(
     }
 );
 
-export default mongoose.model('Snack', snackSchema);
+module.exports = mongoose.model('Snack', snackSchema);
         

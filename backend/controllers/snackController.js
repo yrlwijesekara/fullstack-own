@@ -1,6 +1,6 @@
-import Snack from "../models/Snack";
+const Snack = require('../models/Snack');
 
-export async function createsnack(req, res) {
+const createSnack = async (req, res) => {
     const newSnack = new Snack(req.body);
     try {
         const savedSnack = await newSnack.save();
@@ -17,4 +17,8 @@ export async function createsnack(req, res) {
          });
 
     }
-}
+};
+
+module.exports = {
+    createSnack
+};
