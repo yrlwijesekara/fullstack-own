@@ -104,7 +104,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
+    <div className="min-h-screen bg-background-900 text-text-primary">
       {/* Back Button */}
       <div className="absolute top-6 left-6 z-10 md:static md:relative">
         <BackButton variant="round" />
@@ -113,14 +113,14 @@ export default function Profile() {
       <div className="max-w-4xl mx-auto p-8 pt-20 md:pt-8">
         {/* Header */}
         <div className="flex items-center gap-6 mb-8">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center border-4 border-purple-400 text-3xl font-bold shadow-lg">
+          <div className="w-20 h-20 rounded-full bg-secondary-500 flex items-center justify-center border-4 border-secondary-300 text-3xl font-bold shadow-lg">
             {((user.name || user.firstName || user.email || 'U').charAt(0)).toUpperCase()}
           </div>
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-secondary-300">
               {user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.name || user.email}
             </h1>
-            <p className="text-gray-300 text-lg">{user.email}</p>
+            <p className="text-text-secondary text-lg">{user.email}</p>
           </div>
         </div>
 
@@ -157,7 +157,7 @@ export default function Profile() {
 
           {/* Message */}
           {message && (
-            <div className={`mb-6 p-4 rounded-lg ${message.includes('success') ? 'bg-green-600/20 border border-green-500/50 text-green-300' : 'bg-red-600/20 border border-red-500/50 text-red-300'}`}>
+            <div className={`mb-6 p-4 rounded-lg ${message.includes('success') ? 'bg-semantic-success/20 border border-semantic-success/50 text-semantic-success' : 'bg-semantic-error/20 border border-semantic-error/50 text-semantic-error'}`}>
               {message}
             </div>
           )}
@@ -166,18 +166,18 @@ export default function Profile() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* First Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">First Name</label>
+              <label className="block text-sm font-medium text-text-secondary mb-2">First Name</label>
               {isEditing ? (
                 <input
                   type="text"
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-200"
+                  className="w-full px-4 py-3 bg-surface-500 border border-surface-400 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-transparent text-text-primary placeholder-text-muted transition-all duration-200"
                   placeholder="Enter first name"
                 />
               ) : (
-                <div className="px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white">
+                <div className="px-4 py-3 bg-surface-500/50 border border-surface-400 rounded-lg text-text-primary">
                   {user.firstName || '-'}
                 </div>
               )}
@@ -185,18 +185,18 @@ export default function Profile() {
 
             {/* Last Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Last Name</label>
+              <label className="block text-sm font-medium text-text-secondary mb-2">Last Name</label>
               {isEditing ? (
                 <input
                   type="text"
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-200"
+                  className="w-full px-4 py-3 bg-surface-500 border border-surface-400 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-transparent text-text-primary placeholder-text-muted transition-all duration-200"
                   placeholder="Enter last name"
                 />
               ) : (
-                <div className="px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white">
+                <div className="px-4 py-3 bg-surface-500/50 border border-surface-400 rounded-lg text-text-primary">
                   {user.lastName || '-'}
                 </div>
               )}
@@ -204,26 +204,26 @@ export default function Profile() {
 
             {/* Email (Read-only) */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
-              <div className="px-4 py-3 bg-gray-700/30 border border-gray-600 rounded-lg text-gray-400 cursor-not-allowed">
+              <label className="block text-sm font-medium text-text-secondary mb-2">Email</label>
+              <div className="px-4 py-3 bg-surface-500/30 border border-surface-400 rounded-lg text-text-muted cursor-not-allowed">
                 {user.email}
               </div>
             </div>
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
+              <label className="block text-sm font-medium text-text-secondary mb-2">Phone Number</label>
               {isEditing ? (
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-200"
+                  className="w-full px-4 py-3 bg-surface-500 border border-surface-400 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-transparent text-text-primary placeholder-text-muted transition-all duration-200"
                   placeholder="Enter phone number"
                 />
               ) : (
-                <div className="px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white">
+                <div className="px-4 py-3 bg-surface-500/50 border border-surface-400 rounded-lg text-text-primary">
                   {user.phone || '-'}
                 </div>
               )}
@@ -232,39 +232,39 @@ export default function Profile() {
 
           {/* Password Section */}
           {isEditing && (
-            <div className="mt-8 pt-6 border-t border-gray-600">
-              <h3 className="text-lg font-semibold text-purple-300 mb-4">Change Password</h3>
+            <div className="mt-8 pt-6 border-t border-surface-400">
+              <h3 className="text-lg font-semibold text-secondary-300 mb-4">Change Password</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Current Password</label>
+                  <label className="block text-sm font-medium text-text-secondary mb-2">Current Password</label>
                   <input
                     type="password"
                     name="currentPassword"
                     value={formData.currentPassword}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-200"
+                    className="w-full px-4 py-3 bg-surface-500 border border-surface-400 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-transparent text-text-primary placeholder-text-muted transition-all duration-200"
                     placeholder="Enter current password"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">New Password</label>
+                  <label className="block text-sm font-medium text-text-secondary mb-2">New Password</label>
                   <input
                     type="password"
                     name="newPassword"
                     value={formData.newPassword}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-200"
+                    className="w-full px-4 py-3 bg-surface-500 border border-surface-400 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-transparent text-text-primary placeholder-text-muted transition-all duration-200"
                     placeholder="Enter new password"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Confirm New Password</label>
+                  <label className="block text-sm font-medium text-text-secondary mb-2">Confirm New Password</label>
                   <input
                     type="password"
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-200"
+                    className="w-full px-4 py-3 bg-surface-500 border border-surface-400 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-transparent text-text-primary placeholder-text-muted transition-all duration-200"
                     placeholder="Confirm new password"
                   />
                 </div>
@@ -276,13 +276,13 @@ export default function Profile() {
           <div className="mt-8 flex gap-4">
             <button
               onClick={() => navigate('/')}
-              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition-colors duration-200 shadow-lg"
+              className="px-6 py-3 bg-primary-500 hover:bg-primary-600 rounded-lg font-medium transition-colors duration-200 shadow-lg"
             >
               ← Back to Home
             </button>
             <button
               onClick={handleLogout}
-              className="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-medium transition-colors duration-200 shadow-lg"
+              className="px-6 py-3 bg-semantic-error hover:bg-semantic-error/80 rounded-lg font-medium transition-colors duration-200 shadow-lg"
             >
               Logout
             </button>

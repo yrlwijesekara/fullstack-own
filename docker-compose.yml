@@ -9,7 +9,7 @@ services:
   backend:
     build: ./backend
     ports:
-      - "5000:5000"
+      - "5008:5008"
     env_file:
       - ./backend/.env
     depends_on:
@@ -20,7 +20,7 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: "http://backend:5000"
+        VITE_API_URL: "http://backend:5008"
     ports:
       - "5173:80"
     restart: unless-stopped

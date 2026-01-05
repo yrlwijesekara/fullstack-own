@@ -13,11 +13,11 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-gray-900 border-b border-purple-500 sticky top-0 z-50">
+    <nav className="bg-background-800 border-b border-secondary-400 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <div className="flex items-center gap-4">
           <Logo size={48} className="flex-shrink-0" />
-          <div className="text-2xl font-bold text-white">
+          <div className="text-2xl font-bold text-text-primary">
             Enimate
           </div>
         </div>
@@ -28,7 +28,7 @@ export default function Navbar() {
                 <div
                   role="button"
                   onClick={() => navigate('/profile')}
-                  className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center border-2 border-purple-400 cursor-pointer"
+                  className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center border-2 border-purple-400 cursor-pointer"
                   title="View profile"
                 >
                   <span className="text-white font-bold text-sm">{((user.name || user.firstName || user.email || 'U').charAt(0)).toUpperCase()}</span>

@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+/**
+ * @desc    Protect routes - verify authentication
+ */
 exports.protect = async (req, res, next) => {
   let token;
 
@@ -33,3 +36,24 @@ exports.protect = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Check if user is admin
+ * @note    Must be used after protect middleware
+ */
+exports.isAdmin = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authorized to access this route' });
+    }
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        message: 'Access denied. Admin privileges required.' 
+      });
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).json({ message: 'Server error during authorization check' });
+  }
+};

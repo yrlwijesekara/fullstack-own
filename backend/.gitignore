@@ -47,3 +47,6 @@ coverage/
 
 # MongoDB data (if using local MongoDB)
 data/
+
+# Uploaded files
+uploads/
