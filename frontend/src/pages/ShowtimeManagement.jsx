@@ -39,7 +39,8 @@ export default function ShowtimeManagement() {
       let moviesData = { success: false, data: [] };
       try {
         const moviesRes = await fetch(`${API_BASE_URL}/movies`);
-        moviesData = await moviesRes.json();
+        const data = await moviesRes.json();
+        moviesData = data || { success: false, data: [] };
       } catch (moviesErr) {
         console.log("Movies endpoint not ready yet:", moviesErr.message);
       }
@@ -48,25 +49,42 @@ export default function ShowtimeManagement() {
       let hallsData = { success: false, data: [] };
       try {
         const hallsRes = await fetch(`${API_BASE_URL}/halls`);
-        hallsData = await hallsRes.json();
+        const data = await hallsRes.json();
+        hallsData = data || { success: false, data: [] };
       } catch (hallsErr) {
         console.log("Halls endpoint not ready yet:", hallsErr.message);
       }
 
-      // Set data
-      if (showtimesData.success) setShowtimes(showtimesData.data);
-      if (moviesData.success) setMovies(moviesData.data || []);
-      if (hallsData.success) setHalls(hallsData.data || []);
+      // Set data - with proper undefined checks
+      if (showtimesData && showtimesData.success) {
+        setShowtimes(showtimesData.data || []);
+      }
+
+      if (moviesData && moviesData.success) {
+        setMovies(moviesData.data || []);
+      }
+
+      if (hallsData && hallsData.success) {
+        setHalls(hallsData.data || []);
+      }
 
       // If endpoints not ready, use mock data temporarily
-      if (!moviesData.success || moviesData.data.length === 0) {
+      if (
+        !moviesData.success ||
+        !moviesData.data ||
+        moviesData.data.length === 0
+      ) {
         setMovies([
           { _id: "movie1", title: "Avatar: The Way of Water", duration: 192 },
           { _id: "movie2", title: "Spider-Man: No Way Home", duration: 148 },
         ]);
       }
 
-      if (!hallsData.success || hallsData.data.length === 0) {
+      if (
+        !hallsData.success ||
+        !hallsData.data ||
+        hallsData.data.length === 0
+      ) {
         setHalls([
           { _id: "hall1", name: "Screen 1 (IMAX)", capacity: 250 },
           { _id: "hall2", name: "Screen 2 (Dolby Atmos)", capacity: 180 },
@@ -141,9 +159,15 @@ export default function ShowtimeManagement() {
     setFormData({
       movieId: showtime.movieId || showtime.movieId,
       hallId: showtime.hallId || showtime.hallId,
-      date: showtime.date ? new Date(showtime.date).toISOString().split("T")[0] : "",
-      startTime: showtime.startTime ? new Date(showtime.startTime).toTimeString().slice(0, 5) : "",
-      endTime: showtime.endTime ? new Date(showtime.endTime).toTimeString().slice(0, 5) : "",
+      date: showtime.date
+        ? new Date(showtime.date).toISOString().split("T")[0]
+        : "",
+      startTime: showtime.startTime
+        ? new Date(showtime.startTime).toTimeString().slice(0, 5)
+        : "",
+      endTime: showtime.endTime
+        ? new Date(showtime.endTime).toTimeString().slice(0, 5)
+        : "",
       price: showtime.price || 10.0,
     });
     setShowForm(true);
@@ -184,12 +208,12 @@ export default function ShowtimeManagement() {
   };
 
   const getMovieTitle = (movieId) => {
-    const movie = movies.find(m => m._id === movieId);
+    const movie = movies.find((m) => m._id === movieId);
     return movie ? movie.title : `Movie ID: ${movieId}`;
   };
 
   const getHallName = (hallId) => {
-    const hall = halls.find(h => h._id === hallId);
+    const hall = halls.find((h) => h._id === hallId);
     return hall ? hall.name : `Hall ID: ${hallId}`;
   };
 
@@ -221,9 +245,10 @@ export default function ShowtimeManagement() {
         )}
 
         {/* Info Message if endpoints not ready */}
-        {(movies.length === 2 && movies[0]._id === "movie1") && (
+        {movies.length === 2 && movies[0]._id === "movie1" && (
           <div className="mb-6 p-4 bg-blue-600/20 border border-blue-500/50 text-blue-300 rounded-lg">
-            ⓘ Using mock data for movies/halls. Will switch to real data when Members 2 & 3 complete their endpoints.
+            ⓘ Using mock data for movies/halls. Will switch to real data when
+            Members 2 & 3 complete their endpoints.
           </div>
         )}
 
@@ -251,7 +276,8 @@ export default function ShowtimeManagement() {
                   <option value="">Select a movie</option>
                   {movies.map((movie) => (
                     <option key={movie._id} value={movie._id}>
-                      {movie.title} {movie.duration ? `(${movie.duration} min)` : ""}
+                      {movie.title}{" "}
+                      {movie.duration ? `(${movie.duration} min)` : ""}
                     </option>
                   ))}
                 </select>
@@ -270,7 +296,8 @@ export default function ShowtimeManagement() {
                   <option value="">Select a hall</option>
                   {halls.map((hall) => (
                     <option key={hall._id} value={hall._id}>
-                      {hall.name} {hall.capacity ? `(${hall.capacity} seats)` : ""}
+                      {hall.name}{" "}
+                      {hall.capacity ? `(${hall.capacity} seats)` : ""}
                     </option>
                   ))}
                 </select>
@@ -365,7 +392,9 @@ export default function ShowtimeManagement() {
           <div className="text-center py-8 text-gray-400">
             <div className="text-4xl mb-4">🎬</div>
             <p className="text-xl mb-2">No showtimes found</p>
-            <p className="mb-4">Click "Add New Showtime" to create your first showtime!</p>
+            <p className="mb-4">
+              Click "Add New Showtime" to create your first showtime!
+            </p>
             <button
               onClick={() => setShowForm(true)}
               className="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition-colors"
@@ -386,7 +415,8 @@ export default function ShowtimeManagement() {
                       {getMovieTitle(showtime.movieId)}
                     </h3>
                     <p className="text-gray-400 text-sm">
-                      {getHallName(showtime.hallId)} • {showtime.availableSeats} seats available
+                      {getHallName(showtime.hallId)} • {showtime.availableSeats}{" "}
+                      seats available
                     </p>
                   </div>
                   <span className="px-3 py-1 bg-purple-600 rounded-full text-sm font-medium">
@@ -402,14 +432,19 @@ export default function ShowtimeManagement() {
                   <p className="flex items-center gap-2">
                     <span className="text-gray-400">⏰</span>
                     <span>
-                      {showtime.startTime ? new Date(showtime.startTime).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }) : "N/A"} - 
-                      {showtime.endTime ? new Date(showtime.endTime).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }) : "N/A"}
+                      {showtime.startTime
+                        ? new Date(showtime.startTime).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "N/A"}{" "}
+                      -
+                      {showtime.endTime
+                        ? new Date(showtime.endTime).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "N/A"}
                     </span>
                   </p>
                   <p className="text-sm text-gray-400">
