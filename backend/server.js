@@ -7,6 +7,7 @@ const connectDB = require('./config/db');
 // Import routes
 const authRoutes = require('./routes/auth');
 const movieRoutes = require('./routes/movies');
+const snackRoutes = require('./routes/snackRoute');
 
 // Connect to MongoDB
 connectDB();
@@ -28,6 +29,8 @@ app.use('/uploads', express.static('uploads'));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
+app.use('/api/snacks', snackRoutes);
+
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -57,3 +57,12 @@ exports.isAdmin = async (req, res, next) => {
     res.status(500).json({ message: 'Server error during authorization check' });
   }
 };
+
+/**
+ * @desc    Check if user is admin (utility function for controllers)
+ * @param   {Object} req - Express request object
+ * @returns {Boolean} true if user is admin, false otherwise
+ */
+exports.checkIsAdmin = (req) => {
+  return req.user && req.user.role === 'admin';
+};
