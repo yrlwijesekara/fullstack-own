@@ -4,16 +4,16 @@ export default function Modal({ isOpen, title, message, onClose, onConfirm, conf
   // Theme classes
   const themeStyles = {
     default: {
-      container: 'bg-gray-800 border-purple-500',
-      title: 'text-white',
-      message: 'text-gray-300',
-      button: 'bg-purple-600 hover:bg-purple-700',
+      container: 'bg-surface-600 border-secondary-400',
+      title: 'text-text-primary',
+      message: 'text-text-secondary',
+      button: 'bg-primary-500 hover:bg-primary-600',
     },
     success: {
-      container: 'bg-green-700 border-green-500',
-      title: 'text-white',
-      message: 'text-green-100',
-      button: 'bg-green-600 hover:bg-green-700',
+      container: 'bg-semantic-success/20 border-semantic-success',
+      title: 'text-text-primary',
+      message: 'text-text-secondary',
+      button: 'bg-semantic-success hover:bg-semantic-success/80',
     },
   };
   const styles = themeStyles[theme] || themeStyles.default;

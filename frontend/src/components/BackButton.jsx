@@ -30,7 +30,7 @@ export default function BackButton({
   return (
     <button
       onClick={() => navigate(to)}
-      className={`flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white transition-colors duration-200 shadow-lg font-medium ${buttonClasses[size]} ${variantClasses[variant]} ${className}`}
+      className={`flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-text-primary transition-colors duration-200 shadow-lg font-medium ${buttonClasses[size]} ${variantClasses[variant]} ${className}`}
       aria-label="Go back"
     >
       <svg
