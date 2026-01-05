@@ -1,3 +1,4 @@
+const { checkIsAdmin } = require('../middleware/auth');
 const Snack = require('../models/Snack');
 
 const createSnack = async (req, res) => {
@@ -19,6 +20,35 @@ const createSnack = async (req, res) => {
     }
 };
 
+const getproducts = async (req, res) => {
+    try {
+        if(checkIsAdmin(req)){
+            const snacks = await Snack.find();
+            res.status(200).json(
+                {
+                    message: "snacks fetched successfully",
+                    snacks: snacks
+                }
+            );
+        }else{
+            const snacks = await Snack.find({ isAvailable: true });
+            res.status(200).json(
+                {
+                    message: "snacks fetched successfully",
+                    snacks: snacks
+                }
+            );
+            
+        } 
+    } catch (err) {
+        res.status(500).json({ 
+            message: "Failed to fetch snacks", 
+            error: err.message
+         });
+    }
+};
+
 module.exports = {
-    createSnack
+    createSnack,
+    getproducts
 };

@@ -32,3 +32,31 @@ exports.protect = async (req, res, next) => {
     res.status(401).json({ message: 'Not authorized to access this route' });
   }
 };
+
+/*
+
+
+
+exports.isAdmin = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authorized to access this route' });
+    }
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        message: 'Access denied. Admin privileges required.' 
+      });
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).json({ message: 'Server error during authorization check' });
+  }
+};
+
+// Utility function to check if user is admin (for use in controllers)
+exports.checkIsAdmin = (req) => {
+  return req.user && req.user.role === 'admin';
+};
+*/
