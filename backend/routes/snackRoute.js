@@ -1,5 +1,5 @@
 const express = require('express');
-const { createSnack, getproducts, deleteSnack, updatesnack } = require('../controllers/snackController');
+const { createSnack, getproducts, deleteSnack, updatesnack, getSnackinfo } = require('../controllers/snackController');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -8,6 +8,7 @@ router.post('/', createSnack);
 router.get('/', protect, getproducts);
 router.delete('/:snackid', protect, deleteSnack);
 router.put('/:snackid', protect, updatesnack);
+router.get('/:snackid', protect, getSnackinfo);
 
 module.exports = router;
 
