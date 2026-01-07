@@ -1,43 +1,16 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import { AuthProvider } from './context/AuthProvider';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import HallsList from './pages/HallsList';
+import HallForm from './pages/HallForm';
 
 function AppContent() {
   const { loading } = useContext(AuthContext);
-  const [currentPage, setCurrentPage] = useState('home');
-
-  useEffect(() => {
-    // Simple routing based on URL
-    const handleRouteChange = () => {
-      const path = window.location.pathname;
-      if (path === '/login') setCurrentPage('login');
-        else if (path === '/register') setCurrentPage('register');
-        else if (path === '/profile') setCurrentPage('profile');
-        else setCurrentPage('home');
-    };
-
-    handleRouteChange();
-    window.addEventListener('popstate', handleRouteChange);
-
-    return () => window.removeEventListener('popstate', handleRouteChange);
-  }, []);
-
-  // Override history for navigation
-  useEffect(() => {
-    const originalPushState = window.history.pushState;
-    window.history.pushState = function (...args) {
-      originalPushState.apply(window.history, args);
-      const newPath = args[2];
-      if (newPath === '/login') setCurrentPage('login');
-      else if (newPath === '/register') setCurrentPage('register');
-      else if (newPath === '/profile') setCurrentPage('profile');
-      else setCurrentPage('home');
-    };
-  }, []);
 
   if (loading) {
     return (
@@ -47,21 +20,25 @@ function AppContent() {
     );
   }
 
-  // Show all pages - home is public, login/register for auth
+  // Let React Router decide which page to show
   return (
-    <>
-      {currentPage === 'login' && <Login />}
-      {currentPage === 'register' && <Register />}
-      {currentPage === 'profile' && <Profile />}
-      {currentPage === 'home' && <Home />}
-    </>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/admin/halls" element={<HallsList />} />
+      <Route path="/admin/halls/:id" element={<HallForm />} />
+    </Routes>
   );
 }
 
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
     </AuthProvider>
   );
 }
