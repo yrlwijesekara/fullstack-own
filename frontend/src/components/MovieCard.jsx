@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { useNavigate } from '../hooks/useNavigate';
 
 /**
  * MovieCard Component - Displays a movie card with poster, title, rating, and actions
@@ -9,6 +10,7 @@ import PropTypes from 'prop-types';
  * @param {Function} onClick - Callback function when card is clicked
  */
 export default function MovieCard({ movie, showAdminActions = false, onEdit, onDelete, onClick }) {
+  const navigate = useNavigate();
   const handleCardClick = () => {
     if (onClick) {
       onClick(movie);
@@ -109,8 +111,7 @@ export default function MovieCard({ movie, showAdminActions = false, onEdit, onD
           className="w-full py-2 bg-primary-500 border border-secondary-400 text-text-primary font-bold text-sm hover:bg-primary-600 transition uppercase tracking-wider rounded shadow-lg"
           onClick={(e) => {
             e.stopPropagation();
-            // Handle booking action here
-            console.log('Book movie:', movie.title);
+            navigate(`/movies/${movie._id || movie.id}/showtimes`);
           }}
         >
           BOOK

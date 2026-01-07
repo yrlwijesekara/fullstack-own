@@ -42,11 +42,11 @@ export default function Movies() {
   };
 
   const handleMovieClick = (movie) => {
-    navigate(`/movies/${movie.id}`);
+    navigate(`/movies/${movie._id || movie.id}`);
   };
 
   const handleEdit = (movie) => {
-    navigate(`/movies/${movie.id}/edit`);
+    navigate(`/movies/${movie._id || movie.id}/edit`);
   };
 
   const handleDeleteClick = (movie) => {
@@ -55,7 +55,7 @@ export default function Movies() {
 
   const handleDeleteConfirm = async () => {
     try {
-      await deleteMovie(deleteModal.movie.id);
+      await deleteMovie(deleteModal.movie._id || deleteModal.movie.id);
       setDeleteModal({ isOpen: false, movie: null });
       loadMovies(); // Reload movies after deletion
     } catch (err) {

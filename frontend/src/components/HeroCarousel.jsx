@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from '../hooks/useNavigate';
 
 /**
  * HeroCarousel Component - Featured movies carousel with auto-play and navigation
@@ -8,6 +9,7 @@ import PropTypes from 'prop-types';
  * @param {number} interval - Milliseconds between slides (default: 5000)
  */
 export default function HeroCarousel({ movies = [], autoPlay = true, interval = 5000 }) {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef(null);
@@ -114,7 +116,10 @@ export default function HeroCarousel({ movies = [], autoPlay = true, interval = 
             </div>
 
             {/* Action Button */}
-            <button className="bg-primary-500 border border-secondary-400 text-text-primary px-8 py-3 font-bold text-sm md:text-base hover:bg-primary-600 transition uppercase tracking-wider rounded-lg shadow-lg">
+            <button 
+              onClick={() => navigate(`/movies/${movie._id || movie.id}/showtimes`)}
+              className="bg-primary-500 border border-secondary-400 text-text-primary px-8 py-3 font-bold text-sm md:text-base hover:bg-primary-600 transition uppercase tracking-wider rounded-lg shadow-lg"
+            >
               BOOK NOW
             </button>
           </div>

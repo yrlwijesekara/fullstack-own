@@ -56,14 +56,8 @@ export default function MovieDetails() {
       return;
     }
     
-    // Navigate to seat selection or booking page
-    if (showtime) {
-      console.log('Booking showtime:', showtime);
-      alert(`Booking ${movie.title} at ${showtime.cinema} - ${showtime.time}`);
-    } else {
-      console.log('Navigate to all showtimes');
-      alert('View all showtimes - feature coming soon!');
-    }
+    // Navigate to movie showtimes page
+    navigate(`/movies/${movieId}/showtimes`);
   };
 
   const getYouTubeEmbedUrl = (url) => {
@@ -297,14 +291,6 @@ export default function MovieDetails() {
                   </p>
                 </div>
               </div>
-
-              {/* Sticky Buy Tickets Button */}
-              <button
-                onClick={() => handleBuyTickets()}
-                className="w-full px-6 py-3 bg-primary-500 text-text-primary font-bold uppercase tracking-wider hover:bg-primary-600 transition border border-secondary-400 rounded-lg shadow-lg"
-              >
-                🎫 Buy Tickets
-              </button>
             </div>
           </div>
         </div>
