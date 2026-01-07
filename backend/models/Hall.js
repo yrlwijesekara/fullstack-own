@@ -1,70 +1,55 @@
 const mongoose = require('mongoose');
 
-const seatSchema = new mongoose.Schema(
-  {
-    row: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    col: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    label: {
-      type: String,
-      // e.g. "A1", "B10"
-    },
-    type: {
-      type: String,
-      enum: ['regular', 'vip', 'accessible'],
-      default: 'regular',
-    },
-    isActive: {
-      type: Boolean,
-      default: true, // false = blocked/removed seat
-    },
-  },
-  { _id: false }
-);
-
 const hallSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: [true, 'Hall name is required'],
       trim: true,
-      unique: true,
     },
-    description: {
+    cinema: {
       type: String,
+      required: [true, 'Cinema location is required'],
       trim: true,
     },
-    status: {
-      type: String,
-      enum: ['active', 'maintenance', 'closed'],
-      default: 'active',
+    totalSeats: {
+      type: Number,
+      required: [true, 'Total seats is required'],
+      min: [1, 'Total seats must be at least 1'],
+      max: [1000, 'Total seats cannot exceed 1000'],
     },
     layout: {
       rows: {
         type: Number,
         required: true,
         min: 1,
+        max: 50,
       },
-      cols: {
+      seatsPerRow: {
         type: Number,
         required: true,
         min: 1,
-      },
-      seats: {
-        type: [seatSchema],
-        default: [],
+        max: 100,
       },
     },
-    totalSeats: {
-      type: Number,
-      default: 0,
+    features: [
+      {
+        type: String,
+        enum: [
+          'IMAX',
+          '3D',
+          '4DX',
+          'Dolby Atmos',
+          'Recliner Seats',
+          'VIP',
+          'Standard',
+        ],
+      },
+    ],
+    status: {
+      type: String,
+      enum: ['active', 'maintenance', 'inactive'],
+      default: 'active',
     },
   },
   {
@@ -72,12 +57,17 @@ const hallSchema = new mongoose.Schema(
   }
 );
 
-// Auto-calc totalSeats from active seats if not provided
-hallSchema.pre('save', function (next) {
-  if (this.layout && Array.isArray(this.layout.seats)) {
-    this.totalSeats = this.layout.seats.filter((s) => s.isActive !== false).length;
-  }
-  next();
+// Index for faster queries
+hallSchema.index({ cinema: 1, name: 1 });
+hallSchema.index({ status: 1 });
+
+// Virtual for full hall identifier
+hallSchema.virtual('fullName').get(function () {
+  return `${this.cinema} - ${this.name}`;
 });
+
+// Ensure virtuals are included in JSON
+hallSchema.set('toJSON', { virtuals: true });
+hallSchema.set('toObject', { virtuals: true });
 
 module.exports = mongoose.model('Hall', hallSchema);

@@ -1,10 +1,11 @@
-import { useState, useEffect, useParams } from "react";
+import { useState, useEffect } from "react";
 import { API_BASE_URL } from "../utils/api";
 import Navbar from "../components/Navbar";
 import BackButton from "../components/BackButton";
 
 export default function MovieShowtimes() {
-  const { movieId } = useParams();
+  // Get movie ID from URL path (e.g., /movies/123/showtimes)
+  const movieId = window.location.pathname.split('/')[2];
   const [movie, setMovie] = useState(null);
   const [showtimes, setShowtimes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -112,7 +113,7 @@ export default function MovieShowtimes() {
           <div className="flex flex-col md:flex-row gap-6">
             {movie?.posterImage && (
               <img
-                src={`${API_BASE_URL.replace("/api", "")}${movie.posterImage}`}
+                src={movie.posterImage.startsWith('http') ? movie.posterImage : `${API_BASE_URL.replace('/api', '')}${movie.posterImage}`}
                 alt={movie.title}
                 className="w-48 h-72 rounded-lg object-cover"
               />
