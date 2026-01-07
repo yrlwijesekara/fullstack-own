@@ -8,6 +8,7 @@ import Profile from './pages/Profile';
 import Movies from './pages/Movies';
 import MovieDetails from './pages/MovieDetails';
 import MovieShowtimes from './pages/MovieShowtimes';
+import Concession from './pages/concession';
 
 function AppContent() {
   const { loading } = useContext(AuthContext);
@@ -80,7 +81,7 @@ function AppContent() {
       {currentPage === 'movie-showtimes' && <MovieShowtimes />}
       {currentPage === 'profile' && <Profile />}
       {currentPage === 'cinemas' && <div className="min-h-screen bg-background-900"><div className="text-center py-20 text-text-primary">Cinemas page coming soon...</div></div>}
-      {currentPage === 'concessions' && <div className="min-h-screen bg-background-900"><div className="text-center py-20 text-text-primary">Concessions page coming soon...</div></div>}
+      {currentPage === 'concessions' && <Concession />}
       {currentPage === 'home' && <Home />}
     </>
   );

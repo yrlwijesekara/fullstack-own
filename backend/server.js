@@ -4,13 +4,10 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const connectDB = require("./config/db");
 
-// Import routes - KEEP BOTH
-const authRoutes = require("./routes/auth");
-const movieRoutes = require("./routes/movies");
-const showtimeRoutes = require("./routes/showtimeRoutes");
 // Import routes
 const authRoutes = require('./routes/auth');
 const movieRoutes = require('./routes/movies');
+const showtimeRoutes = require('./routes/showtimeRoutes');
 const snackRoutes = require('./routes/snackRoute');
 
 // Connect to MongoDB
@@ -32,10 +29,11 @@ app.use(cookieParser()); // Parse cookies
 // Serve static files from uploads directory
 app.use('/uploads', express.static('uploads'));
 
-// Routes - KEEP BOTH
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/showtimes", showtimeRoutes);
+app.use("/api/snacks", snackRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
