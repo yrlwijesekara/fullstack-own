@@ -8,6 +8,10 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
 const movieRoutes = require("./routes/movies");
 const showtimeRoutes = require("./routes/showtimeRoutes");
+// Import routes
+const authRoutes = require('./routes/auth');
+const movieRoutes = require('./routes/movies');
+const snackRoutes = require('./routes/snackRoute');
 const hallRoutes = require('./routes/halls'); // <--- add this
 
 // Connect to MongoDB

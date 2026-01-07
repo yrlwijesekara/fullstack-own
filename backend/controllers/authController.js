@@ -55,6 +55,7 @@ exports.register = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         phone: user.phone,
+        
       },
     });
   } catch (error) {
@@ -107,6 +108,7 @@ exports.login = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         phone: user.phone,
+        
       },
     });
   } catch (error) {
