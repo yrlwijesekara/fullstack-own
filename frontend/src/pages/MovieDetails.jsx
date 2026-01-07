@@ -98,22 +98,6 @@ export default function MovieDetails() {
 
   const embedUrl = getYouTubeEmbedUrl(movie.trailerUrl);
 
-  // Sample showtime data (in production, this would come from API)
-  const showtimes = [
-    {
-      cinema: 'Cinema Location A - Hall 1',
-      times: ['11:00 AM', '2:00 PM', '5:00 PM', '8:00 PM', '11:00 PM']
-    },
-    {
-      cinema: 'Cinema Location B - Hall 2',
-      times: ['11:00 AM', '2:00 PM', '5:00 PM', '8:00 PM']
-    },
-    {
-      cinema: 'Cinema Location C - Hall 3',
-      times: ['11:00 AM', '2:00 PM', '5:00 PM', '8:00 PM']
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-background-900">
       <Navbar />
@@ -208,37 +192,6 @@ export default function MovieDetails() {
                 </div>
               </div>
             )}
-
-            {/* Showtime Selection */}
-            <div className="border-t border-secondary-400 pt-8">
-              <h2 className="text-xl font-bold uppercase tracking-wide mb-6 text-text-primary">Select Showtime</h2>
-              
-              {showtimes.map((location, locationIndex) => (
-                <div key={locationIndex} className="mb-6 p-4 border border-secondary-400 bg-surface-600 rounded-lg">
-                  <h3 className="font-bold uppercase tracking-wide mb-3 text-text-primary">{location.cinema}</h3>
-                  <div className="flex flex-wrap gap-3">
-                    {location.times.map((time, timeIndex) => (
-                      <button
-                        key={timeIndex}
-                        onClick={() => handleBuyTickets({ cinema: location.cinema, time })}
-                        className="px-6 py-2 border border-secondary-400 bg-surface-500 font-bold text-sm hover:bg-primary-500 hover:border-primary-500 transition text-text-primary rounded"
-                      >
-                        {time}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-
-              <div className="mt-6 text-center">
-                <button
-                  onClick={() => handleBuyTickets()}
-                  className="px-8 py-3 bg-primary-500 text-text-primary font-bold uppercase tracking-wider hover:bg-primary-600 transition border border-secondary-400 rounded-lg shadow-lg"
-                >
-                  View All Showtimes & Book
-                </button>
-              </div>
-            </div>
           </div>
 
           {/* Right Column - Quick Info & Sticky CTA */}
