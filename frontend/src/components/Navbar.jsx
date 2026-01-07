@@ -15,10 +15,34 @@ export default function Navbar() {
   return (
     <nav className="bg-background-800 border-b border-secondary-400 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <Logo size={48} className="flex-shrink-0" />
-          <div className="text-2xl font-bold text-text-primary">
-            Enimate
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/')}>
+            <Logo size={48} className="flex-shrink-0" />
+            <div className="text-2xl font-bold text-text-primary">
+              Enimate
+            </div>
+          </div>
+          
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center gap-6 ml-8">
+            <button
+              onClick={() => navigate('/movies')}
+              className="text-text-primary hover:text-purple-400 font-medium transition uppercase tracking-wide text-sm"
+            >
+              Movies
+            </button>
+            <button
+              onClick={() => navigate('/cinemas')}
+              className="text-text-primary hover:text-purple-400 font-medium transition uppercase tracking-wide text-sm"
+            >
+              Cinemas
+            </button>
+            <button
+              onClick={() => navigate('/concessions')}
+              className="text-text-primary hover:text-purple-400 font-medium transition uppercase tracking-wide text-sm"
+            >
+              Concessions
+            </button>
           </div>
         </div>
         <div className="flex items-center gap-4">
