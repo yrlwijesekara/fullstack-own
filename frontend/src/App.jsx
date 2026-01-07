@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import Movies from './pages/Movies';
 
 function AppContent() {
   const { loading } = useContext(AuthContext);
@@ -17,6 +18,7 @@ function AppContent() {
       if (path === '/login') setCurrentPage('login');
         else if (path === '/register') setCurrentPage('register');
         else if (path === '/profile') setCurrentPage('profile');
+        else if (path === '/movies') setCurrentPage('movies');
         else setCurrentPage('home');
     };
 
@@ -35,6 +37,7 @@ function AppContent() {
       if (newPath === '/login') setCurrentPage('login');
       else if (newPath === '/register') setCurrentPage('register');
       else if (newPath === '/profile') setCurrentPage('profile');
+      else if (newPath === '/movies') setCurrentPage('movies');
       else setCurrentPage('home');
     };
   }, []);
@@ -52,6 +55,7 @@ function AppContent() {
     <>
       {currentPage === 'login' && <Login />}
       {currentPage === 'register' && <Register />}
+      {currentPage === 'movies' && <Movies />}
       {currentPage === 'profile' && <Profile />}
       {currentPage === 'home' && <Home />}
     </>
