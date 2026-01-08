@@ -36,9 +36,8 @@ describe("Showtime Model", () => {
 
     const hall = await Hall.create({
       name: "Test Hall",
-      capacity: 100,
-      rows: 10,
-      columns: 10,
+      layout: { rows: 10, cols: 10 },
+      totalSeats: 100,
     });
 
     const showtimeData = {
@@ -75,9 +74,8 @@ describe("Showtime Model", () => {
 
     const hall = await Hall.create({
       name: "Test Hall",
-      capacity: 100,
-      rows: 10,
-      columns: 10,
+      layout: { rows: 10, cols: 10 },
+      totalSeats: 100,
     });
 
     const showtimeData = {
@@ -109,9 +107,8 @@ describe("Showtime Model", () => {
 
     const hall = await Hall.create({
       name: "Test Hall",
-      capacity: 100,
-      rows: 10,
-      columns: 10,
+      layout: { rows: 10, cols: 10 },
+      totalSeats: 100,
     });
 
     // Create first showtime
