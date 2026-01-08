@@ -10,9 +10,30 @@ const movieRoutes = require("./routes/movies");
 const showtimeRoutes = require("./routes/showtimeRoutes");
 const snackRoutes = require("./routes/snackRoute");
 const hallRoutes = require("./routes/halls");
+const seatRoutes = require("./routes/SeatRoutes");
+
+// Import models
+const Show = require("./models/Show");
 
 // Connect to MongoDB
 connectDB();
+
+// Cleanup expired seat locks every minute
+setInterval(async () => {
+  const expiry = new Date(Date.now() - 5 * 60 * 1000);
+
+  await Show.updateMany(
+    {},
+    {
+      $pull: {
+        bookedSeats: {
+          status: "LOCKED",
+          lockedAt: { $lt: expiry }
+        }
+      }
+    }
+  );
+}, 60000);
 
 const app = express();
 
@@ -33,7 +54,8 @@ app.use('/uploads', express.static('uploads'));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
-app.use('/api/halls',hallRoutes);
+app.use('/api/halls', hallRoutes);
+app.use('/api/seats', seatRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
