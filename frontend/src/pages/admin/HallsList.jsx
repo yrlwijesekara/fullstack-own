@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getHalls, deleteHall } from '../services/hallService';
+import { getHalls, deleteHall } from '../../services/hallService';
 import { useNavigate } from 'react-router-dom';
 
 const HallsList = () => {

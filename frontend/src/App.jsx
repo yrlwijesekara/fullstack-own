@@ -9,8 +9,10 @@ import Profile from './pages/Profile';
 import Movies from './pages/Movies';
 import MovieDetails from './pages/MovieDetails';
 import MovieShowtimes from './pages/MovieShowtimes';
-import HallsList from './pages/HallsList';
-import HallForm from './pages/HallForm';
+import HallsList from './pages/admin/HallsList';
+import HallForm from './pages/admin/HallForm';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import ShowtimeManagement from './pages/admin/ShowtimeManagement';
 
 function AppContent() {
   const { loading } = useContext(AuthContext);
@@ -33,8 +35,10 @@ function AppContent() {
       <Route path="/movies" element={<Movies />} />
       <Route path="/movies/:id" element={<MovieDetails />} />
       <Route path="/movies/:id/showtimes" element={<MovieShowtimes />} />
-      <Route path="/admin/halls" element={<HallsList />} />
-      <Route path="/admin/halls/:id" element={<HallForm />} />
+      <Route path="/admin-dashboard" element={<AdminDashboard />} />
+      <Route path="/halls" element={<HallsList />} />
+      <Route path="/halls/:id" element={<HallForm />} />
+      <Route path="/showtime-management" element={<ShowtimeManagement />} />
     </Routes>
   );
 }

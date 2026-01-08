@@ -55,7 +55,7 @@ exports.register = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         phone: user.phone,
-        
+        role: user.role,
       },
     });
   } catch (error) {
@@ -75,16 +75,33 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Please provide email and password' });
     }
 
-    // Find user and include passwordHash field
-    const user = await User.findOne({ email }).select('+passwordHash');
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
+    let user;
 
-    // Check password
-    const isPasswordMatch = await user.comparePassword(password);
-    if (!isPasswordMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+    // Check for admin login
+    if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+      user = await User.findOne({ email: process.env.ADMIN_EMAIL });
+      if (!user) {
+        user = new User({
+          firstName: 'Admin',
+          lastName: 'User',
+          email: process.env.ADMIN_EMAIL,
+          passwordHash: process.env.ADMIN_PASSWORD,
+          role: 'admin'
+        });
+        await user.save();
+      }
+    } else {
+      // Normal user login
+      user = await User.findOne({ email }).select('+passwordHash');
+      if (!user) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      // Check password
+      const isPasswordMatch = await user.comparePassword(password);
+      if (!isPasswordMatch) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
     }
 
     // Generate token
@@ -108,7 +125,7 @@ exports.login = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         phone: user.phone,
-        
+        role: user.role,
       },
     });
   } catch (error) {

@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-import { API_BASE_URL } from "../utils/api";
-import Modal from "../components/Modal";
-import BackButton from "../components/BackButton";
-import Navbar from "../components/Navbar";
+import { AuthContext } from "../../context/AuthContext";
+import { API_BASE_URL } from "../../utils/api";
+import Modal from "../../components/Modal";
+import BackButton from "../../components/BackButton";
+import Navbar from "../../components/Navbar";
 
 export default function ShowtimeManagement() {
   const { user } = useContext(AuthContext);
