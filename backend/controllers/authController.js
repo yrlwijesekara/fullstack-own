@@ -55,7 +55,7 @@ exports.register = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         phone: user.phone,
-        
+        role: user.role,
       },
     });
   } catch (error) {
@@ -75,16 +75,34 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Please provide email and password' });
     }
 
-    // Find user and include passwordHash field
-    const user = await User.findOne({ email }).select('+passwordHash');
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
+    let user;
 
-    // Check password
-    const isPasswordMatch = await user.comparePassword(password);
-    if (!isPasswordMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+    // Check for admin login
+    if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+      user = await User.findOne({ email: process.env.ADMIN_EMAIL });
+      if (!user) {
+        // Create admin user with pre-hashed password
+        user = new User({
+          firstName: 'Admin',
+          lastName: 'User',
+          email: process.env.ADMIN_EMAIL,
+          passwordHash: '$2a$10$GbwZySMus.IEvTAxo//aX.3DPj8Bg.ZeI5sRmYEJV8JT5PLIZaa', // pre-hashed 'admin123'
+          role: 'admin'
+        });
+        await user.save();
+      }
+    } else {
+      // Normal user login
+      user = await User.findOne({ email }).select('+passwordHash');
+      if (!user) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      // Check password
+      const isPasswordMatch = await user.comparePassword(password);
+      if (!isPasswordMatch) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
     }
 
     // Generate token
@@ -108,7 +126,7 @@ exports.login = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         phone: user.phone,
-        
+        role: user.role,
       },
     });
   } catch (error) {
@@ -197,5 +215,64 @@ exports.updateProfile = async (req, res) => {
   } catch (error) {
     console.error('Profile update error:', error);
     res.status(500).json({ message: error.message || 'Server error during profile update' });
+  }
+};
+
+// @desc    Get all users (Admin only)
+// @route   GET /api/auth/users
+exports.getAllUsers = async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied. Admin role required.' });
+    }
+
+    const users = await User.find({}).select('-passwordHash'); // Exclude password hash
+
+    res.status(200).json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    console.error('Get all users error:', error);
+    res.status(500).json({ message: error.message || 'Server error' });
+  }
+};
+
+// @desc    Delete user (Admin only)
+// @route   DELETE /api/auth/users/:id
+exports.deleteUser = async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied. Admin role required.' });
+    }
+
+    const { id } = req.params;
+
+    // Prevent admin from deleting themselves
+    if (id === req.user.id) {
+      return res.status(400).json({ message: 'Cannot delete your own account' });
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Prevent deleting other admins
+    if (user.role === 'admin') {
+      return res.status(400).json({ message: 'Cannot delete admin accounts' });
+    }
+
+    await User.findByIdAndDelete(id);
+
+    res.status(200).json({
+      success: true,
+      message: 'User deleted successfully',
+    });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({ message: error.message || 'Server error during user deletion' });
   }
 };

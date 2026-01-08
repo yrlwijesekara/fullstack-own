@@ -28,7 +28,7 @@ describe("Showtime Model", () => {
     // Create test movie and hall
     const movie = await Movie.create({
       title: "Test Movie",
-      description: "Test Description",
+      description: "This is a test movie description used in unit tests. It is sufficiently long.",
       duration: 120,
       genre: ["Action"],
       language: "English",
@@ -36,9 +36,8 @@ describe("Showtime Model", () => {
 
     const hall = await Hall.create({
       name: "Test Hall",
-      capacity: 100,
-      rows: 10,
-      columns: 10,
+      layout: { rows: 10, cols: 10 },
+      totalSeats: 100,
     });
 
     const showtimeData = {
@@ -67,7 +66,7 @@ describe("Showtime Model", () => {
   test("should prevent duplicate showtimes in same hall at same time", async () => {
     const movie = await Movie.create({
       title: "Test Movie",
-      description: "Test Description",
+      description: "This is a test movie description used in unit tests. It is sufficiently long.",
       duration: 120,
       genre: ["Action"],
       language: "English",
@@ -75,9 +74,8 @@ describe("Showtime Model", () => {
 
     const hall = await Hall.create({
       name: "Test Hall",
-      capacity: 100,
-      rows: 10,
-      columns: 10,
+      layout: { rows: 10, cols: 10 },
+      totalSeats: 100,
     });
 
     const showtimeData = {
@@ -101,7 +99,7 @@ describe("Showtime Model", () => {
   test("should detect overlapping showtimes", async () => {
     const movie = await Movie.create({
       title: "Test Movie",
-      description: "Test Description",
+      description: "This is a test movie description used in unit tests. It is sufficiently long.",
       duration: 120,
       genre: ["Action"],
       language: "English",
@@ -109,9 +107,8 @@ describe("Showtime Model", () => {
 
     const hall = await Hall.create({
       name: "Test Hall",
-      capacity: 100,
-      rows: 10,
-      columns: 10,
+      layout: { rows: 10, cols: 10 },
+      totalSeats: 100,
     });
 
     // Create first showtime
@@ -139,7 +136,7 @@ describe("Showtime Model", () => {
   test("should calculate end time from movie duration", async () => {
     const movie = await Movie.create({
       title: "Test Movie",
-      description: "Test Description",
+      description: "This is a test movie description used in unit tests. It is sufficiently long.",
       duration: 150, // 2.5 hours
       genre: ["Action"],
       language: "English",
@@ -147,9 +144,8 @@ describe("Showtime Model", () => {
 
     const hall = await Hall.create({
       name: "Test Hall",
-      capacity: 100,
-      rows: 10,
-      columns: 10,
+      layout: { rows: 10, cols: 10 },
+      totalSeats: 100,
     });
 
     const startTime = new Date("2024-12-25T18:00:00Z");

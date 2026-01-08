@@ -1,5 +1,21 @@
 const mongoose = require('mongoose');
 
+// Define seat schema for grid layout
+const seatSchema = new mongoose.Schema(
+  {
+    row: { type: Number, required: true },
+    col: { type: Number, required: true },
+    label: { type: String }, // e.g. "A1"
+    type: {
+      type: String,
+      enum: ['regular', 'vip', 'accessible'],
+      default: 'regular',
+    },
+    isActive: { type: Boolean, default: true },
+  },
+  { _id: false }
+);
+
 const hallSchema = new mongoose.Schema(
   {
     name: {
@@ -7,16 +23,14 @@ const hallSchema = new mongoose.Schema(
       required: [true, 'Hall name is required'],
       trim: true,
     },
-    cinema: {
+    description: {
       type: String,
-      required: [true, 'Cinema location is required'],
       trim: true,
     },
-    totalSeats: {
-      type: Number,
-      required: [true, 'Total seats is required'],
-      min: [1, 'Total seats must be at least 1'],
-      max: [1000, 'Total seats cannot exceed 1000'],
+    status: {
+      type: String,
+      enum: ['active', 'maintenance', 'inactive', 'closed'],
+      default: 'active',
     },
     layout: {
       rows: {
@@ -25,12 +39,24 @@ const hallSchema = new mongoose.Schema(
         min: 1,
         max: 50,
       },
-      seatsPerRow: {
+      cols: {
         type: Number,
         required: true,
         min: 1,
         max: 100,
       },
+      seats: {
+        type: [seatSchema],
+        default: [],
+      },
+      partitions: {
+        type: [Number], // Array of column indices where aisles exist
+        default: [],
+      },
+    },
+    totalSeats: {
+      type: Number,
+      default: 0,
     },
     features: [
       {
@@ -46,11 +72,6 @@ const hallSchema = new mongoose.Schema(
         ],
       },
     ],
-    status: {
-      type: String,
-      enum: ['active', 'maintenance', 'inactive'],
-      default: 'active',
-    },
   },
   {
     timestamps: true,
@@ -69,5 +90,13 @@ hallSchema.virtual('fullName').get(function () {
 // Ensure virtuals are included in JSON
 hallSchema.set('toJSON', { virtuals: true });
 hallSchema.set('toObject', { virtuals: true });
+
+// Auto-calculate totalSeats from active seats
+hallSchema.pre('save', function (next) {
+  if (this.layout && Array.isArray(this.layout.seats)) {
+    this.totalSeats = this.layout.seats.filter((s) => s.isActive !== false).length;
+  }
+  next();
+});
 
 module.exports = mongoose.model('Hall', hallSchema);

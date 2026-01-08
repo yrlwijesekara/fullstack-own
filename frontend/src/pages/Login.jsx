@@ -11,7 +11,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const { login } = useContext(AuthContext);
+  const { login, user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -43,7 +43,8 @@ export default function Login() {
       login(data.token, data.user);
       
       // Show success modal
-      setModalMessage(`🎉 Welcome back, ${data.user.name}! You have successfully logged in.`);
+      const isAdmin = data.user.role === 'admin';
+      setModalMessage(`🎉 Welcome back${isAdmin ? ', Admin' : ''}, ${data.user.firstName}! You have successfully logged in.`);
       setShowModal(true);
     } catch (err) {
       setError(err.message);
@@ -54,7 +55,12 @@ export default function Login() {
 
   const handleModalClose = () => {
     setShowModal(false);
-    navigate('/');
+    // Navigate based on user role
+    if (user?.role === 'admin') {
+      navigate('/admin-dashboard');
+    } else {
+      navigate('/');
+    }
   };
 
   return (

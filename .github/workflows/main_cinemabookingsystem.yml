@@ -1,0 +1,76 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy Node.js app to Azure Web App - cinemabookingsystem
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install libssl1.1 (libcrypto) for mongodb-memory-server
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl1.1 || true
+          if ! dpkg -s libssl1.1 >/dev/null 2>&1; then
+            echo "libssl1.1 not available from apt, downloading deb from Ubuntu archive"
+            wget -qO /tmp/libssl1.1.deb https://launchpad.net/ubuntu/+archive/primary/+files/libssl1.1_1.1.1f-1ubuntu2.16_amd64.deb || true
+            sudo dpkg -i /tmp/libssl1.1.deb || true
+          fi
+
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: npm install, build, and test (backend)
+        working-directory: ./backend
+        run: |
+          npm install --no-audit --no-fund
+          npm run build --if-present
+          npm run test --if-present
+
+      - name: Upload backend artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-app
+          path: backend
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - name: Download backend artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: node-app
+      
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_CBD422B8148848B5A3F8CBE7C8D5BF32 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_293DE9029AA54A599189386F8D34A0D2 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_470DBF36AF9D4545BD927E4F9150EFE4 }}
+
+      - name: 'Deploy to Azure Web App'
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'cinemabookingsystem'
+          slot-name: 'Production'
+          package: ./backend
+          

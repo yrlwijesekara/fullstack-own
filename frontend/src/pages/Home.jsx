@@ -6,6 +6,7 @@ import HeroCarousel from '../components/HeroCarousel';
 import QuickBooking from '../components/QuickBooking';
 import MovieCard from '../components/MovieCard';
 import { fetchMovies } from '../services/movieService';
+import { getHalls } from '../services/hallService';
 
 export default function Home() {
   const { user } = useContext(AuthContext);
@@ -13,9 +14,12 @@ export default function Home() {
   const [featuredMovies, setFeaturedMovies] = useState([]);
   const [nowShowingMovies, setNowShowingMovies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [halls, setHalls] = useState([]);
+  const [selectedCinema, setSelectedCinema] = useState('');
 
   useEffect(() => {
     loadMovies();
+    getHalls().then(setHalls).catch(() => setHalls([]));
   }, []);
 
   const loadMovies = async () => {
@@ -58,7 +62,36 @@ export default function Home() {
       <HeroCarousel movies={featuredMovies} autoPlay={true} interval={5000} />
 
       {/* Quick Booking Widget */}
-      <QuickBooking movies={nowShowingMovies} onBooking={handleBooking} />
+      <QuickBooking
+        movies={nowShowingMovies}
+        cinemas={halls.map(hall => ({
+          id: hall._id,
+          name: hall.name,
+        }))}
+        onBooking={handleBooking}
+        onCinemaChange={setSelectedCinema}
+      />
+
+      {selectedCinema && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h2 className="text-2xl font-bold text-text-primary mb-4">
+             {halls.find(h => h._id === selectedCinema)?.name || selectedCinema}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {halls.filter(hall => hall._id === selectedCinema).map(hall => (
+              <div key={hall._id} className="p-4 bg-surface-600 rounded shadow">
+                <h3 className="text-lg font-bold text-text-primary">{hall.name}</h3>
+                <p className="text-text-muted">{hall.description}</p>
+                <p className="text-xs text-text-secondary">Status: {hall.status}</p>
+                <p className="text-xs text-text-secondary">Capacity: {hall.totalSeats}</p>
+              </div>
+            ))}
+            {halls.filter(hall => hall._id === selectedCinema).length === 0 && (
+              <div className="text-text-muted">No halls found for this cinema.</div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Now Showing Movies Section */}
       <section id="movies" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

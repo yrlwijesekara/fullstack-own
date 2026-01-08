@@ -139,7 +139,7 @@ export default function MovieDetails() {
                 {isAdmin && (
                   <div className="flex gap-2">
                     <button
-                      onClick={() => navigate(`/movies/${movie.id}/edit`)}
+                      onClick={() => navigate(`/movies/${movie._id || movie.id}/edit`)}
                       className="px-4 py-2 bg-accent-blue text-white font-bold text-sm uppercase hover:bg-accent-blue/80 rounded shadow"
                     >
                       Edit

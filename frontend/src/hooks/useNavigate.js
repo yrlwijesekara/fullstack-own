@@ -1,10 +1,13 @@
-// import { useContext } from 'react';
-// import { AuthContext } from '../context/AuthContext';
+import { useNavigate as useRouterNavigate } from 'react-router-dom';
 
+/**
+ * Custom navigation hook that wraps React Router's useNavigate
+ * Provides a consistent interface for navigation throughout the app
+ */
 export function useNavigate() {
-  // const { token } = useContext(AuthContext); // Not needed with cookie-based auth
-
+  const navigate = useRouterNavigate();
+  
   return (path) => {
-    window.location.href = path;
+    navigate(path);
   };
 }

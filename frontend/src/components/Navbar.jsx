@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from '../hooks/useNavigate';
 import Logo from '../components/Logo';
@@ -6,10 +6,31 @@ import Logo from '../components/Logo';
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [currentPath, setCurrentPath] = useState('');
+
+  useEffect(() => {
+    // Track current path for active link highlighting
+    setCurrentPath(window.location.pathname);
+    
+    const handlePathChange = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    
+    window.addEventListener('popstate', handlePathChange);
+    
+    return () => window.removeEventListener('popstate', handlePathChange);
+  }, []);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const isActive = (path) => {
+    if (path === '/') {
+      return currentPath === '/';
+    }
+    return currentPath.startsWith(path);
   };
 
   return (
@@ -27,19 +48,31 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-6 ml-8">
             <button
               onClick={() => navigate('/movies')}
-              className="text-text-primary hover:text-purple-400 font-medium transition uppercase tracking-wide text-sm"
+              className={`font-medium transition uppercase tracking-wide text-sm ${
+                isActive('/movies') 
+                  ? 'text-secondary-300 border-b-2 border-secondary-300 pb-1' 
+                  : 'text-text-primary hover:text-purple-400'
+              }`}
             >
               Movies
             </button>
             <button
               onClick={() => navigate('/cinemas')}
-              className="text-text-primary hover:text-purple-400 font-medium transition uppercase tracking-wide text-sm"
+              className={`font-medium transition uppercase tracking-wide text-sm ${
+                isActive('/cinemas') 
+                  ? 'text-secondary-300 border-b-2 border-secondary-300 pb-1' 
+                  : 'text-text-primary hover:text-purple-400'
+              }`}
             >
               Cinemas
             </button>
             <button
               onClick={() => navigate('/concessions')}
-              className="text-text-primary hover:text-purple-400 font-medium transition uppercase tracking-wide text-sm"
+              className={`font-medium transition uppercase tracking-wide text-sm ${
+                isActive('/concessions') 
+                  ? 'text-secondary-300 border-b-2 border-secondary-300 pb-1' 
+                  : 'text-text-primary hover:text-purple-400'
+              }`}
             >
               Concessions
             </button>

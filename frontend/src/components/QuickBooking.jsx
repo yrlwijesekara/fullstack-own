@@ -6,24 +6,20 @@ import PropTypes from 'prop-types';
  * @param {Array} movies - Array of movie objects to populate the dropdown
  * @param {Array} cinemas - Array of cinema locations (optional)
  * @param {Function} onBooking - Callback function when booking is submitted
+ * @param {Function} onCinemaChange - Callback function when cinema selection changes
  */
-export default function QuickBooking({ movies = [], cinemas = [], onBooking }) {
+export default function QuickBooking({ movies = [], cinemas = [], onBooking, onCinemaChange }) {
   const [selectedMovie, setSelectedMovie] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedCinema, setSelectedCinema] = useState('');
 
-  // Default cinema locations if none provided
-  const defaultCinemas = [
-    { id: 'cinema1', name: 'Cinema Location A' },
-    { id: 'cinema2', name: 'Cinema Location B' },
-    { id: 'cinema3', name: 'Cinema Location C' },
-    { id: 'cinema4', name: 'Cinema Location D' },
-  ];
-
-  const cinemaList = cinemas.length > 0 ? cinemas : defaultCinemas;
+  // Remove defaultCinemas or keep it as truly empty fallback
+  const cinemaList = cinemas; // Use cinemas directly
 
   // Get today's date in YYYY-MM-DD format for min date
   const today = new Date().toISOString().split('T')[0];
+
+  console.log('Cinemas received in QuickBooking:', cinemas);
 
   const handleBooking = (e) => {
     e.preventDefault();
@@ -52,6 +48,13 @@ export default function QuickBooking({ movies = [], cinemas = [], onBooking }) {
     setSelectedMovie('');
     setSelectedDate('');
     setSelectedCinema('');
+  };
+
+  const handleCinemaChange = (e) => {
+    setSelectedCinema(e.target.value);
+    if (onCinemaChange) {
+      onCinemaChange(e.target.value);
+    }
   };
 
   return (
@@ -108,16 +111,16 @@ export default function QuickBooking({ movies = [], cinemas = [], onBooking }) {
                 htmlFor="cinema-select" 
                 className="block text-xs font-bold mb-2 uppercase tracking-wider text-text-secondary"
               >
-                Select Cinema
+                Select Hall
               </label>
               <select
                 id="cinema-select"
                 value={selectedCinema}
-                onChange={(e) => setSelectedCinema(e.target.value)}
+                onChange={handleCinemaChange}
                 className="w-full px-4 py-3 bg-surface-500 border border-secondary-400 text-sm uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-secondary-300 focus:border-secondary-300 text-text-primary rounded"
                 required
               >
-                <option value="">Choose a cinema...</option>
+                <option value="">Choose a Hall...</option>
                 {cinemaList.map(cinema => (
                   <option key={cinema.id} value={cinema.id}>
                     {cinema.name}
@@ -163,4 +166,5 @@ QuickBooking.propTypes = {
     })
   ),
   onBooking: PropTypes.func,
+  onCinemaChange: PropTypes.func,
 };
