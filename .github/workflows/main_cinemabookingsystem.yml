@@ -18,6 +18,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install libssl1.1 (libcrypto) for mongodb-memory-server
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl1.1 || true
+          if ! dpkg -s libssl1.1 >/dev/null 2>&1; then
+            echo "libssl1.1 not available from apt, downloading deb from Ubuntu archive"
+            wget -qO /tmp/libssl1.1.deb https://launchpad.net/ubuntu/+archive/primary/+files/libssl1.1_1.1.1f-1ubuntu2.16_amd64.deb || true
+            sudo dpkg -i /tmp/libssl1.1.deb || true
+          fi
+
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
