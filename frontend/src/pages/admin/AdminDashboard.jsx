@@ -68,10 +68,10 @@ export default function AdminDashboard() {
                 <h3 className="text-xl font-semibold text-text-primary mb-2">User Management</h3>
                 <p className="text-text-secondary mb-4">View and manage user accounts.</p>
                 <button
-                  className="w-full py-2 bg-gray-500 text-white font-bold rounded-lg cursor-not-allowed"
-                  disabled
+                  onClick={() => navigate('/user-management')}
+                  className="w-full py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-lg transition-colors"
                 >
-                  Coming Soon
+                  Go to Users
                 </button>
               </div>
 

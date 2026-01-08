@@ -13,6 +13,7 @@ import HallsList from './pages/admin/HallsList';
 import HallForm from './pages/admin/HallForm';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ShowtimeManagement from './pages/admin/ShowtimeManagement';
+import UserManagement from './pages/admin/UserManagement';
 
 function AppContent() {
   const { loading } = useContext(AuthContext);
@@ -39,6 +40,7 @@ function AppContent() {
       <Route path="/halls" element={<HallsList />} />
       <Route path="/halls/:id" element={<HallForm />} />
       <Route path="/showtime-management" element={<ShowtimeManagement />} />
+      <Route path="/user-management" element={<UserManagement />} />
     </Routes>
   );
 }
