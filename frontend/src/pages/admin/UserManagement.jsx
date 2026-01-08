@@ -57,7 +57,7 @@ export default function UserManagement() {
         throw new Error(errorData.message || 'Failed to delete user');
       }
 
-      setSuccess('User deleted successfully');
+      setSuccess('Deleted successfully');
       setUsers(users.filter(u => u._id !== userToDelete._id));
       setShowDeleteModal(false);
       setUserToDelete(null);
