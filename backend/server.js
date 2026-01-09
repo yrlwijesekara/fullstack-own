@@ -49,6 +49,11 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ message: 'Server is running' });
 });
 
+// Always respond on root with a simple JSON so root doesn't 404
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'Backend running' });
+});
+
 // If a frontend build exists (frontend/dist), serve it as static files
 const clientDist = path.join(__dirname, '..', 'frontend', 'dist');
 if (fs.existsSync(clientDist)) {
