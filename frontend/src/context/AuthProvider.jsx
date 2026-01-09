@@ -16,11 +16,17 @@ export function AuthProvider({ children }) {
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
+      } else if (response.status === 401) {
+        // User not authenticated, that's fine
+        setUser(null);
       } else {
+        console.warn('Auth check failed:', response.status);
         setUser(null);
       }
     } catch (error) {
-      console.error('Error fetching user:', error);
+      // Network error - don't log as error, just set user to null
+      // This is expected when backend is not running during development
+      console.warn('Auth check failed (network error):', error.message);
       setUser(null);
     } finally {
       setLoading(false);

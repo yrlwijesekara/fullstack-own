@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from '../hooks/useNavigate';
-import Modal from '../components/Modal';
+import { toast } from 'react-toastify';
 import Logo from '../components/Logo';
 import { API_BASE_URL } from '../utils/api';
 
@@ -9,9 +9,7 @@ export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
-  const { login, user } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -42,24 +40,22 @@ export default function Login() {
       // Pass token and user to context
       login(data.token, data.user);
       
-      // Show success modal
+      // Show success toast
       const isAdmin = data.user.role === 'admin';
-      setModalMessage(`🎉 Welcome back${isAdmin ? ', Admin' : ''}, ${data.user.firstName}! You have successfully logged in.`);
-      setShowModal(true);
+      toast.success(`Welcome back${isAdmin ? ', Admin' : ''}, ${data.user.firstName}! You have successfully logged in.`);
+      
+      // Navigate based on user role
+      setTimeout(() => {
+        if (data.user.role === 'admin') {
+          navigate('/admin-dashboard');
+        } else {
+          navigate('/');
+        }
+      }, 1000);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleModalClose = () => {
-    setShowModal(false);
-    // Navigate based on user role
-    if (user?.role === 'admin') {
-      navigate('/admin-dashboard');
-    } else {
-      navigate('/');
     }
   };
 
@@ -137,15 +133,6 @@ export default function Login() {
           </a>
         </p>
       </div>
-      {/* Success Modal */}
-      <Modal
-        isOpen={showModal}
-        title="Login Successful"
-        message={modalMessage}
-        onClose={handleModalClose}
-        confirmText="Go to Home"
-        theme="success"
-      />
     </div>
   );
 }

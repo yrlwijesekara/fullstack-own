@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from '../hooks/useNavigate';
-import Modal from '../components/Modal';
+import { toast } from 'react-toastify';
 import Logo from '../components/Logo';
 import { API_BASE_URL } from '../utils/api';
 
@@ -15,8 +15,6 @@ export default function Register() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -47,9 +45,13 @@ export default function Register() {
       // JWT token is now in httpOnly cookie (set by backend)
       login(data.token, data.user);
       
-      // Show success modal
-      setModalMessage(`Welcome ${data.user.firstName}! Your account has been created successfully.`);
-      setShowModal(true);
+      // Show success toast
+      toast.success(`Welcome ${data.user.firstName}! Your account has been created successfully.`);
+      
+      // Navigate to home
+      setTimeout(() => {
+        navigate('/');
+      }, 1000);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -57,21 +59,8 @@ export default function Register() {
     }
   };
 
-  const handleModalClose = () => {
-    setShowModal(false);
-    navigate('/');
-  };
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background-900 px-4 py-8">
-      <Modal 
-        isOpen={showModal}
-        title="🎉 Registration Successful!"
-        message={modalMessage}
-        onClose={handleModalClose}
-        confirmText="Go to Home"
-        theme="success"
-      />
       <div className="w-full max-w-md bg-surface-600 rounded-2xl shadow-2xl p-8 border border-surface-400/40">
         <div className="flex justify-center mb-6">
           <Logo size={96} className="bg-transparent shadow-none border-0" />
