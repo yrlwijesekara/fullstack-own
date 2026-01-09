@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import MediaUpload from "../../utils/mediaupload";
 
 
 
@@ -17,57 +18,114 @@ export default function AddSnacks() {
     const [productPrice, setProductPrice] = useState('');
     const [productQuantity, setProductQuantity] = useState('');
     const [productCategory, setProductCategory] = useState('chips');
-    const [productImage, setProductImage] = useState('');
+    const [productImage, setProductImage] = useState([]);
     const [productDescription, setProductDescription] = useState('');
     const [isAvailable, setIsAvailable] = useState('true');
+    const [uploading, setUploading] = useState(false);
     const navigate = useNavigate();
 
 
-    function handleSubmit() {
-        // Basic validation
-        if (!productId || !productName || !productPrice || !labelledPrice || !productQuantity) {
-            toast.error('Please fill in all required fields (ID, Name, Price, Label Price, Quantity)');
-            return;
-        }
+   async function handleSubmit(e) {
+        e.preventDefault();
+        setUploading(true);
 
-        const snackData = {
-            ProductId: productId,
-            ProductName: productName,
-            labelledPrice: parseFloat(labelledPrice) || 0,
-            ProductPrice: parseFloat(productPrice) || 0,
-            ProductQuantity: parseInt(productQuantity) || 0,
-            ProductCategory: productCategory,
-            ProductImage: productImage ? [productImage] : [],
-            ProductDescription: productDescription,
-            isAvailable: isAvailable === 'true',
-        };
-        
-        const token = localStorage.getItem('token');
-        if (!token) {
-            toast.error('Please log in to continue');
-            setTimeout(() => {
-                window.location.href = '/login';
-            }, 2000);
-            return;
-        }
-        
-        // Loading toast
-        const loadingToast = toast.loading('Adding snack...');
-        
-        const API_BASE_URL = import.meta.env.VITE_API_URL ;
-        
-        axios.post(`${API_BASE_URL}/snacks`, snackData, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        })
-        .then((response) => {
+        try {
+            // Basic validation
+            if (!productId || !productName || !productPrice || !labelledPrice || !productQuantity) {
+                toast.error('Please fill in all required fields (ID, Name, Price, Label Price, Quantity)');
+                setUploading(false);
+                return;
+            }
+
+            // Check if images are selected
+            if (!productImage || productImage.length === 0) {
+                toast.error("Please select at least one image");
+                setUploading(false);
+                return;
+            }
+
+            // Validate description length
+            if (!productDescription || productDescription.length < 10) {
+                toast.error("Description must be at least 10 characters");
+                setUploading(false);
+                return;
+            }
+
+            // Validate numeric fields
+            if (isNaN(productPrice) || parseFloat(productPrice) <= 0) {
+                toast.error('Please enter a valid product price (greater than 0)');
+                setUploading(false);
+                return;
+            }
+
+            if (isNaN(labelledPrice) || parseFloat(labelledPrice) <= 0) {
+                toast.error('Please enter a valid labelled price (greater than 0)');
+                setUploading(false);
+                return;
+            }
+
+            if (isNaN(productQuantity) || parseInt(productQuantity) <= 0) {
+                toast.error('Please enter a valid quantity (greater than 0)');
+                setUploading(false);
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                toast.error('Please log in to continue');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+                setUploading(false);
+                return;
+            }
+
+            toast.loading("Uploading images...");
+
+            // Upload each image file and collect URLs
+            const promisesArray = [];
+
+            for (let i = 0; i < productImage.length; i++) {
+                if (!productImage[i]) continue; // Skip null or undefined files
+                promisesArray.push(MediaUpload(productImage[i]));
+            }
+
+            if (promisesArray.length === 0) {
+                toast.error("No valid images to upload");
+                setUploading(false);
+                return;
+            }
+
+            const responses = await Promise.all(promisesArray);
+            toast.dismiss();
+            console.log("Uploaded image URLs:", responses);
+
+            const snackData = {
+                ProductId: productId.trim(),
+                ProductName: productName.trim(),
+                labelledPrice: parseFloat(labelledPrice),
+                ProductPrice: parseFloat(productPrice),
+                ProductQuantity: parseInt(productQuantity),
+                ProductCategory: productCategory,
+                ProductImage: responses, // Use the array of image URLs from uploads
+                ProductDescription: productDescription.trim(),
+                isAvailable: isAvailable === 'true',
+            };
+
+            // Loading toast for API call
+            const loadingToast = toast.loading('Adding snack...');
+            
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5008/api';
+            
+            const response = await axios.post(`${API_BASE_URL}/snacks`, snackData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
             toast.dismiss(loadingToast);
             toast.success('Snack added successfully!');
-            navigate('/concession-management');
-
-            
             
             // Clear form
             setProductId('');
@@ -76,12 +134,14 @@ export default function AddSnacks() {
             setProductPrice('');
             setProductQuantity('');
             setProductCategory('chips');
-            setProductImage('');
+            setProductImage([]);
             setProductDescription('');
             setIsAvailable('true');
-        })
-        .catch((error) => {
-            toast.dismiss(loadingToast);
+            
+            navigate('/concession-management');
+            
+        } catch (error) {
+            toast.dismiss();
             console.error('Error adding snack:', error);
             
             if (error.response) {
@@ -98,7 +158,9 @@ export default function AddSnacks() {
             } else {
                 toast.error('Cannot connect to server. Please check if backend is running.');
             }
-        });
+        } finally {
+            setUploading(false);
+        }
     }
 
 
@@ -156,9 +218,12 @@ export default function AddSnacks() {
                 <div className="w-full mb-4 flex flex-col">
                     <label className="text-text-primary text-lg font-semibold">Image</label>
                     <input 
-                    onChange={(e) => {setProductImage(e.target.value)}}
-                    value={productImage}
-                    type="text" className="w-full p-2 mt-2 mb-4 bg-background-700 text-text-primary rounded"/>
+                    onChange={(e) => {setProductImage(e.target.files)}}
+                    
+                    type="file"
+                    multiple
+                    accept="image/*"
+                     className="w-full p-2 mt-2 mb-4 bg-background-700 text-text-primary rounded"/>
                 </div>
                 <div className="w-full mb-4 flex flex-col">
                     <label className="text-text-primary text-lg font-semibold">Description</label>
