@@ -20,7 +20,6 @@ const showtimeSchema = new mongoose.Schema({
   },
   endTime: {
     type: Date,
-    required: [true, "End time is required"],
   },
   date: {
     type: Date,
