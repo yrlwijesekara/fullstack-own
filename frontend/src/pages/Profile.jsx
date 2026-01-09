@@ -284,12 +284,6 @@ export default function Profile() {
           {/* Action Buttons */}
           <div className="mt-8 flex gap-4">
             <button
-              onClick={() => navigate('/')}
-              className="px-6 py-3 bg-primary-500 hover:bg-primary-600 rounded-lg font-medium transition-colors duration-200 shadow-lg"
-            >
-              ← Back to Home
-            </button>
-            <button
               onClick={handleLogout}
               className="px-6 py-3 bg-semantic-error hover:bg-semantic-error/80 rounded-lg font-medium transition-colors duration-200 shadow-lg"
             >
