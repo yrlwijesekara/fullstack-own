@@ -5,10 +5,12 @@ const {
   initializeSeats,
   getSeatMap,
   lockSeat,
-  confirmSeat
+  confirmSeat,
+  syncSeatsFromHall
 } = require("../controllers/SeatController");
 
 router.post("/initialize", initializeSeats); // CREATE
+router.post("/sync", syncSeatsFromHall);     // SYNC manually
 router.get("/:showId", getSeatMap);           // READ
 router.post("/lock", auth, lockSeat);         // UPDATE
 router.post("/confirm", auth, confirmSeat);   // UPDATE

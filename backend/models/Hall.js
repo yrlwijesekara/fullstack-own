@@ -99,4 +99,48 @@ hallSchema.pre('save', function (next) {
   next();
 });
 
+// Auto-sync seats to all shows when hall layout changes
+hallSchema.post('save', async function(doc) {
+  try {
+    // Only sync if layout.seats was modified
+    if (this.isModified('layout.seats')) {
+      const Show = mongoose.model('Show');
+      
+      // Find all shows for this hall
+      const shows = await Show.find({ hallId: doc._id });
+      
+      console.log(`Syncing ${shows.length} shows for hall ${doc.name}...`);
+      
+      for (const show of shows) {
+        // Get existing booked/locked seats to preserve them
+        const existingSeats = show.seats || [];
+        const bookedSeats = existingSeats.filter(s => s.status === 'BOOKED' || s.status === 'LOCKED');
+        
+        // Create new seat map from hall layout
+        const newSeats = doc.layout.seats.map(seat => ({
+          seatLabel: seat.label,
+          status: 'AVAILABLE',
+          userId: null,
+          lockedAt: null
+        }));
+        
+        // Preserve booked/locked seats
+        for (const bookedSeat of bookedSeats) {
+          const seatIndex = newSeats.findIndex(s => s.seatLabel === bookedSeat.seatLabel);
+          if (seatIndex !== -1) {
+            newSeats[seatIndex] = bookedSeat;
+          }
+        }
+        
+        show.seats = newSeats;
+        await show.save();
+      }
+      
+      console.log(`✅ Synced seats for ${shows.length} shows`);
+    }
+  } catch (error) {
+    console.error('Error syncing seats to shows:', error);
+  }
+});
+
 module.exports = mongoose.model('Hall', hallSchema);
