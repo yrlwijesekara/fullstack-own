@@ -19,9 +19,7 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: process.env.NODE_ENV === 'production' 
-      ? ["https://enimate.netlify.app"] 
-      : ["http://localhost:5173"],
+    origin: ["https://enimate.netlify.app", "http://localhost:5173"],
     credentials: true, // Allow cookies
   })
 );
