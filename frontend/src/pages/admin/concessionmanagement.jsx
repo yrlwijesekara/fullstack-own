@@ -1,4 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { BiTrash, BiEdit, BiArrowBack } from "react-icons/bi";
+import { API_BASE_URL } from "../../utils/api";
+import toast from "react-hot-toast";
+import { AuthContext } from "../../context/AuthContext";
+
+
 
 
 
@@ -13,170 +21,101 @@ const sampleSnacks = [
         ProductImage: ["/uploads/movies/popcorn1.jpg", "/uploads/movies/popcorn2.jpg"],
         ProductDescription: "Fresh, warm butter popcorn made with premium kernels and real butter. A classic movie theater favorite that's perfect for any film experience.",
         isAvailable: true,
-    },
-    {
-        ProductId: "SNK002",
-        ProductName: "Caramel Popcorn",
-        labelledPrice: 14.99,
-        ProductPrice: 12.99,
-        ProductQuantity: 30,
-        ProductCategory: "popcorn",
-        ProductImage: ["/uploads/movies/caramel-popcorn1.jpg"],
-        ProductDescription: "Sweet and crunchy caramel-coated popcorn with a perfect balance of sweetness and crunch. Made with premium caramel coating.",
-        isAvailable: true,
-    },
-    {
-        ProductId: "SNK003",
-        ProductName: "Classic Nachos with Cheese",
-        labelledPrice: 16.99,
-        ProductPrice: 14.99,
-        ProductQuantity: 25,
-        ProductCategory: "nachos",
-        ProductImage: ["/uploads/movies/nachos1.jpg", "/uploads/movies/nachos2.jpg"],
-        ProductDescription: "Crispy tortilla chips served with our signature warm cheese sauce. Perfect for sharing during your movie experience.",
-        isAvailable: true,
-    },
-    {
-        ProductId: "SNK004",
-        ProductName: "Doritos Nacho Cheese",
-        labelledPrice: 6.99,
-        ProductPrice: 5.49,
-        ProductQuantity: 75,
-        ProductCategory: "chips",
-        ProductImage: ["/uploads/movies/doritos1.jpg"],
-        ProductDescription: "The classic nacho cheese flavored Doritos that everyone loves. Crunchy, cheesy, and perfect for movie snacking.",
-        isAvailable: true,
-    },
-    {
-        ProductId: "SNK005",
-        ProductName: "Coca-Cola",
-        labelledPrice: 5.99,
-        ProductPrice: 4.99,
-        ProductQuantity: 100,
-        ProductCategory: "beverages",
-        ProductImage: ["/uploads/movies/coke1.jpg"],
-        ProductDescription: "Ice-cold Coca-Cola served in a large cup with ice. The perfect refreshing drink to accompany your movie.",
-        isAvailable: true,
-    },
-    {
-        ProductId: "SNK006",
-        ProductName: "Chocolate Chip Cookies",
-        labelledPrice: 8.99,
-        ProductPrice: 7.49,
-        ProductQuantity: 40,
-        ProductCategory: "sweets",
-        ProductImage: ["/uploads/movies/cookies1.jpg", "/uploads/movies/cookies2.jpg"],
-        ProductDescription: "Freshly baked chocolate chip cookies with real chocolate chips. Warm, soft, and absolutely delicious.",
-        isAvailable: true,
-    },
-    {
-        ProductId: "SNK007",
-        ProductName: "Spicy Jalapeño Nachos",
-        labelledPrice: 18.99,
-        ProductPrice: 16.99,
-        ProductQuantity: 20,
-        ProductCategory: "nachos",
-        ProductImage: ["/uploads/movies/spicy-nachos1.jpg"],
-        ProductDescription: "Tortilla chips topped with cheese sauce, jalapeños, and spicy seasoning. Perfect for those who like it hot!",
-        isAvailable: true,
-    },
-    {
-        ProductId: "SNK008",
-        ProductName: "Large Sprite",
-        labelledPrice: 5.99,
-        ProductPrice: 4.99,
-        ProductQuantity: 80,
-        ProductCategory: "beverages",
-        ProductImage: ["/uploads/movies/sprite1.jpg"],
-        ProductDescription: "Refreshing lemon-lime soda served ice-cold. Light, crisp, and perfect for quenching your thirst.",
-        isAvailable: true,
-    },
-    {
-        ProductId: "SNK009",
-        ProductName: "Pretzel Bites",
-        labelledPrice: 10.99,
-        ProductPrice: 8.99,
-        ProductQuantity: 35,
-        ProductCategory: "snacks",
-        ProductImage: ["/uploads/movies/pretzels1.jpg"],
-        ProductDescription: "Soft, warm pretzel bites served with cheese dipping sauce. Perfectly salted and freshly baked.",
-        isAvailable: false,
-    },
-    {
-        ProductId: "SNK010",
-        ProductName: "Gummy Bears",
-        labelledPrice: 7.99,
-        ProductPrice: 6.49,
-        ProductQuantity: 60,
-        ProductCategory: "sweets",
-        ProductImage: ["/uploads/movies/gummy-bears1.jpg"],
-        ProductDescription: "Assorted fruity gummy bears in various flavors. Chewy, sweet, and perfect for candy lovers.",
-        isAvailable: true,
-    },
-    {
-        ProductId: "SNK011",
-        ProductName: "Hot Dogs",
-        labelledPrice: 12.99,
-        ProductPrice: 10.99,
-        ProductQuantity: 15,
-        ProductCategory: "hot_food",
-        ProductImage: ["/uploads/movies/hotdog1.jpg", "/uploads/movies/hotdog2.jpg"],
-        ProductDescription: "Grilled hot dogs served with your choice of mustard, ketchup, and relish. A classic movie theater snack.",
-        isAvailable: true,
-    },
-    {
-        ProductId: "SNK012",
-        ProductName: "Pepsi",
-        labelledPrice: 5.99,
-        ProductPrice: 4.99,
-        ProductQuantity: 90,
-        ProductCategory: "beverages",
-        ProductImage: ["/uploads/movies/pepsi1.jpg"],
-        ProductDescription: "Ice-cold Pepsi cola served in a large cup. The perfect cola drink to enjoy with your movie.",
-        isAvailable: true,
-    },
-    {
-        ProductId: "SNK013",
-        ProductName: "M&M's",
-        labelledPrice: 6.99,
-        ProductPrice: 5.99,
-        ProductQuantity: 65,
-        ProductCategory: "sweets",
-        ProductImage: ["/uploads/movies/mms1.jpg"],
-        ProductDescription: "Colorful chocolate candies that melt in your mouth, not in your hand. A movie classic.",
-        isAvailable: true,
-    },
-    {
-        ProductId: "SNK014",
-        ProductName: "Loaded Nachos Supreme",
-        labelledPrice: 22.99,
-        ProductPrice: 19.99,
-        ProductQuantity: 12,
-        ProductCategory: "nachos",
-        ProductImage: ["/uploads/movies/loaded-nachos1.jpg", "/uploads/movies/loaded-nachos2.jpg"],
-        ProductDescription: "Ultimate nachos loaded with cheese, jalapeños, sour cream, guacamole, and ground beef. Perfect for sharing.",
-        isAvailable: true,
-    },
-    {
-        ProductId: "SNK015",
-        ProductName: "Iced Coffee",
-        labelledPrice: 7.99,
-        ProductPrice: 6.49,
-        ProductQuantity: 45,
-        ProductCategory: "beverages",
-        ProductImage: ["/uploads/movies/iced-coffee1.jpg"],
-        ProductDescription: "Rich, cold-brewed coffee served over ice with optional cream and sugar. Perfect pick-me-up during long movies.",
-        isAvailable: true,
     }
 ];  
 
 export default function ConcessionManagement() {
+    const { user } = useContext(AuthContext);
+    const [snacks, setSnacks] = useState(sampleSnacks);
+    const navigate = useNavigate();
+    
+    useEffect(() => {
+        const fetchSnacks = async () => {
+            try {
+                // Try to fetch from backend with credentials (like ShowtimeManagement)
+                const response = await fetch(`${API_BASE_URL}/snacks`, {
+                    credentials: "include", // This includes httpOnly cookies
+                });
+
+                if (!response.ok) {
+                    // If fetch fails, try with token from localStorage
+                    const token = localStorage.getItem('token');
+                    if (token) {
+                        const axiosResponse = await axios.get(`${API_BASE_URL}/snacks`, {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                                'Content-Type': 'application/json',
+                            },
+                        });
+                        
+                        console.log('Fetched snacks with token:', axiosResponse.data);
+                        
+                        // Handle different response structures
+                        if (axiosResponse.data && axiosResponse.data.snacks) {
+                            setSnacks(axiosResponse.data.snacks);
+                        } else if (Array.isArray(axiosResponse.data)) {
+                            setSnacks(axiosResponse.data);
+                        } else {
+                            console.log('Unexpected response structure:', axiosResponse.data);
+                        }
+                        
+                        toast.success('Snacks loaded from database');
+                        return;
+                    }
+                    throw new Error('Authentication required');
+                }
+
+                // If fetch succeeds, handle the response
+                const data = await response.json();
+                console.log('Fetched snacks with cookies:', data);
+                
+                if (data && data.snacks) {
+                    setSnacks(data.snacks);
+                } else if (Array.isArray(data)) {
+                    setSnacks(data);
+                } else {
+                    console.log('Unexpected response structure:', data);
+                }
+                
+                toast.success('Snacks loaded from database');
+                
+            } catch (error) {
+                console.error('Error fetching snacks:', error);
+                console.log('Using sample data - User authentication status:', user ? 'Logged in' : 'Not logged in');
+                
+                if (user) {
+                    toast('Could not load snacks from database. Using sample data.', {
+                        icon: 'ℹ️',
+                    });
+                } else {
+                    toast('Login to see live inventory. Showing sample data.', {
+                        icon: 'ℹ️',
+                    });
+                }
+            }
+        };
+        
+        fetchSnacks();
+    }, [user]);
+
+
     return (
-       <div className="min-h-screen bg-background-900 text-text-primary w-full">
-         <h1 className="text-2xl font-bold m-4">Concession Management Page</h1>
+       <div className="min-h-screen bg-background-900 text-text-primary ">
+         {/* Header with back button */}
+         <div className="flex items-center justify-between p-4 pt-8">
+            <Link 
+                to="/admin-dashboard" 
+                className="flex items-center gap-2 text-primary-400 hover:text-primary-300 transition-colors"
+            >
+                <BiArrowBack className="text-2xl" />
+                <span className="text-lg font-medium">Back to Admin Dashboard</span>
+            </Link>
+            <h1 className="text-2xl font-bold text-center flex-1">Concession Management</h1>
+            <div className="w-48"></div> 
+         </div>
          
          <div className="p-4">
-            <h2 className="text-xl font-semibold mb-4">Sample Snacks Inventory</h2>
+            
             
             {/* Table Container */}
             <div className="overflow-x-auto bg-surface-600 rounded-lg border border-surface-400/40 m-6">
@@ -185,8 +124,9 @@ export default function ConcessionManagement() {
                         <tr>
                             <th className="px-4 py-3 font-semibold text-text-primary">Product ID</th>
                             <th className="px-4 py-3 font-semibold text-text-primary">Product Name</th>
+                            <th className="px-4 py-3 font-semibold text-text-primary">Image</th>
                             <th className="px-4 py-3 font-semibold text-text-primary">Category</th>
-                            <th className="px-4 py-3 font-semibold text-text-primary">Description</th>
+                            
                             <th className="px-4 py-3 font-semibold text-text-primary">Labelled Price</th>
                             <th className="px-4 py-3 font-semibold text-text-primary">Selling Price</th>
                             <th className="px-4 py-3 font-semibold text-text-primary">Quantity</th>
@@ -195,18 +135,29 @@ export default function ConcessionManagement() {
                         </tr>
                     </thead>
                     <tbody>
-                        {sampleSnacks.map((snack, index) => (
-                            <tr key={snack.ProductId} className={`border-b border-surface-400/20 hover:bg-background-800/50 ${index % 2 === 0 ? 'bg-background-900/30' : 'bg-surface-600/30'}`}>
+                        {snacks.map((snack, index) => (
+                            <tr key={snack._id || `${snack.ProductId}-${index}`} className={`border-b border-surface-400/20 hover:bg-background-800/50 ${index % 2 === 0 ? 'bg-background-900/30' : 'bg-surface-600/30'}`}>
                                 <td className="px-4 py-3 font-mono text-sm text-gray-300">{snack.ProductId}</td>
-                                <td className="px-4 py-3 font-medium text-text-primary">{snack.ProductName}</td>
+                                <td className="px-4 py-3 font-mono text-sm text-text-primary">{snack.ProductName}</td>
+                                <td className="px-4 py-3">
+                                    {snack.ProductImage && snack.ProductImage.length > 0 ? (
+                                        <img
+                                            src={snack.ProductImage[0]}
+                                            alt={snack.ProductName}
+                                            className="w-16 h-16 object-cover rounded"
+                                        />
+                                    ) : (
+                                        <div className="w-16 h-16 bg-surface-500 flex items-center justify-center rounded text-sm text-text-muted">
+                                            No Image
+                                        </div>
+                                    )}
+                                </td>
                                 <td className="px-4 py-3">
                                     <span className="bg-primary-600 px-2 py-1 rounded text-xs text-white capitalize">
                                         {snack.ProductCategory}
                                     </span>
                                 </td>
-                                <td className="px-4 py-3 text-text-muted max-w-xs truncate" title={snack.ProductDescription}>
-                                    {snack.ProductDescription}
-                                </td>
+                                
                                 <td className="px-4 py-3 text-gray-500 line-through">${snack.labelledPrice}</td>
                                 <td className="px-4 py-3 font-bold text-green-400">${snack.ProductPrice}</td>
                                 <td className="px-4 py-3 text-center">
@@ -221,12 +172,90 @@ export default function ConcessionManagement() {
                                 </td>
                                 <td className="px-4 py-3">
                                     <div className="flex space-x-2">
-                                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs transition-colors">
-                                            Edit
+                                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-2xl transition-colors">
+                                           <BiEdit />
                                         </button>
-                                        <button className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition-colors">
-                                            Delete
+                                        <button 
+                                            onClick={async () => {
+                                                if (!user) {
+                                                    toast.error('Please login to delete snacks');
+                                                    navigate('/login');
+                                                    return;
+                                                }
+
+                                                try {
+                                                    // Use _id for deletion (MongoDB ObjectId) instead of ProductId
+                                                    const deleteEndpoint = snack._id ? 
+                                                        `${API_BASE_URL}/snacks/${snack._id}` : 
+                                                        `${API_BASE_URL}/snacks/${snack.ProductId}`;
+                                                    
+                                                    console.log('Deleting snack:', deleteEndpoint);
+                                                    
+                                                    let response;
+                                                    
+                                                    // Try with credentials first (httpOnly cookies)
+                                                    try {
+                                                        response = await fetch(deleteEndpoint, {
+                                                            method: 'DELETE',
+                                                            credentials: "include",
+                                                            headers: {
+                                                                'Content-Type': 'application/json',
+                                                            },
+                                                        });
+                                                        
+                                                        if (!response.ok) {
+                                                            throw new Error('Cookie auth failed');
+                                                        }
+                                                        
+                                                        console.log("Snack deleted successfully with cookies");
+                                                    } catch (cookieError) {
+                                                        console.log('Cookie auth failed, trying with token:', cookieError.message);
+                                                        
+                                                        // Fallback to localStorage token
+                                                        const token = localStorage.getItem('token');
+                                                        if (!token) {
+                                                            toast.error('Authentication required. Please login again.');
+                                                            navigate('/login');
+                                                            return;
+                                                        }
+                                                        
+                                                        response = await axios.delete(deleteEndpoint, {
+                                                            headers: {
+                                                                Authorization: `Bearer ${token}`,                       
+                                                            },
+                                                        });
+                                                        
+                                                        console.log("Snack deleted successfully with token");
+                                                    }
+                                                    
+                                                    toast.success('Snack deleted successfully');
+                                                    
+                                                    // Remove snack from state using both _id and ProductId for safety
+                                                    setSnacks(snacks.filter(s => 
+                                                        s._id !== snack._id && s.ProductId !== snack.ProductId
+                                                    ));
+                                                    
+                                                } catch (error) {
+                                                    console.error("Error deleting snack:", error);
+                                                    
+                                                    if (error.response?.status === 401 || error.status === 401) {
+                                                        toast.error('Authentication failed. Please login again.');
+                                                        navigate('/login');
+                                                    } else if (error.response?.status === 404 || error.status === 404) {
+                                                        toast.error('Snack not found.');
+                                                    } else if (error.response?.data?.message) {
+                                                        toast.error(error.response.data.message);
+                                                    } else {
+                                                        toast.error('Error deleting snack. Please try again.');
+                                                    }
+                                                }
+                                            }}
+                                            className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-2xl transition-colors"
+                                        >
+                                            <BiTrash />
                                         </button>
+                                        
+                                       
                                     </div>
                                 </td>
                             </tr>

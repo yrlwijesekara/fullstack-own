@@ -1,17 +1,18 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import MediaUpload from "../../utils/mediaupload";
+import { AuthContext } from "../../context/AuthContext";
+import { API_BASE_URL } from "../../utils/api";
 
 
 
 
 
 export default function AddSnacks() {
-
-
+    const { user } = useContext(AuthContext);
     const [productId, setProductId] = useState('');
     const [productName, setProductName] = useState('');
     const [labelledPrice, setLabelledPrice] = useState('');
@@ -70,12 +71,10 @@ export default function AddSnacks() {
                 return;
             }
 
-            const token = localStorage.getItem('token');
-            if (!token) {
+            // Check if user is authenticated
+            if (!user) {
                 toast.error('Please log in to continue');
-                setTimeout(() => {
-                    window.location.href = '/login';
-                }, 2000);
+                navigate('/login');
                 setUploading(false);
                 return;
             }
@@ -115,14 +114,45 @@ export default function AddSnacks() {
             // Loading toast for API call
             const loadingToast = toast.loading('Adding snack...');
             
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5008/api';
+            let response;
             
-            const response = await axios.post(`${API_BASE_URL}/snacks`, snackData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            // Try with credentials first (httpOnly cookies)
+            try {
+                response = await fetch(`${API_BASE_URL}/snacks`, {
+                    method: 'POST',
+                    credentials: "include",
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(snackData),
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Cookie auth failed');
+                }
+                
+                console.log("Snack added successfully with cookies");
+            } catch (cookieError) {
+                console.log('Cookie auth failed, trying with token:', cookieError.message);
+                
+                // Fallback to localStorage token
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    toast.error('Authentication required. Please login again.');
+                    navigate('/login');
+                    setUploading(false);
+                    return;
+                }
+                
+                response = await axios.post(`${API_BASE_URL}/snacks`, snackData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                console.log("Snack added successfully with token");
+            }
 
             toast.dismiss(loadingToast);
             toast.success('Snack added successfully!');
