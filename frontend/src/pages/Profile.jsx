@@ -1,6 +1,8 @@
 import { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from '../hooks/useNavigate';
+import { toast } from 'react-toastify';
+import Modal from '../components/Modal';
 import BackButton from '../components/BackButton';
 
 export default function Profile() {
@@ -16,6 +18,7 @@ export default function Profile() {
     confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [message, setMessage] = useState('');
 
   if (!user) {
@@ -26,8 +29,14 @@ export default function Profile() {
     );
   }
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = async () => {
+    setShowLogoutModal(false);
     await logout();
+    toast.success('You have been successfully logged out.');
     navigate('/login');
   };
 
@@ -289,6 +298,17 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        isOpen={showLogoutModal}
+        title="Confirm Logout"
+        message="Are you sure you want to log out?"
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={confirmLogout}
+        confirmText="Yes, Logout"
+        theme="default"
+      />
     </div>
   );
 }

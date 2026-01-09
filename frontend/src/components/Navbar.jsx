@@ -1,12 +1,15 @@
 import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from '../hooks/useNavigate';
+import { toast } from 'react-toastify';
+import Modal from '../components/Modal';
 import Logo from '../components/Logo';
 
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [currentPath, setCurrentPath] = useState('');
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     // Track current path for active link highlighting
@@ -22,7 +25,13 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = () => {
-    logout();
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = async () => {
+    setShowLogoutModal(false);
+    await logout();
+    toast.success('You have been successfully logged out.');
     navigate('/login');
   };
 
@@ -110,6 +119,17 @@ export default function Navbar() {
           )}
         </div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        isOpen={showLogoutModal}
+        title="Confirm Logout"
+        message="Are you sure you want to log out?"
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={confirmLogout}
+        confirmText="Yes, Logout"
+        theme="default"
+      />
     </nav>
   );
 }
