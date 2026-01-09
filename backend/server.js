@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const path = require('path');
+const fs = require('fs');
 require("dotenv").config();
 const connectDB = require("./config/db");
 
@@ -43,14 +44,27 @@ app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/halls',hallRoutes);
 
-// Root route (simple API landing) and health check
-app.get('/', (req, res) => {
-  res.status(200).json({ message: 'CinemaBookingSystem API', health: '/api/health' });
-});
-
+// Health check
 app.get('/api/health', (req, res) => {
   res.status(200).json({ message: 'Server is running' });
 });
+
+// If a frontend build exists (frontend/dist), serve it as static files
+const clientDist = path.join(__dirname, '..', 'frontend', 'dist');
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+
+  // Serve index.html for any non-API route (SPA fallback)
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+} else {
+  // Simple API landing at root when no frontend build is present
+  app.get('/', (req, res) => {
+    res.status(200).json({ message: 'CinemaBookingSystem API', health: '/api/health' });
+  });
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
