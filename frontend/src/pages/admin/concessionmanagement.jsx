@@ -84,13 +84,11 @@ export default function ConcessionManagement() {
                 console.log('Using sample data - User authentication status:', user ? 'Logged in' : 'Not logged in');
                 
                 if (user) {
-                    toast('Could not load snacks from database. Using sample data.', {
-                        icon: 'ℹ️',
-                    });
+                    toast('Could not load snacks from database. Using sample data.'
+                    
+                    );
                 } else {
-                    toast('Login to see live inventory. Showing sample data.', {
-                        icon: 'ℹ️',
-                    });
+                    toast('Login to see live inventory. Showing sample data.');
                 }
             }
         };
@@ -102,7 +100,7 @@ export default function ConcessionManagement() {
     return (
        <div className="min-h-screen bg-background-900 text-text-primary w-full">
          {/* Header with back button */}
-         <div className="flex items-center justify-between p-6 m-2">
+         <div className="flex items-center justify-between p-6 ">
             <Link 
                 to="/admin-dashboard" 
                 className="flex items-center gap-2 text-primary-400 hover:text-primary-300 transition-colors"
