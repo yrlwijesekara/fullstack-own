@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../middleware/authMiddleware");
+const { protect, isAdmin } = require("../middleware/auth");
 const {
   initializeSeats,
   getSeatMap,
@@ -9,10 +9,15 @@ const {
   syncSeatsFromHall
 } = require("../controllers/SeatController");
 
-router.post("/initialize", initializeSeats); // CREATE
-router.post("/sync", syncSeatsFromHall);     // SYNC manually
-router.get("/:showId", getSeatMap);           // READ
-router.post("/lock", auth, lockSeat);         // UPDATE
-router.post("/confirm", auth, confirmSeat);   // UPDATE
+// Public routes - Get seat layout from hall/show
+router.get("/:showId", getSeatMap);
+
+// Protected routes - Authenticated users
+router.post("/lock", protect, lockSeat);
+router.post("/confirm", protect, confirmSeat);
+
+// Admin routes - Seat management
+router.post("/initialize", protect, isAdmin, initializeSeats);
+router.post("/sync", protect, isAdmin, syncSeatsFromHall);
 
 module.exports = router;
