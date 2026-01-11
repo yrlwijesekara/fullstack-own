@@ -6,6 +6,8 @@ const {
   getSeatMap,
   lockSeat,
   confirmSeat,
+  unlockSeat,
+  clearExpiredLocks,
   syncSeatsFromHall
 } = require("../controllers/SeatController");
 
@@ -15,9 +17,11 @@ router.get("/:showId", getSeatMap);
 // Protected routes - Authenticated users
 router.post("/lock", protect, lockSeat);
 router.post("/confirm", protect, confirmSeat);
+router.post("/unlock", protect, unlockSeat);
 
 // Admin routes - Seat management
 router.post("/initialize", protect, isAdmin, initializeSeats);
 router.post("/sync", protect, isAdmin, syncSeatsFromHall);
+router.post("/clear-expired", clearExpiredLocks); // Can be called by cron job
 
 module.exports = router;

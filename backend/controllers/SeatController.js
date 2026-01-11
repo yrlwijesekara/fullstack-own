@@ -100,6 +100,93 @@ exports.confirmSeat = async (req, res) => {
 };
 
 /**
+ * DELETE – Unlock/Release seat (timeout or user cancels)
+ */
+exports.unlockSeat = async (req, res) => {
+  try {
+    const { showId, seatLabel } = req.body;
+    const userId = req.user.id;
+    const io = req.app.get("io");
+
+    const show = await Show.findById(showId);
+    if (!show) {
+      return res.status(404).json({ message: "Show not found" });
+    }
+
+    const seat = show.seats.find(s => s.seatLabel === seatLabel);
+    if (!seat) {
+      return res.status(404).json({ message: "Seat not found" });
+    }
+
+    // Only the user who locked it can unlock (or admin)
+    if (seat.status === "LOCKED" && seat.userId.toString() === userId) {
+      seat.status = "AVAILABLE";
+      seat.userId = null;
+      seat.lockedAt = null;
+
+      await show.save();
+
+      // 🔥 REAL-TIME UPDATE
+      io.to(showId).emit("seatUpdate", {
+        seatLabel,
+        status: "AVAILABLE",
+      });
+
+      res.json({ message: "Seat unlocked" });
+    } else {
+      res.status(403).json({ message: "Unauthorized or seat not locked by you" });
+    }
+  } catch (error) {
+    console.error("Error unlocking seat:", error);
+    res.status(500).json({ message: "Error unlocking seat", error: error.message });
+  }
+};
+
+/**
+ * DELETE – Clear expired locks (background job)
+ */
+exports.clearExpiredLocks = async (req, res) => {
+  try {
+    const LOCK_TIMEOUT_MINUTES = 10; // Seats locked for more than 10 minutes
+    const cutoffTime = new Date(Date.now() - LOCK_TIMEOUT_MINUTES * 60 * 1000);
+
+    const shows = await Show.find({
+      "seats.status": "LOCKED",
+      "seats.lockedAt": { $lt: cutoffTime }
+    });
+
+    let clearedCount = 0;
+    const io = req.app.get("io");
+
+    for (const show of shows) {
+      for (const seat of show.seats) {
+        if (seat.status === "LOCKED" && seat.lockedAt < cutoffTime) {
+          seat.status = "AVAILABLE";
+          seat.userId = null;
+          seat.lockedAt = null;
+          clearedCount++;
+
+          // 🔥 REAL-TIME UPDATE
+          io.to(show._id.toString()).emit("seatUpdate", {
+            seatLabel: seat.seatLabel,
+            status: "AVAILABLE",
+          });
+        }
+      }
+      await show.save();
+    }
+
+    res.json({ 
+      message: "Expired locks cleared", 
+      clearedSeats: clearedCount 
+    });
+  } catch (error) {
+    console.error("Error clearing expired locks:", error);
+    res.status(500).json({ message: "Error clearing locks", error: error.message });
+  }
+};
+
+/**
  * SYNC – Manually sync seats from hall to show
  */
 exports.syncSeatsFromHall = async (req, res) => {
