@@ -10,6 +10,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [currentPath, setCurrentPath] = useState('');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     // Track current path for active link highlighting
@@ -26,6 +27,11 @@ export default function Navbar() {
 
   const handleLogout = () => {
     setShowLogoutModal(true);
+  };
+
+  const navTo = (path) => {
+    setMobileOpen(false);
+    navigate(path);
   };
 
   const confirmLogout = async () => {
@@ -100,6 +106,24 @@ export default function Navbar() {
           </div>
         </div>
         <div className="flex items-center gap-4">
+          {/* Mobile menu toggle (visible on small screens) */}
+          <button
+            onClick={() => setMobileOpen((v) => !v)}
+            className="md:hidden p-2 rounded-md text-text-primary hover:bg-secondary-700"
+            aria-expanded={mobileOpen}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+
           {user ? (
             <>
               <div className="flex items-center gap-3">
@@ -137,6 +161,54 @@ export default function Navbar() {
           )}
         </div>
       </div>
+
+      {/* Mobile menu (small screens) */}
+      {mobileOpen && (
+        <div className="md:hidden px-4 pb-4 border-t border-secondary-400">
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => navTo('/movies')}
+              className={`w-full text-left font-medium transition uppercase tracking-wide text-sm ${isActive('/movies') ? 'text-secondary-300' : 'text-text-primary hover:text-purple-400'}`}
+            >
+              Movies
+            </button>
+            <button
+              onClick={() => navTo('/cinemas')}
+              className={`w-full text-left font-medium transition uppercase tracking-wide text-sm ${isActive('/cinemas') ? 'text-secondary-300' : 'text-text-primary hover:text-purple-400'}`}
+            >
+              Cinemas
+            </button>
+            <button
+              onClick={() => navTo('/concessions')}
+              className={`w-full text-left font-medium transition uppercase tracking-wide text-sm ${isActive('/concessions') ? 'text-secondary-300' : 'text-text-primary hover:text-purple-400'}`}
+            >
+              Concessions
+            </button>
+            {user && user.role === 'admin' && (
+              <button
+                onClick={() => navTo('/admin-dashboard')}
+                className={`w-full text-left font-medium transition uppercase tracking-wide text-sm ${isActive('/admin-dashboard') ? 'text-secondary-300' : 'text-text-primary hover:text-purple-400'}`}
+              >
+                Admin
+              </button>
+            )}
+
+            <div className="pt-2">
+              {user ? (
+                <div className="flex flex-col gap-2">
+                  <button onClick={() => { setMobileOpen(false); navigate('/profile'); }} className="w-full text-left px-3 py-2 bg-purple-600 text-white rounded-md">Profile</button>
+                  <button onClick={() => { setMobileOpen(false); handleLogout(); }} className="w-full text-left px-3 py-2 bg-red-600 text-white rounded-md">Logout</button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <button onClick={() => navTo('/login')} className="w-full text-left px-3 py-2 bg-secondary-500 text-white rounded-md">Login</button>
+                  <button onClick={() => navTo('/register')} className="w-full text-left px-3 py-2 bg-primary-500 text-white rounded-md">Register</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Logout Confirmation Modal */}
       <Modal
