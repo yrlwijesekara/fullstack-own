@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import BackButton from '../components/BackButton';
 import LoadingLogo from '../components/LoadingLogo';
+import HallLayoutPreview from '../components/HallLayoutPreview';
 import { API_BASE_URL } from '../utils/api';
 
 export default function BookShowtime() {
@@ -52,19 +53,17 @@ export default function BookShowtime() {
 
   const hallLayout = showtime.hallId?.layout || { rows: 0, cols: 0, seats: [] };
 
-  const isSeatBooked = (label) => showtime.bookedSeats?.includes(label) || false;
-
-  const toggleSeat = (label, active) => {
-    if (!active) return;
-    if (isSeatBooked(label)) return;
-    if (selectedSeats.includes(label)) {
-      setSelectedSeats(selectedSeats.filter(s => s !== label));
+  const handleSeatClick = (seat) => {
+    if (selectedSeats.includes(seat.label)) {
+      // Deselect
+      setSelectedSeats(selectedSeats.filter(s => s !== seat.label));
     } else {
+      // Select
       if (selectedSeats.length >= totalTickets) {
         toast.info(`You can only select ${totalTickets} seats`);
         return;
       }
-      setSelectedSeats([...selectedSeats, label]);
+      setSelectedSeats([...selectedSeats, seat.label]);
     }
   };
 
@@ -97,81 +96,160 @@ export default function BookShowtime() {
     }
   };
 
-  // Build seat grid
-  const seatMap = {};
-  (hallLayout.seats || []).forEach(s => {
-    seatMap[`${s.row}-${s.col}`] = s;
-  });
-
-  const rows = hallLayout.rows || 0;
-  const cols = hallLayout.cols || 0;
-
   return (
     <div className="min-h-screen bg-background-900 text-text-primary">
       <Navbar />
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-6">
         <BackButton to={`/movies/${showtime.movieId?._id || ''}/showtimes`} />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-          <div className="md:col-span-2 bg-surface-600 p-6 rounded-lg">
-            <h2 className="text-2xl font-bold mb-4">Select Seats</h2>
-            <div className="mb-4">Select {totalTickets} seats for {new Date(showtime.startTime).toLocaleString()}</div>
-
-            <div className="overflow-auto">
-              <div className="inline-block p-4 bg-surface-500 rounded-lg">
-                {[...Array(rows)].map((_, rIdx) => (
-                  <div key={rIdx} className="flex gap-2 mb-2">
-                    {[...Array(cols)].map((_, cIdx) => {
-                      const key = `${rIdx+1}-${cIdx+1}`;
-                      const seat = seatMap[key];
-                      const label = seat?.label || `${String.fromCharCode(65 + rIdx)}${cIdx+1}`;
-                      const active = seat ? seat.isActive !== false : false;
-                      const booked = isSeatBooked(label);
-                      const selected = selectedSeats.includes(label);
-                      return (
-                        <button
-                          key={key}
-                          onClick={() => toggleSeat(label, active)}
-                          disabled={!active || booked}
-                          className={`w-10 h-10 text-sm rounded ${booked ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : selected ? 'bg-primary-500 text-white' : active ? 'bg-surface-400 hover:bg-surface-300' : 'bg-gray-800 text-gray-500'}`}
-                          title={label}
-                        >{label}</button>
-                      );
-                    })}
-                  </div>
-                ))}
+        {/* Movie & Showtime Info */}
+        <div className="mt-6 mb-6 bg-surface-600 p-6 rounded-lg border border-secondary-400">
+          <div className="flex gap-4 items-start">
+            {showtime.movieId?.posterUrl && (
+              <img
+                src={showtime.movieId.posterUrl}
+                alt={showtime.movieId.title}
+                className="w-24 h-36 object-cover rounded-lg"
+              />
+            )}
+            <div>
+              <h1 className="text-2xl font-bold mb-2">{showtime.movieId?.title || 'Movie'}</h1>
+              <div className="text-text-secondary space-y-1">
+                <p>🏛️ Hall: {showtime.hallId?.name || 'N/A'}</p>
+                <p>🎬 Cinema: {showtime.cinemaId?.name || 'N/A'}</p>
+                <p>📅 {new Date(showtime.startTime).toLocaleString()}</p>
+                <p>💰 ${Number(showtime.price).toFixed(2)} per ticket</p>
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="bg-surface-600 p-6 rounded-lg">
-            <h3 className="text-xl font-semibold mb-4">Booking Summary</h3>
-            <div className="mb-3">
-              <label className="block text-sm text-text-secondary">Adults</label>
-              <input type="number" min={0} value={selectedAdult} onChange={(e) => setSelectedAdult(Math.max(0, Number(e.target.value)))} className="w-full px-3 py-2 rounded mt-1 bg-surface-500" />
-            </div>
-            <div className="mb-3">
-              <label className="block text-sm text-text-secondary">Children</label>
-              <input type="number" min={0} value={selectedChild} onChange={(e) => setSelectedChild(Math.max(0, Number(e.target.value)))} className="w-full px-3 py-2 rounded mt-1 bg-surface-500" />
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Seat Selection with Hall Layout */}
+          <div className="lg:col-span-2 bg-surface-600 p-6 rounded-lg border border-secondary-400">
+            <h2 className="text-2xl font-bold mb-2">Select Your Seats</h2>
+            <p className="text-text-secondary mb-6">
+              Choose {totalTickets} seat{totalTickets !== 1 ? 's' : ''} for your booking
+            </p>
 
-            <div className="mb-3">
-              <div className="text-sm text-text-secondary">Price</div>
-              <div className="text-lg font-bold">${Number(showtime.price).toFixed(2)} (Adult)</div>
-              <div className="text-sm">Child = 50% discount</div>
-            </div>
+            <HallLayoutPreview
+              layout={hallLayout}
+              onSeatClick={handleSeatClick}
+              selectedSeats={selectedSeats}
+              bookedSeats={showtime.bookedSeats || []}
+              showScreen={true}
+              showLegend={true}
+              interactive={true}
+              maxSeats={totalTickets}
+            />
+          </div>
 
-            <div className="mb-3">
-              <div className="text-sm text-text-secondary">Selected Seats</div>
-              <div className="mt-2">{selectedSeats.join(', ') || '-'}</div>
-            </div>
+          {/* Booking Summary */}
+          <div className="bg-surface-600 p-6 rounded-lg border border-secondary-400 h-fit">
+            <h3 className="text-xl font-semibold mb-6">Booking Summary</h3>
+            
+            <div className="space-y-4">
+              {/* Ticket Selection */}
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Adult Tickets
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={20}
+                  value={selectedAdult}
+                  onChange={(e) => {
+                    setSelectedAdult(Math.max(0, Number(e.target.value)));
+                    setSelectedSeats([]); // Reset seat selection when count changes
+                  }}
+                  className="w-full px-4 py-3 rounded bg-surface-500 border border-secondary-400 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
 
-            <div className="mt-6">
-              <button onClick={handleConfirm} className="w-full py-2 bg-primary-500 rounded-lg text-white">Confirm Booking</button>
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Child Tickets (50% off)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={20}
+                  value={selectedChild}
+                  onChange={(e) => {
+                    setSelectedChild(Math.max(0, Number(e.target.value)));
+                    setSelectedSeats([]); // Reset seat selection when count changes
+                  }}
+                  className="w-full px-4 py-3 rounded bg-surface-500 border border-secondary-400 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              {/* Price Breakdown */}
+              <div className="border-t border-secondary-400 pt-4">
+                <div className="text-sm text-text-secondary mb-2">Price per Adult</div>
+                <div className="text-lg font-bold text-primary-400 mb-3">
+                  ${Number(showtime.price).toFixed(2)}
+                </div>
+                <div className="text-sm text-text-secondary mb-1">
+                  Total: {totalTickets} ticket{totalTickets !== 1 ? 's' : ''}
+                </div>
+                <div className="text-2xl font-bold text-secondary-300">
+                  ${(selectedAdult * showtime.price + selectedChild * showtime.price * 0.5).toFixed(2)}
+                </div>
+              </div>
+
+              {/* Selected Seats */}
+              <div className="border-t border-secondary-400 pt-4">
+                <div className="text-sm font-medium text-text-secondary mb-2">
+                  Selected Seats
+                </div>
+                <div className="min-h-[60px] p-3 bg-surface-500 rounded border border-secondary-400">
+                  {selectedSeats.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {selectedSeats.map((seat) => (
+                        <span
+                          key={seat}
+                          className="px-3 py-1 bg-primary-500 text-white rounded-full text-sm font-medium"
+                        >
+                          {seat}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-text-muted text-sm">No seats selected</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-6 space-y-3">
+                <button
+                  onClick={handleConfirm}
+                  disabled={selectedSeats.length !== totalTickets || totalTickets === 0}
+                  className={`w-full py-3 rounded-lg font-bold uppercase tracking-wide transition ${
+                    selectedSeats.length === totalTickets && totalTickets > 0
+                      ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/30'
+                      : 'bg-surface-500 text-text-muted cursor-not-allowed'
+                  }`}
+                >
+                  {selectedSeats.length === totalTickets && totalTickets > 0
+                    ? 'Confirm Booking'
+                    : `Select ${totalTickets - selectedSeats.length} more seat${
+                        totalTickets - selectedSeats.length !== 1 ? 's' : ''
+                      }`}
+                </button>
+
+                {!user && (
+                  <div className="text-center text-xs text-text-secondary">
+                    💡 You'll be redirected to login to complete the booking
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <ToastContainer position="bottom-right" theme="dark" />
     </div>
   );
 }

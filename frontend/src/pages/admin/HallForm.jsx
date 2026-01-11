@@ -122,7 +122,7 @@ const HallForm = () => {
       <div className="max-w-6xl mx-auto px-4">
         <div className="mb-6">
           <button
-            onClick={() => navigate('/admin/halls')}
+            onClick={() => navigate('/admin-dashboard/halls')}
             className="text-secondary-300 hover:text-secondary-400 flex items-center gap-2 mb-4"
           >
             ← Back to Halls
