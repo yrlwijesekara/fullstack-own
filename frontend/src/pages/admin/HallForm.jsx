@@ -78,7 +78,7 @@ const HallForm = () => {
       } else {
         await createHall(payload);
       }
-      navigate('/admin/halls');
+      navigate('/admin-dashboard/halls');
     } catch (err) {
       setError(err.message || 'Failed to save hall');
     }

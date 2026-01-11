@@ -47,7 +47,7 @@ const HallsList = () => {
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-semibold">Halls</h1>
         <button
-          onClick={() => navigate('/admin/halls/new')}
+          onClick={() => navigate('/admin-dashboard/halls/new')}
           className="px-4 py-2 bg-indigo-600 text-white rounded"
         >
           + New Hall
@@ -71,7 +71,7 @@ const HallsList = () => {
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => navigate(`/admin/halls/${hall._id}`)}
+                  onClick={() => navigate(`/admin-dashboard/halls/${hall._id}`)}
                   className="px-3 py-1 text-sm border rounded"
                 >
                   Edit
