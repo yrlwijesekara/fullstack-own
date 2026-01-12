@@ -12,6 +12,11 @@ export function getCart() {
 
 export function saveCart(items) {
   localStorage.setItem(CART_KEY, JSON.stringify(items));
+  try {
+    window.dispatchEvent(new Event('cartUpdated'));
+  } catch (e) {
+    // ignore in non-browser environments
+  }
 }
 
 export function addToCart(snack, qty = 1) {

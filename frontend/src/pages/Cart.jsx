@@ -23,6 +23,7 @@ export default function Cart() {
   const handleRemove = (id) => {
     const updated = removeFromCart(id);
     setItems(updated);
+    toast.success('Removed from cart');
   };
 
   const total = items.reduce((s, i) => s + i.price * i.qty, 0);
@@ -100,8 +101,8 @@ export default function Cart() {
               <div className="text-2xl font-bold">{new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(total)}</div>
             </div>
 
-            <div className="flex justify-end gap-3">
-              <button onClick={() => { clearCart(); setItems([]); }} className="px-4 py-2 bg-gray-600 rounded">Clear</button>
+              <div className="flex justify-end gap-3">
+              <button onClick={() => { clearCart(); setItems([]); toast.success('Cart cleared'); }} className="px-4 py-2 bg-gray-600 rounded">Clear</button>
               <button onClick={handlePay} className="px-4 py-2 bg-primary-500 text-white rounded">Pay Now</button>
             </div>
           </div>

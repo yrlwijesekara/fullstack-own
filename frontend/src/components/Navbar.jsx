@@ -38,10 +38,13 @@ export default function Navbar() {
     };
     updateCart();
     const onStorage = () => updateCart();
+    const onCartUpdated = () => updateCart();
     window.addEventListener('storage', onStorage);
+    window.addEventListener('cartUpdated', onCartUpdated);
     document.addEventListener('visibilitychange', updateCart);
     return () => {
       window.removeEventListener('storage', onStorage);
+      window.removeEventListener('cartUpdated', onCartUpdated);
       document.removeEventListener('visibilitychange', updateCart);
     };
   }, []);
