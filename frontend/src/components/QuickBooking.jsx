@@ -7,8 +7,9 @@ import PropTypes from 'prop-types';
  * @param {Array} cinemas - Array of cinema locations (optional)
  * @param {Function} onBooking - Callback function when booking is submitted
  * @param {Function} onCinemaChange - Callback function when cinema selection changes
+ * @param {Function} navigate - Navigation function to redirect to booking page
  */
-export default function QuickBooking({ movies = [], cinemas = [], onBooking, onCinemaChange }) {
+export default function QuickBooking({ movies = [], cinemas = [], onBooking, onCinemaChange, navigate }) {
   const [selectedMovie, setSelectedMovie] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedCinema, setSelectedCinema] = useState('');
@@ -20,6 +21,7 @@ export default function QuickBooking({ movies = [], cinemas = [], onBooking, onC
   const today = new Date().toISOString().split('T')[0];
 
   console.log('Cinemas received in QuickBooking:', cinemas);
+  console.log('Cinema list count:', cinemaList?.length || 0);
 
   const handleBooking = (e) => {
     e.preventDefault();
@@ -34,14 +36,23 @@ export default function QuickBooking({ movies = [], cinemas = [], onBooking, onC
     const movie = movies.find(m => m.id === selectedMovie);
     const cinema = cinemaList.find(c => c.id === selectedCinema);
 
-    if (onBooking) {
-      onBooking({
-        movieId: selectedMovie,
-        movieTitle: movie?.title || 'Unknown',
-        date: selectedDate,
-        cinemaId: selectedCinema,
-        cinemaName: cinema?.name || 'Unknown',
-      });
+    const bookingData = {
+      movieId: selectedMovie,
+      movieTitle: movie?.title || 'Unknown',
+      date: selectedDate,
+      cinemaId: selectedCinema,
+      cinemaName: cinema?.name || 'Unknown',
+    };
+
+    // If navigate function is provided, use it to go to MovieShowtimes page
+    if (navigate && selectedMovie) {
+      const queryParams = new URLSearchParams();
+      queryParams.append('date', selectedDate);
+      queryParams.append('hallId', selectedCinema); // Pass as hallId since we're selecting halls
+      navigate(`/movies/${selectedMovie}/showtimes?${queryParams.toString()}`);
+    } else if (onBooking) {
+      // Fallback to callback if navigate not provided
+      onBooking(bookingData);
     }
 
     // Reset form after booking
@@ -121,11 +132,15 @@ export default function QuickBooking({ movies = [], cinemas = [], onBooking, onC
                 required
               >
                 <option value="">Choose a Hall...</option>
-                {cinemaList.map(cinema => (
-                  <option key={cinema.id} value={cinema.id}>
-                    {cinema.name}
-                  </option>
-                ))}
+                {cinemaList && cinemaList.length > 0 ? (
+                  cinemaList.map(cinema => (
+                    <option key={cinema.id} value={cinema.id}>
+                      {cinema.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>No halls available</option>
+                )}
               </select>
             </div>
 
@@ -167,4 +182,5 @@ QuickBooking.propTypes = {
   ),
   onBooking: PropTypes.func,
   onCinemaChange: PropTypes.func,
+  navigate: PropTypes.func,
 };

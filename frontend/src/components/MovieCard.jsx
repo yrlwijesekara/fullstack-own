@@ -57,7 +57,11 @@ export default function MovieCard({ movie, onClick }) {
         {/* Genre and Duration (optional info) */}
         {(movie.genre || movie.duration) && (
           <div className="text-xs text-text-muted mb-3 flex items-center gap-2">
-            {movie.genre && <span className="truncate">{movie.genre}</span>}
+            {movie.genre && (
+              <span className="truncate">
+                {Array.isArray(movie.genre) ? movie.genre.join(', ') : movie.genre}
+              </span>
+            )}
             {movie.genre && movie.duration && <span>•</span>}
             {movie.duration && <span>{movie.duration} min</span>}
           </div>
