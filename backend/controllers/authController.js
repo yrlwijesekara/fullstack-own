@@ -41,7 +41,9 @@ exports.register = async (req, res) => {
     res.cookie('authToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      // In production we need 'none' for cross-site cookies with secure; in development use 'lax' so localhost works
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/', // ensure cookie is sent for all API routes
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -112,7 +114,8 @@ exports.login = async (req, res) => {
     res.cookie('authToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/', // ensure cookie is sent for all API routes
       maxAge: 60 * 60 * 1000, // 60 minutes
     });
 
@@ -154,11 +157,12 @@ exports.getMe = async (req, res) => {
 // @route   POST /api/auth/logout
 exports.logout = async (req, res) => {
   try {
-    // Clear httpOnly cookie
+    // Clear httpOnly cookie (match path and sameSite used when setting)
     res.clearCookie('authToken', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/',
     });
 
     res.status(200).json({

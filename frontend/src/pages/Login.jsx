@@ -38,6 +38,8 @@ export default function Login() {
 
       // JWT token is now in httpOnly cookie (set by backend)
       // Pass token and user to context
+      // Persist token to localStorage for compatibility with some admin requests
+      if (data.token) localStorage.setItem('token', data.token);
       login(data.token, data.user);
       
       // Show success toast

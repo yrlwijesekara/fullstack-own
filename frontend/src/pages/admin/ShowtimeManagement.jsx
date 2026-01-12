@@ -122,15 +122,15 @@ export default function ShowtimeManagement() {
   };
 
   const handleCreateShowtime = async (e) => {
-    e.preventDefault();
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
     try {
       const token = localStorage.getItem("token");
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const response = await fetch(`${API_BASE_URL}/showtimes`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers,
         credentials: "include",
         body: JSON.stringify(formData),
       });
@@ -154,19 +154,19 @@ export default function ShowtimeManagement() {
   };
 
   const handleUpdateShowtime = async (e) => {
-    e.preventDefault();
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
     if (!currentShowtime) return;
 
     try {
       const token = localStorage.getItem("token");
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const response = await fetch(
         `${API_BASE_URL}/showtimes/${currentShowtime._id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers,
           credentials: "include",
           body: JSON.stringify(formData),
         }
@@ -194,13 +194,14 @@ export default function ShowtimeManagement() {
 
     try {
       const token = localStorage.getItem("token");
+      const headers = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const response = await fetch(
         `${API_BASE_URL}/showtimes/${currentShowtime._id}`,
         {
           method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers,
           credentials: "include",
         }
       );
@@ -224,13 +225,14 @@ export default function ShowtimeManagement() {
   const handleCancelShowtime = async (showtimeId) => {
     try {
       const token = localStorage.getItem("token");
+      const headers = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const response = await fetch(
         `${API_BASE_URL}/showtimes/${showtimeId}/cancel`,
         {
           method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers,
           credentials: "include",
         }
       );
@@ -261,7 +263,8 @@ export default function ShowtimeManagement() {
 
   const openCreateModal = (preselectedMovieId = null) => {
     resetForm();
-    if (preselectedMovieId) {
+    // If this was called from a click handler without an id, ignore the event object
+    if (preselectedMovieId && typeof preselectedMovieId === 'string') {
       setFormData(prev => ({ ...prev, movieId: preselectedMovieId }));
     }
     setShowCreateModal(true);

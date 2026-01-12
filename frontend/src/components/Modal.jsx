@@ -1,4 +1,4 @@
-export default function Modal({ isOpen, title, message, onClose, onConfirm, confirmText = 'OK', theme = 'default' }) {
+export default function Modal({ isOpen, title, message, children, onClose, onConfirm, confirmText = 'OK', theme = 'default' }) {
   if (!isOpen) return null;
 
   // Theme classes
@@ -23,6 +23,7 @@ export default function Modal({ isOpen, title, message, onClose, onConfirm, conf
       <div className={`rounded-lg p-6 max-w-sm w-full mx-4 border shadow-2xl ${styles.container}`}>
         <h2 className={`text-2xl font-bold mb-4 ${styles.title}`}>{title}</h2>
         <p className={`mb-6 ${styles.message}`}>{message}</p>
+        {children}
         <div className="flex gap-4">
           {onConfirm ? (
             <>

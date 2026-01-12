@@ -23,6 +23,7 @@ const formatValidationErrors = (error) => {
  * @access  Private/Admin
  */
 exports.createShowtime = async (req, res) => {
+  console.log('⏺️ CreateShowtime called. body=', JSON.stringify(req.body));
   try {
     const { movieId, hallId, startTime, price, totalSeats } = req.body;
 
