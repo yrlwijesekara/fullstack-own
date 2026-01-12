@@ -19,12 +19,12 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import ShowtimeManagement from './pages/admin/ShowtimeManagement';
 import CreateShowtime from './pages/admin/CreateShowtime';
 import UserManagement from './pages/admin/UserManagement';
-import ConcessionManagement from './pages/admin/concessionmanagement';
+import SnackManagement from './pages/admin/snackmanagement';
 import AddSnacks from './pages/admin/addsnacks';
 import AdminLayout from './pages/admin/AdminLayout';
 import Cinemas from './pages/Cinemas';
 import CinemasManagement from './pages/admin/CinemasManagement';
-import Concession from './pages/concession';
+import Snacks from './pages/snacks';
 import Cart from './pages/Cart';
 import { AdminOnlyRoute } from './components/ProtectedRoute';
 import { Navigate } from 'react-router-dom';
@@ -54,7 +54,8 @@ function AppContent() {
       <Route path="/movies/:id/edit" element={<AdminOnlyRoute><MovieForm /></AdminOnlyRoute>} />
       <Route path="/movies/:id/showtimes" element={<MovieShowtimes />} />
       <Route path="/showtimes/:id/book" element={<BookShowtime />} />
-      <Route path="/concessions" element={<Concession />} />
+      <Route path="/snacks" element={<Snacks />} />
+      <Route path="/concessions" element={<Navigate to="/snacks" replace />} />
       <Route path="/cart" element={<Cart />} />
 
       {/* Nested admin routes under /admin-dashboard to ensure admin lands in dashboard layout */}
@@ -66,7 +67,7 @@ function AppContent() {
         <Route path="showtime-management" element={<ShowtimeManagement />} />
         <Route path="showtime-management/new" element={<AdminOnlyRoute><CreateShowtime /></AdminOnlyRoute>} />
         <Route path="user-management" element={<UserManagement />} />
-        <Route path="concession-management" element={<ConcessionManagement />} />
+        <Route path="snack-management" element={<SnackManagement />} />
         <Route path="addsnack" element={<AddSnacks />} />
       </Route>
 
@@ -75,7 +76,7 @@ function AppContent() {
       <Route path="/halls/:id" element={<Navigate to="/admin-dashboard/halls/:id" replace />} />
       <Route path="/showtime-management" element={<Navigate to="/admin-dashboard/showtime-management" replace />} />
       <Route path="/user-management" element={<Navigate to="/admin-dashboard/user-management" replace />} />
-      <Route path="/concession-management" element={<Navigate to="/admin-dashboard/concession-management" replace />} />
+      <Route path="/concession-management" element={<Navigate to="/admin-dashboard/snack-management" replace />} />
       <Route path="/admin/addsnack" element={<Navigate to="/admin-dashboard/addsnack" replace />} />
     </Routes>
   );

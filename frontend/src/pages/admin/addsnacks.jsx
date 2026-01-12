@@ -168,7 +168,7 @@ export default function AddSnacks() {
             setProductDescription('');
             setIsAvailable('true');
             
-            navigate('/concession-management');
+            navigate('/admin-dashboard/snack-management');
             
         } catch (error) {
             toast.dismiss();
@@ -319,7 +319,7 @@ export default function AddSnacks() {
                 </div>
                 
                 <div className="flex justify-end gap-4">
-                    <Link to="/concession-management" className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+                    <Link to="/admin-dashboard/snack-management" className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
                         Cancel
                     </Link>
                     <Link onClick={handleSubmit} className="bg-primary-500 hover:bg-primary-600 text-white font-bold py-2 px-4 rounded">

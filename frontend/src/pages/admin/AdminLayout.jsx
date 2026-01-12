@@ -58,7 +58,7 @@ export default function AdminLayout() {
               <a href="/admin-dashboard/halls" className="block px-3 py-2 rounded hover:bg-surface-500">Halls</a>
               <a href="/admin-dashboard/showtime-management" className="block px-3 py-2 rounded hover:bg-surface-500">Showtimes</a>
               <a href="/admin-dashboard/user-management" className="block px-3 py-2 rounded hover:bg-surface-500">Users</a>
-              <a href="/admin-dashboard/concession-management" className="block px-3 py-2 rounded hover:bg-surface-500">Concessions</a>
+              <a href="/admin-dashboard/snack-management" className="block px-3 py-2 rounded hover:bg-surface-500">Snacks</a>
               <a href="/admin-dashboard/addsnack" className="block px-3 py-2 rounded hover:bg-surface-500">Add Snacks</a>
             </nav>
 

@@ -193,7 +193,7 @@ export default function AdminDashboard() {
                   <div className="text-2xl font-bold">{usersCount}</div>
                 </div>
                 <div className="bg-surface-500 p-4 rounded-xl border border-secondary-400/40">
-                  <div className="text-sm text-text-secondary">Concessions</div>
+                  <div className="text-sm text-text-secondary">Snacks</div>
                   <div className="text-2xl font-bold">{snacksCount}</div>
                 </div>
               </div>
@@ -230,9 +230,9 @@ export default function AdminDashboard() {
               </div>
 
               <div className="bg-surface-500 p-4 md:p-6 rounded-xl border border-secondary-400/40 hover:border-primary-500 transition-colors">
-                <h3 className="text-xl font-semibold text-text-primary mb-2">Manage Concessions</h3>
-                <p className="text-text-secondary mb-4">Add and manage concession items and inventory.</p>
-                <button onClick={() => navigate('/admin-dashboard/concession-management')} className="w-full py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-lg transition-colors">Go to Concessions</button>
+                <h3 className="text-xl font-semibold text-text-primary mb-2">Manage Snacks</h3>
+                <p className="text-text-secondary mb-4">Add and manage snack items and inventory.</p>
+                <button onClick={() => navigate('/admin-dashboard/snack-management')} className="w-full py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-lg transition-colors">Go to Snacks</button>
               </div>
 
               {/* Reports and Settings removed per admin request */}

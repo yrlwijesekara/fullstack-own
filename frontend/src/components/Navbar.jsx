@@ -4,6 +4,7 @@ import { useNavigate } from '../hooks/useNavigate';
 import { toast } from 'react-toastify';
 import Modal from '../components/Modal';
 import Logo from '../components/Logo';
+import { getCart } from '../utils/cart';
 
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
@@ -11,6 +12,7 @@ export default function Navbar() {
   const [currentPath, setCurrentPath] = useState('');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
     // Track current path for active link highlighting
@@ -23,6 +25,25 @@ export default function Navbar() {
     window.addEventListener('popstate', handlePathChange);
     
     return () => window.removeEventListener('popstate', handlePathChange);
+  }, []);
+
+  useEffect(() => {
+    const updateCart = () => {
+      try {
+        const cart = getCart();
+        setCartCount(cart.reduce((s, i) => s + (i.qty || 0), 0));
+      } catch (e) {
+        setCartCount(0);
+      }
+    };
+    updateCart();
+    const onStorage = () => updateCart();
+    window.addEventListener('storage', onStorage);
+    document.addEventListener('visibilitychange', updateCart);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      document.removeEventListener('visibilitychange', updateCart);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -82,14 +103,14 @@ export default function Navbar() {
               Cinemas
             </button>
             <button
-              onClick={() => navigate('/concessions')}
+              onClick={() => navigate('/snacks')}
               className={`font-medium transition uppercase tracking-wide text-sm ${
-                isActive('/concessions') 
+                isActive('/snacks') 
                   ? 'text-secondary-300 border-b-2 border-secondary-300 pb-1' 
                   : 'text-text-primary hover:text-purple-400'
               }`}
             >
-              Concessions
+              Snacks
             </button>
             {user && user.role === 'admin' && (
               <button
@@ -107,7 +128,7 @@ export default function Navbar() {
         </div>
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/cart')} className="px-3 py-2 bg-secondary-700 hover:bg-secondary-600 text-white rounded-lg">
-            Cart
+            Cart {cartCount > 0 ? `(${cartCount})` : ''}
           </button>
           {/* Mobile menu toggle (visible on small screens) */}
           <button
@@ -182,10 +203,10 @@ export default function Navbar() {
               Cinemas
             </button>
             <button
-              onClick={() => navTo('/concessions')}
-              className={`w-full text-left font-medium transition uppercase tracking-wide text-sm ${isActive('/concessions') ? 'text-secondary-300' : 'text-text-primary hover:text-purple-400'}`}
+              onClick={() => navTo('/snacks')}
+              className={`w-full text-left font-medium transition uppercase tracking-wide text-sm ${isActive('/snacks') ? 'text-secondary-300' : 'text-text-primary hover:text-purple-400'}`}
             >
-              Concessions
+              Snacks
             </button>
             {user && user.role === 'admin' && (
               <button

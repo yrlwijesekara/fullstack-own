@@ -8,13 +8,11 @@ import { AuthContext } from "../../context/AuthContext";
 
 
 
-
-
 const sampleSnacks = [
    
 ];  
 
-export default function ConcessionManagement() {
+export default function SnackManagement() {
     const { user } = useContext(AuthContext);
     const [snacks, setSnacks] = useState(sampleSnacks);
     const [isLoading, setIsLoading] = useState(true);
@@ -105,7 +103,7 @@ export default function ConcessionManagement() {
                         <BiArrowBack className="text-2xl" />
                         <span className="text-lg font-medium">Back to Admin Dashboard</span>
                     </Link>
-                    <h1 className="text-2xl font-bold text-center flex-1">Concession Management</h1>
+                    <h1 className="text-2xl font-bold text-center flex-1">Snack Management</h1>
                     <div className="w-48"></div> 
                 </div>
                 
@@ -130,7 +128,7 @@ export default function ConcessionManagement() {
                 <BiArrowBack className="text-2xl" />
                 <span className="text-lg font-medium">Back to Admin Dashboard</span>
             </Link>
-            <h1 className="text-2xl font-bold text-center flex-1">Concession Management</h1>
+            <h1 className="text-2xl font-bold text-center flex-1">Snack Management</h1>
             <div className="w-48"></div> 
          </div>
          
@@ -242,7 +240,7 @@ export default function ConcessionManagement() {
                                                         // Fallback to localStorage token
                                                         const token = localStorage.getItem('token');
                                                         if (!token) {
-                                                            toast.error('Authentication required. Please login again.');
+                                                            toast.error('Authentication required. Please log in again.');
                                                             navigate('/login');
                                                             return;
                                                         }
@@ -299,5 +297,3 @@ export default function ConcessionManagement() {
         </div>
     );
 }
-
-

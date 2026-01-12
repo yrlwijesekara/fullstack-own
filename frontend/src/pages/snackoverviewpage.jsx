@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import SnackImageSlider from "../components/snackimageslider";
 import Navbar from "../components/Navbar";
 import BackButton from "../components/BackButton";
+import { addToCart as addToCartUtil, getCart as getCartUtil } from "../utils/cart";
 
 export default function SnackOverviewPage() {
     const params = useParams();
@@ -12,35 +13,16 @@ export default function SnackOverviewPage() {
     const [snack, setSnack] = useState(null);
     const [status, setStatus] = useState('loading');
 
-    // Cart management functions
-    const getCart = () => {
-        const cart = localStorage.getItem('cart');
-        return cart ? JSON.parse(cart) : [];
-    };
-
-    const addToCart = (product, quantity) => {
-        const cart = getCart();
-        const existingItem = cart.find(item => item._id === product._id);
-        
-        if (existingItem) {
-            existingItem.quantity += quantity;
-        } else {
-            cart.push({ ...product, quantity });
-        }
-        
-        localStorage.setItem('cart', JSON.stringify(cart));
-    };
-
     const handleAddToCart = () => {
-        addToCart(snack, 1);
+        addToCartUtil(snack, 1);
         toast.success("Product added to cart");
-        console.log(getCart());
+        console.log(getCartUtil());
         navigate('/cart');
     };
 
     const handleBuyNow = () => {
-        addToCart(snack, 1);
-        navigate('/checkout', { state: { items: getCart() } });
+        addToCartUtil(snack, 1);
+        navigate('/checkout', { state: { items: getCartUtil() } });
     };
 
     useEffect(() => {
@@ -73,7 +55,7 @@ export default function SnackOverviewPage() {
         <div className="min-h-screen bg-gray-900">
             <Navbar />
             <div className="pt-2 sm:pt-4 px-2 sm:px-4">
-                <BackButton to="/concessions" showText={true} text="Back to Concessions" />
+                <BackButton to="/snacks" showText={true} text="Back to Snacks" />
             </div>
             <div className="p-6 ">
             <div className="w-full min-h-screen flex flex-col lg:flex-row justify-center items-center lg:items-start bg-gray-900 px-2 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8"> 

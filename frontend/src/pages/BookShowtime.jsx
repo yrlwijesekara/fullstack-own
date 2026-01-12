@@ -265,7 +265,7 @@ export default function BookShowtime() {
 
                   <div className="mt-3 flex gap-3">
                     <button
-                      onClick={() => navigate(`/concessions?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}&showtimeId=${showtimeId}&cinemaId=${cinemaQueryId}`)}
+                      onClick={() => navigate(`/snacks?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}&showtimeId=${showtimeId}&cinemaId=${cinemaQueryId}`)}
                       className="px-4 py-2 bg-primary-500 text-white rounded"
                     >
                       Add Snacks
