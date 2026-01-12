@@ -83,36 +83,51 @@ export default function Cart() {
   return (
     <div className="min-h-screen bg-background-900 text-text-primary">
       <Navbar />
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-24 sm:pb-6">
         <h1 className="text-2xl font-bold mb-4">Your Cart</h1>
         {items.length === 0 ? (
           <div className="text-text-secondary">Your cart is empty</div>
         ) : (
           <div className="space-y-4">
             {items.map(it => (
-              <div key={it.id} className="flex items-center justify-between bg-surface-600 p-4 rounded">
-                <div>
+              <div key={it.id} className="flex flex-col sm:flex-row sm:items-center justify-between bg-surface-600 p-4 rounded gap-3">
+                <div className="flex-1">
                   <div className="font-medium">{it.name}</div>
                   <div className="text-sm text-text-secondary">{new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(it.price)}</div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => handleQty(it.id, Math.max(1, it.qty - 1))} className="px-2 py-1 bg-surface-500 rounded">-</button>
-                  <div className="w-8 text-center">{it.qty}</div>
-                  <button onClick={() => handleQty(it.id, it.qty + 1)} className="px-2 py-1 bg-surface-500 rounded">+</button>
-                  <div className="w-32 text-right font-semibold">{new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(it.price * it.qty)}</div>
-                  <button onClick={() => handleRemove(it.id)} className="ml-3 px-3 py-1 bg-red-600 text-white rounded">Remove</button>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <button onClick={() => handleQty(it.id, Math.max(1, it.qty - 1))} className="px-3 py-2 bg-surface-500 rounded">-</button>
+                  <div className="w-10 text-center font-medium">{it.qty}</div>
+                  <button onClick={() => handleQty(it.id, it.qty + 1)} className="px-3 py-2 bg-surface-500 rounded">+</button>
+                  <div className="w-28 text-right font-semibold">{new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(it.price * it.qty)}</div>
+                  <button onClick={() => handleRemove(it.id)} className="ml-2 px-3 py-2 bg-red-600 text-white rounded">Remove</button>
                 </div>
               </div>
             ))}
 
-            <div className="flex justify-between items-center p-4 bg-surface-600 rounded">
+            {/* Desktop/Tablet summary */}
+            <div className="hidden sm:flex justify-between items-center p-4 bg-surface-600 rounded">
               <div className="text-lg font-semibold">Total:</div>
               <div className="text-2xl font-bold">{new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(total)}</div>
             </div>
 
-              <div className="flex justify-end gap-3">
+            <div className="hidden sm:flex justify-end gap-3">
               <button onClick={() => { clearCart(); setItems([]); toast.success('Cart cleared'); }} className="px-4 py-2 bg-gray-600 rounded">Clear</button>
               <button onClick={handlePay} className="px-4 py-2 bg-primary-500 text-white rounded">Pay Now</button>
+            </div>
+
+            {/* Mobile sticky checkout bar */}
+            <div className="fixed inset-x-0 bottom-0 bg-background-900 border-t border-secondary-400 p-3 sm:hidden">
+              <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm text-text-secondary">Total</div>
+                  <div className="text-lg font-bold">{new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(total)}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => { clearCart(); setItems([]); toast.success('Cart cleared'); }} className="px-3 py-2 bg-gray-600 rounded">Clear</button>
+                  <button onClick={handlePay} className="px-4 py-2 bg-primary-500 text-white rounded">Pay</button>
+                </div>
+              </div>
             </div>
           </div>
         )}
