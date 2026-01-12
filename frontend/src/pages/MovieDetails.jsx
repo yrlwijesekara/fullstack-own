@@ -108,7 +108,7 @@ export default function MovieDetails() {
       </div>
 
       {/* Trailer Section (responsive) */}
-      <div className="w-full bg-surface-500 relative aspect-[16/9]">
+      <div className="w-full bg-surface-500 relative" style={{ aspectRatio: '16/5.4' }}>
         {embedUrl ? (
           <iframe
             src={embedUrl}
