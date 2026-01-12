@@ -107,8 +107,8 @@ export default function MovieDetails() {
         <BackButton to="/movies" showText text="Back to Movies" />
       </div>
 
-      {/* Trailer Section */}
-      <div className="w-full bg-surface-500 relative" style={{ height: '500px' }}>
+      {/* Trailer Section (responsive) */}
+      <div className="w-full bg-surface-500 relative aspect-[16/9]">
         {embedUrl ? (
           <iframe
             src={embedUrl}
@@ -119,7 +119,7 @@ export default function MovieDetails() {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center border-b border-secondary-400">
-            <div className="text-center">
+            <div className="text-center px-4">
               <div className="text-6xl mb-4 text-secondary-300">▷</div>
               <p className="text-text-secondary uppercase tracking-widest font-bold">Movie Trailer Placeholder</p>
             </div>
@@ -163,11 +163,11 @@ export default function MovieDetails() {
             {/* Buy Tickets Button - Primary CTA */}
             <div className="mb-8">
               <button
-                onClick={() => handleBuyTickets()}
-                className="w-full lg:w-auto px-12 py-4 bg-primary-500 text-text-primary font-bold text-lg uppercase tracking-widest hover:bg-primary-600 transition border border-secondary-400 shadow-lg rounded-lg"
-              >
-                🎫 Buy Tickets
-              </button>
+                  onClick={() => handleBuyTickets()}
+                  className="w-full sm:w-auto px-6 sm:px-12 py-4 bg-primary-500 text-text-primary font-bold text-lg uppercase tracking-widest hover:bg-primary-600 transition border border-secondary-400 shadow-lg rounded-lg"
+                >
+                  🎫 Buy Tickets
+                </button>
             </div>
 
             {/* Synopsis */}
@@ -196,7 +196,7 @@ export default function MovieDetails() {
 
           {/* Right Column - Quick Info & Sticky CTA */}
           <div>
-            <div className="bg-surface-600 border border-secondary-400 p-6 sticky top-4 rounded-lg">
+            <div className="bg-surface-600 border border-secondary-400 p-6 lg:sticky lg:top-4 rounded-lg">
               <h2 className="text-lg font-bold uppercase tracking-wide mb-4 text-text-primary">Quick Info</h2>
               
               <div className="space-y-3 text-sm mb-6">

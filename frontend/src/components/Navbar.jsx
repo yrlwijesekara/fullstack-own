@@ -27,6 +27,15 @@ export default function Navbar() {
     return () => window.removeEventListener('popstate', handlePathChange);
   }, []);
 
+  // Close mobile menu when resizing to desktop
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth >= 768) setMobileOpen(false);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   useEffect(() => {
     const updateCart = () => {
       try {
@@ -77,8 +86,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/')}>
-            <Logo size={48} className="flex-shrink-0" />
-            <div className="text-2xl font-bold text-text-primary">
+            <Logo size={40} className="flex-shrink-0" />
+            <div className="hidden sm:block text-2xl font-bold text-text-primary">
               Enimate
             </div>
           </div>
@@ -129,10 +138,21 @@ export default function Navbar() {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/cart')} className="px-3 py-2 bg-secondary-700 hover:bg-secondary-600 text-white rounded-lg">
-            Cart {cartCount > 0 ? `(${cartCount})` : ''}
+        <div className="flex items-center gap-3">
+          {/* Desktop cart with label */}
+          <button onClick={() => navigate('/cart')} className="hidden md:inline-flex items-center gap-2 px-3 py-2 bg-secondary-700 hover:bg-secondary-600 text-white rounded-lg text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4"/></svg>
+            <span>Cart {cartCount > 0 ? `(${cartCount})` : ''}</span>
           </button>
+
+          {/* Mobile compact cart */}
+          <button onClick={() => navigate('/cart')} className="md:hidden relative p-2 rounded-full bg-secondary-700 text-white" aria-label="Open cart">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4"/></svg>
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-accent-gold text-xs text-background-900 rounded-full px-1">{cartCount}</span>
+            )}
+          </button>
+
           {/* Mobile menu toggle (visible on small screens) */}
           <button
             onClick={() => setMobileOpen((v) => !v)}
