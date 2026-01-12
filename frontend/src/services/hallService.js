@@ -1,9 +1,8 @@
 // Simple wrapper for Halls API
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5008';
+import { buildUrl } from '../utils/api';
 
 export const getHalls = async () => {
-  const res = await fetch(`${API_URL}/api/halls`, {
+  const res = await fetch(buildUrl('halls'), {
     credentials: 'include',
   });
   if (!res.ok) throw new Error('Failed to fetch halls');
@@ -11,7 +10,7 @@ export const getHalls = async () => {
 };
 
 export const getHall = async (id) => {
-  const res = await fetch(`${API_URL}/api/halls/${id}`, {
+  const res = await fetch(buildUrl(`halls/${id}`), {
     credentials: 'include',
   });
   if (!res.ok) throw new Error('Failed to fetch hall');
@@ -19,7 +18,7 @@ export const getHall = async (id) => {
 };
 
 export const createHall = async (data) => {
-  const res = await fetch(`${API_URL}/api/halls`, {
+  const res = await fetch(buildUrl('halls'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -33,7 +32,7 @@ export const createHall = async (data) => {
 };
 
 export const updateHall = async (id, data) => {
-  const res = await fetch(`${API_URL}/api/halls/${id}`, {
+  const res = await fetch(buildUrl(`halls/${id}`), {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -47,7 +46,7 @@ export const updateHall = async (id, data) => {
 };
 
 export const deleteHall = async (id) => {
-  const res = await fetch(`${API_URL}/api/halls/${id}`, {
+  const res = await fetch(buildUrl(`halls/${id}`), {
     method: 'DELETE',
     credentials: 'include',
   });
