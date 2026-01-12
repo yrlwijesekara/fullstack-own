@@ -73,6 +73,15 @@ export default function MovieShowtimes() {
     });
   };
 
+  const formatCurrency = (value) => {
+    const amount = Number(value) || 0;
+    try {
+      return new Intl.NumberFormat('si-LK', { style: 'currency', currency: 'LKR' }).format(amount);
+    } catch (e) {
+      return `LKR ${amount.toFixed(2)}`;
+    }
+  };
+
   const handleBookNow = (showtimeId) => {
     // Navigate to seat selection / booking page
     window.location.href = `/showtimes/${showtimeId}/book`;
@@ -252,7 +261,7 @@ export default function MovieShowtimes() {
 
                   <div className="flex justify-between items-center">
                     <div className="text-xl font-bold text-secondary-300">
-                      ${parseFloat(showtime.price).toFixed(2)}
+                      {formatCurrency(showtime.price)}
                     </div>
                     <button
                       onClick={() => handleBookNow(showtime._id)}
