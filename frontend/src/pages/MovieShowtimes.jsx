@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { API_BASE_URL } from "../utils/api";
 import Navbar from "../components/Navbar";
 import BackButton from "../components/BackButton";
 import LoadingLogo from "../components/LoadingLogo";
+import { AuthContext } from "../context/AuthContext";
 
 export default function MovieShowtimes() {
   // Get movie ID from URL path (e.g., /movies/123/showtimes)
@@ -12,6 +13,8 @@ export default function MovieShowtimes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
+  const { user } = useContext(AuthContext);
+  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     fetchMovieAndShowtimes();
@@ -197,9 +200,7 @@ export default function MovieShowtimes() {
                   ? `No showtimes scheduled for ${formatDate(selectedDate)}`
                   : "No upcoming showtimes scheduled for this movie"}
               </p>
-              <p className="text-text-secondary">
-                If you're an admin, add showtimes in the <a href="/showtime-management" className="text-accent-magenta underline">Showtime Management</a> page. Admins must create movies and halls before scheduling.
-              </p>
+              {/* Admin instruction removed per request */}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
