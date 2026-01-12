@@ -118,7 +118,7 @@ export default function BookShowtime() {
                 <p>🏛️ Hall: {showtime.hallId?.name || 'N/A'}</p>
                 <p>🎬 Cinema: {showtime.cinemaId?.name || 'N/A'}</p>
                 <p>📅 {new Date(showtime.startTime).toLocaleString()}</p>
-                <p>💰 ${Number(showtime.price).toFixed(2)} per ticket</p>
+                <p>💰 {new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(Number(showtime.price))} per ticket</p>
               </div>
             </div>
           </div>
@@ -188,13 +188,13 @@ export default function BookShowtime() {
               <div className="border-t border-secondary-400 pt-4">
                 <div className="text-sm text-text-secondary mb-2">Price per Adult</div>
                 <div className="text-lg font-bold text-primary-400 mb-3">
-                  ${Number(showtime.price).toFixed(2)}
+                  {new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(Number(showtime.price))}
                 </div>
                 <div className="text-sm text-text-secondary mb-1">
                   Total: {totalTickets} ticket{totalTickets !== 1 ? 's' : ''}
                 </div>
                 <div className="text-2xl font-bold text-secondary-300">
-                  ${(selectedAdult * showtime.price + selectedChild * showtime.price * 0.5).toFixed(2)}
+                  {new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(Number(selectedAdult * showtime.price + selectedChild * showtime.price * 0.5))}
                 </div>
               </div>
 
