@@ -39,38 +39,47 @@ export default function SnackOverviewPage() {
     return (
         <div className="min-h-screen bg-gray-900">
             <Navbar />
-            <div className="pt-4 px-4">
+            <div className="pt-2 sm:pt-4 px-2 sm:px-4">
                 <BackButton to="/concessions" showText={true} text="Back to Concessions" />
             </div>
-            <div className="w-full h-screen flex flex-row justify-center items-center bg-gray-900"> 
+            <div className="p-6 ">
+            <div className="w-full min-h-screen flex flex-col lg:flex-row justify-center items-center lg:items-start bg-gray-900 px-2 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8"> 
         
-            <div className="w-[49%] h-full flex justify-center items-center">
+            <div className="w-full lg:w-[49%] xl:w-[45%] flex justify-center items-center mb-6 lg:mb-0">
                 <SnackImageSlider images={snack.ProductImage || []} />
             </div>
-            <div className="w-[49%] h-full flex flex-col justify-center items-start p-8 text-white ">
-                <h1 className="text-4xl font-bold mb-4">{snack.ProductName}</h1>
-                <p className="text-gray-400 text-lg mb-2">{snack.ProductCategory}</p>
+            <div className="w-full lg:w-[49%] xl:w-[50%] flex flex-col justify-start items-start p-2 sm:p-4 md:p-6 lg:p-8 text-white">
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 md:mb-4">{snack.ProductName}</h1>
+                <p className="text-gray-400 text-sm sm:text-base md:text-lg lg:text-xl mb-1 sm:mb-2">{snack.ProductCategory}</p>
                 
                 
-                <div className="mb-6">
+                <div className="mb-3 sm:mb-4 lg:mb-6">
                     {snack.labelledPrice > snack.ProductPrice ? (
                         <>
-                            <span className="line-through text-gray-500 text-xl">Rs {snack.labelledPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> 
-                            <span className="text-purple-400 ml-3 font-semibold text-3xl">Rs {snack.ProductPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span className="line-through text-gray-500 text-sm sm:text-base md:text-lg lg:text-xl">Rs {snack.labelledPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> 
+                            <span className="text-purple-400 ml-2 sm:ml-3 font-semibold text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl">Rs {snack.ProductPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </>
                     ) : (
-                        <span className="text-purple-400 font-semibold text-3xl">Rs {snack.ProductPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span className="text-purple-400 font-semibold text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl">Rs {snack.ProductPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     )}
                 </div>
                 
-                <p className="text-gray-300 mb-6 text-lg leading-relaxed">{snack.ProductDescription || 'No description available'}</p>
+                <p className="text-gray-300 mb-4 sm:mb-5 lg:mb-6 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed break-words word-wrap overflow-wrap-anywhere hyphens-auto max-w-full">{snack.ProductDescription || 'No description available'}</p>
                 
+                <div className="mb-4 sm:mb-5 lg:mb-6">
+                    <p className="text-gray-400 text-xs sm:text-sm md:text-base">Stock: <span className="text-white font-semibold">{snack.ProductQuantity} items</span></p>
+                </div>
                
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-6 w-full">
+                    <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 lg:py-3 lg:px-8 rounded-lg transition-colors text-sm sm:text-base lg:text-lg w-full sm:w-auto">
+                        Add to Cart
+                    </button>
+                    <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 lg:py-3 lg:px-8 rounded-lg transition-colors text-sm sm:text-base lg:text-lg w-full sm:w-auto">
+                        Buy Now
+                    </button>
+                </div>
                 
-                <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-colors text-lg">
-                    Add to Cart
-                </button>
-                
+            </div>
             </div>
             </div>
         </div>
