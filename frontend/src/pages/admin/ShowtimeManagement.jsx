@@ -40,6 +40,7 @@ export default function ShowtimeManagement() {
     price: "",
     totalSeats: "",
   });
+  const [hallCapacityPlaceholder, setHallCapacityPlaceholder] = useState('');
 
   // Fetch initial data
   useEffect(() => {
@@ -118,7 +119,46 @@ export default function ShowtimeManagement() {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
+    // If hall changed, populate totalSeats from selected hall capacity
+    if (name === 'hallId') {
+      const selectedHall = halls.find(h => h._id === value);
+      // Determine capacity from hall.totalSeats or layout (rows * cols) or seats length
+      let capacity = '';
+      if (selectedHall) {
+        if (typeof selectedHall.totalSeats === 'number' && selectedHall.totalSeats > 0) {
+          capacity = String(selectedHall.totalSeats);
+        } else if (selectedHall.layout) {
+          if (Array.isArray(selectedHall.layout.seats) && selectedHall.layout.seats.length > 0) {
+            capacity = String(selectedHall.layout.seats.length);
+          } else if (selectedHall.layout.rows && selectedHall.layout.cols) {
+            capacity = String(Number(selectedHall.layout.rows) * Number(selectedHall.layout.cols));
+          }
+        }
+      }
+      setHallCapacityPlaceholder(capacity);
+      setFormData((prev) => ({ ...prev, hallId: value }));
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Format currency as Sri Lankan Rupee
+  const formatCurrency = (amount) => {
+    try {
+      const num = Number(amount) || 0;
+      return new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(num);
+    } catch (err) {
+      return `Rs ${Number(amount || 0).toFixed(2)}`;
+    }
+  };
+
+  // Helper: get local datetime-local string for input min (YYYY-MM-DDTHH:mm)
+  const getLocalDateTimeForInput = () => {
+    const now = new Date();
+    const tzOffset = now.getTimezoneOffset() * 60000; // in ms
+    const localISO = new Date(now - tzOffset).toISOString().slice(0, 16);
+    return localISO;
   };
 
   const handleCreateShowtime = async (e) => {
@@ -128,11 +168,50 @@ export default function ShowtimeManagement() {
       const headers = { "Content-Type": "application/json" };
       if (token) headers.Authorization = `Bearer ${token}`;
 
+      // Prepare payload: ensure required fields and coerce types
+      const payload = { ...formData };
+      // Basic validation
+      if (!payload.movieId || !payload.hallId || !payload.startTime) {
+        setError('Please select a movie, hall and start time');
+        return;
+      }
+
+      // Normalize startTime to ISO (treat datetime-local as local time)
+      try {
+        payload.startTime = new Date(payload.startTime).toISOString();
+      } catch (err) {
+        setError('Invalid start time format');
+        return;
+      }
+
+      // Coerce numeric fields
+      payload.price = parseFloat(payload.price) || 0;
+
+      // Ensure totalSeats: if empty use selected hall capacity
+      if (!payload.totalSeats || Number(payload.totalSeats) <= 0) {
+        const selectedHall = halls.find(h => h._id === payload.hallId);
+        let capacity = null;
+        if (selectedHall) {
+          if (typeof selectedHall.totalSeats === 'number' && selectedHall.totalSeats > 0) capacity = selectedHall.totalSeats;
+          else if (selectedHall.layout) {
+            if (Array.isArray(selectedHall.layout.seats) && selectedHall.layout.seats.length > 0) capacity = selectedHall.layout.seats.length;
+            else if (selectedHall.layout.rows && selectedHall.layout.cols) capacity = Number(selectedHall.layout.rows) * Number(selectedHall.layout.cols);
+          }
+        }
+        if (capacity) payload.totalSeats = capacity;
+        else {
+          setError('Total seats missing and cannot be inferred from selected hall');
+          return;
+        }
+      } else {
+        payload.totalSeats = Number(payload.totalSeats);
+      }
+
       const response = await fetch(`${API_BASE_URL}/showtimes`, {
         method: "POST",
         headers,
         credentials: "include",
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -162,13 +241,46 @@ export default function ShowtimeManagement() {
       const headers = { "Content-Type": "application/json" };
       if (token) headers.Authorization = `Bearer ${token}`;
 
+      // Prepare payload similar to create
+      const payload = { ...formData };
+      if (!payload.movieId || !payload.hallId || !payload.startTime) {
+        setError('Please select a movie, hall and start time');
+        return;
+      }
+      // Normalize startTime to ISO for update as well
+      try {
+        payload.startTime = new Date(payload.startTime).toISOString();
+      } catch (err) {
+        setError('Invalid start time format');
+        return;
+      }
+      payload.price = parseFloat(payload.price) || 0;
+      if (!payload.totalSeats || Number(payload.totalSeats) <= 0) {
+        const selectedHall = halls.find(h => h._id === payload.hallId);
+        let capacity = null;
+        if (selectedHall) {
+          if (typeof selectedHall.totalSeats === 'number' && selectedHall.totalSeats > 0) capacity = selectedHall.totalSeats;
+          else if (selectedHall.layout) {
+            if (Array.isArray(selectedHall.layout.seats) && selectedHall.layout.seats.length > 0) capacity = selectedHall.layout.seats.length;
+            else if (selectedHall.layout.rows && selectedHall.layout.cols) capacity = Number(selectedHall.layout.rows) * Number(selectedHall.layout.cols);
+          }
+        }
+        if (capacity) payload.totalSeats = capacity;
+        else {
+          setError('Total seats missing and cannot be inferred from selected hall');
+          return;
+        }
+      } else {
+        payload.totalSeats = Number(payload.totalSeats);
+      }
+
       const response = await fetch(
         `${API_BASE_URL}/showtimes/${currentShowtime._id}`,
         {
           method: "PUT",
           headers,
           credentials: "include",
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -562,7 +674,7 @@ export default function ShowtimeManagement() {
                             </div>
                             <div className="flex justify-between text-sm">
                               <span className="text-text-secondary">Price:</span>
-                              <span className="text-text-primary">${parseFloat(showtime.price || 0).toFixed(2)}</span>
+                              <span className="text-text-primary">{formatCurrency(showtime.price)}</span>
                             </div>
                             <div className="flex justify-between text-sm">
                               <span className="text-text-secondary">Seats:</span>
@@ -697,10 +809,10 @@ export default function ShowtimeManagement() {
             >
               <option value="">Select a hall</option>
               {halls.map((hall) => (
-                <option key={hall._id} value={hall._id}>
-                  {hall.name} ({hall.capacity} seats)
-                </option>
-              ))}
+                  <option key={hall._id} value={hall._id}>
+                    {hall.name} ({hall.totalSeats || (hall.layout?.rows && hall.layout?.cols ? `${hall.layout.rows * hall.layout.cols}` : '0')} seats)
+                  </option>
+                ))}
             </select>
           </div>
 
@@ -714,7 +826,7 @@ export default function ShowtimeManagement() {
               value={formData.startTime}
               onChange={handleFormChange}
               required
-              min={new Date().toISOString().slice(0, 16)}
+              min={getLocalDateTimeForInput()}
               className="w-full px-4 py-2 bg-surface-500 border border-surface-400 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-transparent"
             />
           </div>
@@ -722,18 +834,19 @@ export default function ShowtimeManagement() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-text-secondary mb-2">
-                Price ($) *
+                Price (LKR) *
               </label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleFormChange}
-                required
-                min="0"
-                step="0.01"
-                className="w-full px-4 py-2 bg-surface-500 border border-surface-400 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-transparent"
-              />
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleFormChange}
+                  required
+                  min="0"
+                  step="0.01"
+                  placeholder={formatCurrency(0)}
+                  className="w-full px-4 py-2 bg-surface-500 border border-surface-400 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-transparent"
+                />
             </div>
 
             <div>
@@ -744,6 +857,7 @@ export default function ShowtimeManagement() {
                 type="number"
                 name="totalSeats"
                 value={formData.totalSeats}
+                placeholder={hallCapacityPlaceholder || 'Total seats'}
                 onChange={handleFormChange}
                 required
                 min="1"
