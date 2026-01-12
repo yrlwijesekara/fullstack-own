@@ -88,7 +88,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/')}>
             <Logo size={40} className="flex-shrink-0" />
             <div className="hidden sm:block text-2xl font-bold text-text-primary">
-              Enimate
+              ENIMATE
             </div>
           </div>
           
