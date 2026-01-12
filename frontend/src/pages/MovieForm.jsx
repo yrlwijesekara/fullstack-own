@@ -472,7 +472,7 @@ export default function MovieForm() {
   // Show loading state while checking auth or fetching movie
   if (!user || fetchingMovie) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+      <div className="min-h-screen flex items-center justify-center bg-background-900 text-text-primary">
         <div className="text-xl">Loading...</div>
       </div>
     );
@@ -481,10 +481,10 @@ export default function MovieForm() {
   // Show unauthorized message if not admin
   if (user.role !== 'admin') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+      <div className="min-h-screen flex items-center justify-center bg-background-900 text-text-primary">
         <div className="text-center">
-          <div className="text-xl text-red-500 mb-4">{error}</div>
-          <div className="text-gray-400">Redirecting to home...</div>
+          <div className="text-xl text-semantic-error mb-4">{error}</div>
+          <div className="text-text-muted">Redirecting to home...</div>
         </div>
       </div>
     );
@@ -500,7 +500,7 @@ export default function MovieForm() {
         confirmText="View Movies"
         theme="success"
       />
-      <div className="min-h-screen bg-gray-900 text-white py-8">
+      <div className="min-h-screen bg-background-900 text-text-primary py-8">
         <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="mb-6">
@@ -525,17 +525,17 @@ export default function MovieForm() {
         )}
 
         {/* Form Container */}
-        <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg p-6 shadow-xl">
+        <form onSubmit={handleSubmit} className="bg-surface-800 rounded-lg p-6 shadow-xl border border-secondary-400">
           <div className="space-y-6">
             {/* Basic Information Section */}
             <div>
-              <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+              <h2 className="text-xl font-semibold text-text-primary mb-4 pb-2 border-b border-secondary-400">
                 Basic Information
               </h2>
               
               {/* Title */}
               <div className="mb-4">
-                <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="title" className="block text-sm font-medium text-text-secondary mb-2">
                   Title <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -545,25 +545,25 @@ export default function MovieForm() {
                   value={formData.title}
                   onChange={handleInputChange}
                   maxLength={200}
-                  className={`w-full px-4 py-2 bg-gray-700 text-white rounded-lg border ${
+                  className={`w-full px-4 py-2 bg-surface-500 text-text-primary rounded-lg border ${
                     validationErrors.title 
-                      ? 'border-red-500 focus:border-red-500' 
-                      : 'border-purple-500 focus:border-purple-400'
+                      ? 'border-semantic-error focus:border-semantic-error' 
+                      : 'border-secondary-400 focus:border-secondary-300'
                   } focus:outline-none transition-colors`}
                   placeholder="Enter movie title"
                 />
                 {validationErrors.title && (
-                  <p className="mt-1 text-sm text-red-500">{validationErrors.title}</p>
+                  <p className="mt-1 text-sm text-semantic-error">{validationErrors.title}</p>
                 )}
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-text-muted">
                   {formData.title.length}/200 characters
                 </p>
               </div>
 
               {/* Description */}
               <div className="mb-4">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
-                  Description <span className="text-red-500">*</span>
+                <label htmlFor="description" className="block text-sm font-medium text-text-secondary mb-2">
+                  Description <span className="text-semantic-error">*</span>
                 </label>
                 <textarea
                   id="description"
@@ -572,17 +572,17 @@ export default function MovieForm() {
                   onChange={handleInputChange}
                   rows={5}
                   maxLength={1000}
-                  className={`w-full px-4 py-2 bg-gray-700 text-white rounded-lg border ${
+                  className={`w-full px-4 py-2 bg-surface-500 text-text-primary rounded-lg border ${
                     validationErrors.description 
-                      ? 'border-red-500 focus:border-red-500' 
-                      : 'border-purple-500 focus:border-purple-400'
+                      ? 'border-semantic-error focus:border-semantic-error' 
+                      : 'border-secondary-400 focus:border-secondary-300'
                   } focus:outline-none transition-colors resize-none`}
                   placeholder="Enter movie description (minimum 50 characters)"
                 />
                 {validationErrors.description && (
-                  <p className="mt-1 text-sm text-red-500">{validationErrors.description}</p>
+                  <p className="mt-1 text-sm text-semantic-error">{validationErrors.description}</p>
                 )}
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-text-muted">
                   {formData.description.length}/1000 characters
                   {formData.description.length < 50 && 
                     ` (${50 - formData.description.length} more required)`
@@ -594,8 +594,8 @@ export default function MovieForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 {/* Duration */}
                 <div>
-                  <label htmlFor="duration" className="block text-sm font-medium text-gray-300 mb-2">
-                    Duration (minutes) <span className="text-red-500">*</span>
+                  <label htmlFor="duration" className="block text-sm font-medium text-text-secondary mb-2">
+                    Duration (minutes) <span className="text-semantic-error">*</span>
                   </label>
                   <input
                     type="number"
@@ -604,18 +604,18 @@ export default function MovieForm() {
                     value={formData.duration}
                     onChange={handleInputChange}
                     min="1"
-                    className={`w-full px-4 py-2 bg-gray-700 text-white rounded-lg border ${
+                    className={`w-full px-4 py-2 bg-surface-500 text-text-primary rounded-lg border ${
                       validationErrors.duration 
-                        ? 'border-red-500 focus:border-red-500' 
-                        : 'border-purple-500 focus:border-purple-400'
+                        ? 'border-semantic-error focus:border-semantic-error' 
+                        : 'border-secondary-400 focus:border-secondary-300'
                     } focus:outline-none transition-colors`}
                     placeholder="e.g., 120"
                   />
                   {validationErrors.duration && (
-                    <p className="mt-1 text-sm text-red-500">{validationErrors.duration}</p>
+                    <p className="mt-1 text-sm text-semantic-error">{validationErrors.duration}</p>
                   )}
                   {formData.duration > 0 && (
-                    <p className="mt-1 text-xs text-gray-400">
+                    <p className="mt-1 text-xs text-text-muted">
                       Duration: {formatDuration(formData.duration)}
                     </p>
                   )}
@@ -623,7 +623,7 @@ export default function MovieForm() {
 
                 {/* Language */}
                 <div>
-                  <label htmlFor="language" className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="language" className="block text-sm font-medium text-text-secondary mb-2">
                     Language
                   </label>
                   <select
@@ -631,7 +631,7 @@ export default function MovieForm() {
                     name="language"
                     value={formData.language}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-purple-500 focus:border-purple-400 focus:outline-none transition-colors"
+                    className="w-full px-4 py-2 bg-surface-500 text-text-primary rounded-lg border border-secondary-400 focus:border-secondary-300 focus:outline-none transition-colors"
                   >
                     <option value="">Select a language</option>
                     <option value="English">English</option>
@@ -655,7 +655,7 @@ export default function MovieForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 {/* Release Date */}
                 <div>
-                  <label htmlFor="releaseDate" className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="releaseDate" className="block text-sm font-medium text-text-secondary mb-2">
                     Release Date
                   </label>
                   <input
@@ -664,13 +664,13 @@ export default function MovieForm() {
                     name="releaseDate"
                     value={formData.releaseDate}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-purple-500 focus:border-purple-400 focus:outline-none transition-colors"
+                    className="w-full px-4 py-2 bg-surface-500 text-text-primary rounded-lg border border-secondary-400 focus:border-secondary-300 focus:outline-none transition-colors"
                   />
                 </div>
 
                 {/* Status */}
                 <div>
-                  <label htmlFor="status" className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="status" className="block text-sm font-medium text-text-secondary mb-2">
                     Status
                   </label>
                   <select
@@ -678,7 +678,7 @@ export default function MovieForm() {
                     name="status"
                     value={formData.status}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-purple-500 focus:border-purple-400 focus:outline-none transition-colors"
+                    className="w-full px-4 py-2 bg-surface-500 text-text-primary rounded-lg border border-secondary-400 focus:border-secondary-300 focus:outline-none transition-colors"
                   >
                     <option value="upcoming">Coming Soon</option>
                     <option value="now_showing">Now Showing</option>
@@ -691,7 +691,7 @@ export default function MovieForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Director */}
                 <div>
-                  <label htmlFor="director" className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="director" className="block text-sm font-medium text-text-secondary mb-2">
                     Director
                   </label>
                   <input
@@ -700,14 +700,14 @@ export default function MovieForm() {
                     name="director"
                     value={formData.director}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-purple-500 focus:border-purple-400 focus:outline-none transition-colors"
+                    className="w-full px-4 py-2 bg-surface-500 text-text-primary rounded-lg border border-secondary-400 focus:border-secondary-300 focus:outline-none transition-colors"
                     placeholder="e.g., Christopher Nolan"
                   />
                 </div>
 
                 {/* Rating */}
                 <div>
-                  <label htmlFor="rating" className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="rating" className="block text-sm font-medium text-text-secondary mb-2">
                     Rating (0-10)
                   </label>
                   <input
@@ -719,15 +719,15 @@ export default function MovieForm() {
                     min="0"
                     max="10"
                     step="0.1"
-                    className={`w-full px-4 py-2 bg-gray-700 text-white rounded-lg border ${
+                    className={`w-full px-4 py-2 bg-surface-500 text-text-primary rounded-lg border ${
                       validationErrors.rating 
-                        ? 'border-red-500 focus:border-red-500' 
-                        : 'border-purple-500 focus:border-purple-400'
+                        ? 'border-semantic-error focus:border-semantic-error' 
+                        : 'border-secondary-400 focus:border-secondary-300'
                     } focus:outline-none transition-colors`}
                     placeholder="e.g., 8.5"
                   />
                   {validationErrors.rating && (
-                    <p className="mt-1 text-sm text-red-500">{validationErrors.rating}</p>
+                    <p className="mt-1 text-sm text-semantic-error">{validationErrors.rating}</p>
                   )}
                 </div>
               </div>
@@ -735,15 +735,15 @@ export default function MovieForm() {
 
             {/* Genre Selection Section */}
             <div>
-              <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+              <h2 className="text-xl font-semibold text-text-primary mb-4 pb-2 border-b border-secondary-400">
                 Genres
               </h2>
               
               <div className="mb-2">
-                <label className="block text-sm font-medium text-gray-300 mb-3">
-                  Select Genres <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-text-secondary mb-3">
+                  Select Genres <span className="text-semantic-error">*</span>
                   {formData.genre.length > 0 && (
-                    <span className="ml-2 text-purple-400">
+                    <span className="ml-2 text-secondary-300">
                       ({formData.genre.length} selected)
                     </span>
                   )}
@@ -754,34 +754,34 @@ export default function MovieForm() {
                       key={genre}
                       className={`flex items-center space-x-2 px-4 py-2 rounded-lg border cursor-pointer transition-colors ${
                         formData.genre.includes(genre)
-                          ? 'bg-purple-600 border-purple-500 text-white'
-                          : 'bg-gray-700 border-gray-600 text-gray-300 hover:border-purple-500'
+                          ? 'bg-secondary-300 border-secondary-300 text-background-900'
+                          : 'bg-surface-700 border-secondary-400 text-text-secondary hover:border-secondary-300'
                       }`}
                     >
                       <input
                         type="checkbox"
                         checked={formData.genre.includes(genre)}
                         onChange={() => handleGenreToggle(genre)}
-                        className="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
+                        className="w-4 h-4 text-secondary-300 bg-surface-700 border-secondary-400 rounded focus:ring-secondary-300"
                       />
                       <span className="text-sm">{genre}</span>
                     </label>
                   ))}
                 </div>
                 {validationErrors.genre && (
-                  <p className="mt-2 text-sm text-red-500">{validationErrors.genre}</p>
+                  <p className="mt-2 text-sm text-semantic-error">{validationErrors.genre}</p>
                 )}
               </div>
             </div>
 
             {/* Cast Management Section */}
             <div>
-              <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+              <h2 className="text-xl font-semibold text-text-primary mb-4 pb-2 border-b border-secondary-400">
                 Cast Members
               </h2>
               
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-text-secondary mb-2">
                   Add Cast Members (Optional)
                 </label>
                 
@@ -791,13 +791,13 @@ export default function MovieForm() {
                     value={castInput}
                     onChange={(e) => setCastInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCast())}
-                    className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg border border-purple-500 focus:border-purple-400 focus:outline-none transition-colors"
+                    className="flex-1 px-4 py-2 bg-surface-500 text-text-primary rounded-lg border border-secondary-400 focus:border-secondary-300 focus:outline-none transition-colors"
                     placeholder="Enter actor/actress name"
                   />
                   <button
                     type="button"
                     onClick={handleAddCast}
-                    className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+                    className="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-text-primary rounded-lg font-medium transition-colors border border-secondary-400"
                   >
                     Add
                   </button>
@@ -809,13 +809,13 @@ export default function MovieForm() {
                     {formData.cast.map((actor, index) => (
                       <div 
                         key={index}
-                        className="flex items-center justify-between px-4 py-2 bg-gray-700 rounded-lg"
+                        className="flex items-center justify-between px-4 py-2 bg-surface-700 rounded-lg border border-secondary-400"
                       >
-                        <span className="text-white">{actor}</span>
+                        <span className="text-text-primary">{actor}</span>
                         <button
                           type="button"
                           onClick={() => handleRemoveCast(index)}
-                          className="text-red-400 hover:text-red-300 transition-colors"
+                          className="text-semantic-error hover:text-red-400 transition-colors"
                         >
                           Remove
                         </button>
@@ -824,19 +824,19 @@ export default function MovieForm() {
                   </div>
                 )}
                 {formData.cast.length === 0 && (
-                  <p className="text-sm text-gray-500">No cast members added yet.</p>
+                  <p className="text-sm text-text-muted">No cast members added yet.</p>
                 )}
               </div>
             </div>
 
             {/* Poster Image Upload Section */}
             <div>
-              <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+              <h2 className="text-xl font-semibold text-text-primary mb-4 pb-2 border-b border-secondary-400">
                 Poster Image
               </h2>
               
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-text-secondary mb-2">
                   Upload Poster Image
                 </label>
                 
@@ -846,13 +846,13 @@ export default function MovieForm() {
                     id="posterImage"
                     accept="image/jpeg,image/jpg,image/png,image/webp"
                     onChange={handleFileChange}
-                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-purple-500 focus:border-purple-400 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 cursor-pointer"
+                    className="w-full px-4 py-2 bg-surface-500 text-text-primary rounded-lg border border-secondary-400 focus:border-secondary-300 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-text-primary hover:file:bg-primary-600 cursor-pointer"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-text-muted">
                     Accepted formats: JPG, JPEG, PNG, WEBP (Max size: 5MB)
                   </p>
                   {validationErrors.posterImage && (
-                    <p className="mt-1 text-sm text-red-500">{validationErrors.posterImage}</p>
+                    <p className="mt-1 text-sm text-semantic-error">{validationErrors.posterImage}</p>
                   )}
                 </div>
 
@@ -863,19 +863,19 @@ export default function MovieForm() {
                       <img
                         src={imagePreview || existingPosterUrl}
                         alt="Poster preview"
-                        className="max-w-xs max-h-96 rounded-lg border-2 border-purple-500"
+                        className="max-w-xs max-h-96 rounded-lg border-2 border-secondary-300"
                       />
                       <button
                         type="button"
                         onClick={handleRemoveImage}
-                        className="absolute top-2 right-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors"
+                        className="absolute top-2 right-2 px-3 py-1 bg-semantic-error hover:bg-red-700 text-text-primary text-sm rounded-lg transition-colors"
                       >
                         Remove
                       </button>
                     </div>
                   ) : (
-                    <div className="w-64 h-96 bg-gray-700 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center">
-                      <div className="text-center text-gray-500">
+                    <div className="w-64 h-96 bg-surface-700 rounded-lg border-2 border-dashed border-secondary-400 flex items-center justify-center">
+                      <div className="text-center text-text-muted">
                         <svg className="mx-auto h-12 w-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -889,12 +889,12 @@ export default function MovieForm() {
 
             {/* Trailer URL Section */}
             <div>
-              <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+              <h2 className="text-xl font-semibold text-text-primary mb-4 pb-2 border-b border-secondary-400">
                 Trailer
               </h2>
               
               <div>
-                <label htmlFor="trailerUrl" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="trailerUrl" className="block text-sm font-medium text-text-secondary mb-2">
                   YouTube Trailer URL (Optional)
                 </label>
                 <input
@@ -903,24 +903,24 @@ export default function MovieForm() {
                   name="trailerUrl"
                   value={formData.trailerUrl}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-2 bg-gray-700 text-white rounded-lg border ${
+                  className={`w-full px-4 py-2 bg-surface-500 text-text-primary rounded-lg border ${
                     validationErrors.trailerUrl 
-                      ? 'border-red-500 focus:border-red-500' 
-                      : 'border-purple-500 focus:border-purple-400'
+                      ? 'border-semantic-error focus:border-semantic-error' 
+                      : 'border-secondary-400 focus:border-secondary-300'
                   } focus:outline-none transition-colors`}
                   placeholder="https://www.youtube.com/watch?v=..."
                 />
                 {validationErrors.trailerUrl && (
-                  <p className="mt-1 text-sm text-red-500">{validationErrors.trailerUrl}</p>
+                  <p className="mt-1 text-sm text-semantic-error">{validationErrors.trailerUrl}</p>
                 )}
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-text-muted">
                   Enter a valid YouTube video URL
                 </p>
 
                 {/* YouTube Preview */}
                 {youtubePreview && (
                   <div className="mt-4">
-                    <p className="text-sm text-gray-400 mb-2">Trailer Preview:</p>
+                    <p className="text-sm text-text-secondary mb-2">Trailer Preview:</p>
                     <div className="aspect-video max-w-2xl">
                       <iframe
                         width="100%"
@@ -930,7 +930,7 @@ export default function MovieForm() {
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
-                        className="rounded-lg"
+                        className="rounded-lg border border-secondary-400"
                       ></iframe>
                     </div>
                   </div>
@@ -940,18 +940,18 @@ export default function MovieForm() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 mt-8 pt-6 border-t border-gray-700">
+          <div className="flex gap-4 mt-8 pt-6 border-t border-secondary-400">
             <button
               type="button"
               onClick={handleCancel}
-              className="flex-1 px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+              className="flex-1 px-6 py-3 bg-surface-700 hover:bg-surface-600 text-text-primary rounded-lg font-medium transition-colors border border-secondary-400"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+              className="flex-1 px-6 py-3 bg-primary-500 hover:bg-primary-600 disabled:bg-surface-600 disabled:cursor-not-allowed text-text-primary rounded-lg font-medium transition-colors border border-secondary-400"
             >
               {loading ? 'Saving...' : isEditMode ? 'Update Movie' : 'Create Movie'}
             </button>

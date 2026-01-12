@@ -7,6 +7,7 @@ import MovieCard from '../components/MovieCard';
 import Modal from '../components/Modal';
 import LoadingLogo from '../components/LoadingLogo';
 import { fetchMovies, deleteMovie } from '../services/movieService';
+import { getHalls } from '../services/hallService';
 
 /**
  * Movies Page Component - Displays list of movies with tabs for Now Showing and Coming Soon
@@ -19,21 +20,50 @@ export default function Movies() {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('now-showing');
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, movie: null });
+  const [halls, setHalls] = useState([]);
 
   const isAdmin = user?.role === 'admin';
+
+  // Load halls on mount
+  useEffect(() => {
+    loadHalls();
+  }, []);
 
   // Load movies when tab changes
   useEffect(() => {
     loadMovies();
   }, [activeTab]);
 
+  const loadHalls = async () => {
+    try {
+      const hallsData = await getHalls();
+      console.log('Halls fetched in Movies page:', hallsData);
+      setHalls(Array.isArray(hallsData) ? hallsData : []);
+    } catch (error) {
+      console.error('Error fetching halls:', error);
+      setHalls([]);
+    }
+  };
+
   const loadMovies = async () => {
     setLoading(true);
     setError('');
     try {
-      const status = activeTab === 'now-showing' ? 'Now Showing' : 'Coming Soon';
-      const data = await fetchMovies({ status, limit: 100 });
-      setMovies(data.movies || []);
+      // Fetch both old and new status values for backward compatibility
+      const statusNew = activeTab === 'now-showing' ? 'now_showing' : 'upcoming';
+      const statusOld = activeTab === 'now-showing' ? 'Now Showing' : 'Coming Soon';
+      
+      const [dataNew, dataOld] = await Promise.all([
+        fetchMovies({ status: statusNew, limit: 100 }),
+        fetchMovies({ status: statusOld, limit: 100 })
+      ]);
+      
+      // Combine and remove duplicates
+      const allMovies = [...(dataNew.movies || []), ...(dataOld.movies || [])];
+      const uniqueMovies = allMovies.filter((movie, index, self) => 
+        index === self.findIndex((m) => m._id === movie._id)
+      );
+      setMovies(uniqueMovies);
     } catch (err) {
       setError(err.message);
       console.error('Error loading movies:', err);
@@ -123,7 +153,18 @@ export default function Movies() {
       </div>
 
       {/* Quick Booking Widget */}
-      <QuickBooking movies={movies} onBooking={handleBooking} />
+      <QuickBooking 
+        movies={movies.map(movie => ({
+          id: movie._id,
+          title: movie.title,
+        }))}
+        cinemas={halls.map(hall => ({
+          id: hall._id,
+          name: hall.name,
+        }))}
+        onBooking={handleBooking}
+        navigate={navigate}
+      />
 
       {/* Movies Grid Section */}
       <div className="max-w-7xl mx-auto px-4 py-12">

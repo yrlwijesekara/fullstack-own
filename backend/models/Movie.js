@@ -50,12 +50,12 @@ const movieSchema = new mongoose.Schema(
     /**
      * Movie genre(s)
      * @type {Array<String>}
-     * @enum ['Action', 'Comedy', 'Drama', 'Horror', 'Sci-Fi', 'Romance', 'Thriller', 'Animation', 'Documentary', 'Adventure']
+     * @enum ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'Western']
      */
     genre: {
       type: [String],
       enum: {
-        values: ['Action', 'Comedy', 'Drama', 'Horror', 'Sci-Fi', 'Romance', 'Thriller', 'Animation', 'Documentary', 'Adventure'],
+        values: ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'Western'],
         message: '{VALUE} is not a valid genre',
       },
       validate: {
@@ -155,16 +155,17 @@ const movieSchema = new mongoose.Schema(
     /**
      * Movie status
      * @type {String}
-     * @enum ['Now Showing', 'Coming Soon', 'Archived']
-     * @default 'Now Showing'
+     * @enum ['upcoming', 'now_showing', 'archived', 'Coming Soon', 'Now Showing', 'Archived']
+     * Supports both new format (lowercase with underscore) and old format (Title Case with space) for backward compatibility
+     * @default 'upcoming'
      */
     status: {
       type: String,
       enum: {
-        values: ['Now Showing', 'Coming Soon', 'Archived'],
+        values: ['upcoming', 'now_showing', 'archived', 'Coming Soon', 'Now Showing', 'Archived'],
         message: '{VALUE} is not a valid status',
       },
-      default: 'Now Showing',
+      default: 'upcoming',
     },
   },
   { 

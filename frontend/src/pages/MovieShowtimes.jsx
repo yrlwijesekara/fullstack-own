@@ -9,13 +9,21 @@ import { AuthContext } from "../context/AuthContext";
 export default function MovieShowtimes() {
   // Get movie ID from URL path (e.g., /movies/123/showtimes)
   const movieId = window.location.pathname.split('/')[2];
+  
+  // Get query parameters for pre-selection from Quick Booking
+  const urlParams = new URLSearchParams(window.location.search);
+  const preSelectedDate = urlParams.get('date') || '';
+  const preSelectedHallId = urlParams.get('hallId') || '';
+  const preSelectedCinemaId = urlParams.get('cinemaId') || '';
+  
   const [movie, setMovie] = useState(null);
   const [showtimes, setShowtimes] = useState([]);
   const [cinemas, setCinemas] = useState([]);
-  const [selectedCinema, setSelectedCinema] = useState("");
+  const [selectedCinema, setSelectedCinema] = useState(preSelectedCinemaId);
+  const [selectedHall, setSelectedHall] = useState(preSelectedHallId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(preSelectedDate);
   const [showCinemaPicker, setShowCinemaPicker] = useState(false);
   const [bookingShowtimeId, setBookingShowtimeId] = useState(null);
   const [tempCinemaSelection, setTempCinemaSelection] = useState("");
@@ -24,7 +32,7 @@ export default function MovieShowtimes() {
 
   useEffect(() => {
     fetchMovieAndShowtimes();
-  }, [movieId, selectedDate, selectedCinema]);
+  }, [movieId, selectedDate, selectedCinema, selectedHall]);
 
   useEffect(() => {
     // Fetch cinemas for selector
@@ -56,11 +64,15 @@ export default function MovieShowtimes() {
       const movieData = await movieResponse.json();
       setMovie(movieData.movie);
 
-      // Fetch showtimes for this movie (optionally filtered by cinema)
+      // Fetch showtimes for this movie (optionally filtered by cinema or hall)
       const queryParams = new URLSearchParams();
       queryParams.append("movieId", movieId);
       if (selectedDate) queryParams.append("date", selectedDate);
-      if (selectedCinema) queryParams.append("cinemaId", selectedCinema);
+      if (selectedHall) {
+        queryParams.append("hallId", selectedHall); // Use hallId if selected from Quick Booking
+      } else if (selectedCinema) {
+        queryParams.append("cinemaId", selectedCinema); // Otherwise use cinemaId
+      }
 
       const showtimesResponse = await fetch(`${API_BASE_URL}/showtimes?${queryParams}`, {
         credentials: "include",

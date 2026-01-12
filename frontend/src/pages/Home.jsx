@@ -20,19 +20,47 @@ export default function Home() {
 
   useEffect(() => {
     loadMovies();
-    getHalls().then(setHalls).catch(() => setHalls([]));
+    loadHalls();
   }, []);
+
+  const loadHalls = async () => {
+    try {
+      const hallsData = await getHalls();
+      console.log('Halls fetched:', hallsData);
+      setHalls(Array.isArray(hallsData) ? hallsData : []);
+    } catch (error) {
+      console.error('Error fetching halls:', error);
+      setHalls([]);
+    }
+  };
 
   const loadMovies = async () => {
     setLoading(true);
     try {
       // Fetch featured movies for carousel (top rated or newest)
-      const featured = await fetchMovies({ status: 'Now Showing', limit: 5, sort: '-rating' });
-      setFeaturedMovies(featured.movies || []);
+      // Fetch both old and new status values for backward compatibility
+      const [featuredNew, featuredOld] = await Promise.all([
+        fetchMovies({ status: 'now_showing', limit: 5, sort: '-rating' }),
+        fetchMovies({ status: 'Now Showing', limit: 5, sort: '-rating' })
+      ]);
+      const allFeatured = [...(featuredNew.movies || []), ...(featuredOld.movies || [])];
+      // Remove duplicates by id and take top 5
+      const uniqueFeatured = allFeatured.filter((movie, index, self) => 
+        index === self.findIndex((m) => m._id === movie._id)
+      ).slice(0, 5);
+      setFeaturedMovies(uniqueFeatured);
 
       // Fetch now showing movies for grid
-      const nowShowing = await fetchMovies({ status: 'Now Showing', limit: 8 });
-      setNowShowingMovies(nowShowing.movies || []);
+      const [nowShowingNew, nowShowingOld] = await Promise.all([
+        fetchMovies({ status: 'now_showing', limit: 8 }),
+        fetchMovies({ status: 'Now Showing', limit: 8 })
+      ]);
+      const allNowShowing = [...(nowShowingNew.movies || []), ...(nowShowingOld.movies || [])];
+      // Remove duplicates by id and take top 8
+      const uniqueNowShowing = allNowShowing.filter((movie, index, self) => 
+        index === self.findIndex((m) => m._id === movie._id)
+      ).slice(0, 8);
+      setNowShowingMovies(uniqueNowShowing);
     } catch (error) {
       console.error('Failed to load movies:', error);
       // Set empty arrays on error to prevent UI issues
@@ -64,13 +92,17 @@ export default function Home() {
 
       {/* Quick Booking Widget */}
       <QuickBooking
-        movies={nowShowingMovies}
+        movies={nowShowingMovies.map(movie => ({
+          id: movie._id,
+          title: movie.title,
+        }))}
         cinemas={halls.map(hall => ({
           id: hall._id,
           name: hall.name,
         }))}
         onBooking={handleBooking}
         onCinemaChange={setSelectedCinema}
+        navigate={navigate}
         hideSelectorsForAdmin={true}
       />
 

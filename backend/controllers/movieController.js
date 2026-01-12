@@ -1,6 +1,5 @@
 const Movie = require('../models/Movie');
-const path = require('path');
-const fs = require('fs');
+const { deleteFromB2 } = require('../config/b2Storage');
 
 /**
  * @desc    Create a new movie
@@ -32,9 +31,9 @@ exports.createMovie = async (req, res) => {
 
     // Handle poster image if uploaded
     let posterImage = '/images/placeholder-poster.jpg'; // Default placeholder
-    if (req.file) {
-      // Store relative path from uploads directory
-      posterImage = `/uploads/movies/${req.file.filename}`;
+    if (req.file && req.file.b2Url) {
+      // Use B2 URL from upload middleware
+      posterImage = req.file.b2Url;
     }
 
     // Parse genre and cast arrays if they come as JSON strings
@@ -256,20 +255,18 @@ exports.updateMovie = async (req, res) => {
     }
 
     // Handle new poster image upload
-    if (req.file) {
-      // Delete old poster image if it exists and is not the placeholder
+    if (req.file && req.file.b2Url) {
+      // Delete old poster image from B2 if it exists and is not the placeholder
       if (movie.posterImage && !movie.posterImage.includes('placeholder')) {
-        const oldImagePath = path.join(__dirname, '..', movie.posterImage);
-        if (fs.existsSync(oldImagePath)) {
-          try {
-            fs.unlinkSync(oldImagePath);
-          } catch (err) {
-            console.error('Error deleting old image:', err);
-          }
+        try {
+          await deleteFromB2(movie.posterImage);
+          console.log('Deleted old poster from B2');
+        } catch (err) {
+          console.error('Error deleting old image from B2:', err);
         }
       }
-      // Update with new image path
-      movie.posterImage = `/uploads/movies/${req.file.filename}`;
+      // Update with new B2 URL
+      movie.posterImage = req.file.b2Url;
     }
 
     // Parse genre and cast arrays if they come as JSON strings
@@ -364,17 +361,14 @@ exports.deleteMovie = async (req, res) => {
       });
     }
 
-    // Delete associated poster image if it exists and is not the placeholder
+    // Delete associated poster image from B2 if it exists and is not the placeholder
     if (movie.posterImage && !movie.posterImage.includes('placeholder')) {
-      const imagePath = path.join(__dirname, '..', movie.posterImage);
-      if (fs.existsSync(imagePath)) {
-        try {
-          fs.unlinkSync(imagePath);
-          console.log('Deleted poster image:', imagePath);
-        } catch (err) {
-          console.error('Error deleting poster image:', err);
-          // Continue with movie deletion even if file deletion fails
-        }
+      try {
+        await deleteFromB2(movie.posterImage);
+        console.log('Deleted poster image from B2');
+      } catch (err) {
+        console.error('Error deleting poster image from B2:', err);
+        // Continue with movie deletion even if file deletion fails
       }
     }
 

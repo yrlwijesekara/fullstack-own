@@ -1,32 +1,14 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const { uploadToB2, generateUniqueFileName } = require('../config/b2Storage');
 
 /**
- * Multer Middleware for Movie Poster Uploads
- * Handles file validation, storage configuration, and error handling
+ * Multer Middleware for Movie Poster Uploads with Backblaze B2
+ * Handles file validation and uploads to B2 cloud storage
  */
 
-// Ensure upload directory exists
-const uploadDir = path.join(__dirname, '../uploads/movies');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Configure storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    // Generate unique filename: timestamp-originalname
-    const uniqueSuffix = Date.now();
-    const ext = path.extname(file.originalname);
-    const nameWithoutExt = path.basename(file.originalname, ext);
-    const sanitizedName = nameWithoutExt.replace(/[^a-zA-Z0-9]/g, '-');
-    cb(null, `${uniqueSuffix}-${sanitizedName}${ext}`);
-  },
-});
+// Use memory storage to keep file in buffer for B2 upload
+const storage = multer.memoryStorage();
 
 // File filter - accept only images
 const fileFilter = (req, file, cb) => {
@@ -51,6 +33,39 @@ const upload = multer({
     fileSize: 50 * 1024 * 1024, // 50MB in bytes
   },
 });
+
+/**
+ * Middleware to upload file to B2 after multer processes it
+ * Replaces the file object with B2 URL
+ */
+const uploadToB2Middleware = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return next();
+    }
+
+    // Generate unique filename
+    const uniqueFileName = generateUniqueFileName(req.file.originalname);
+
+    // Upload to B2
+    const publicUrl = await uploadToB2(
+      req.file.buffer,
+      uniqueFileName,
+      req.file.mimetype
+    );
+
+    // Replace file object with B2 URL for controller to use
+    req.file.b2Url = publicUrl;
+    req.file.b2FileName = uniqueFileName;
+
+    next();
+  } catch (error) {
+    console.error('B2 Upload Error:', error);
+    return res.status(500).json({
+      message: `Failed to upload to cloud storage: ${error.message}`,
+    });
+  }
+};
 
 /**
  * Error handling middleware for multer
@@ -82,32 +97,32 @@ const handleUploadError = (err, req, res, next) => {
 };
 
 /**
- * Single file upload middleware
+ * Single file upload middleware with B2 upload
  * Use for uploading a single movie poster
  * @param {string} fieldName - The name of the form field (default: 'posterImage')
  */
 const uploadSingle = (fieldName = 'posterImage') => {
-  return [upload.single(fieldName), handleUploadError];
+  return [upload.single(fieldName), handleUploadError, uploadToB2Middleware];
 };
 
 /**
- * Multiple files upload middleware
+ * Multiple files upload middleware with B2 upload
  * Use for uploading multiple movie posters or images
  * @param {string} fieldName - The name of the form field (default: 'images')
  * @param {number} maxCount - Maximum number of files (default: 10)
  */
 const uploadMultiple = (fieldName = 'images', maxCount = 10) => {
-  return [upload.array(fieldName, maxCount), handleUploadError];
+  return [upload.array(fieldName, maxCount), handleUploadError, uploadToB2Middleware];
 };
 
 /**
- * Multiple fields upload middleware
+ * Multiple fields upload middleware with B2 upload
  * Use for uploading different types of files in different fields
  * @param {Array} fields - Array of field configurations
  * Example: [{ name: 'poster', maxCount: 1 }, { name: 'stills', maxCount: 5 }]
  */
 const uploadFields = (fields) => {
-  return [upload.fields(fields), handleUploadError];
+  return [upload.fields(fields), handleUploadError, uploadToB2Middleware];
 };
 
 module.exports = {
