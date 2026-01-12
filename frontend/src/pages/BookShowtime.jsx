@@ -7,7 +7,7 @@ import BackButton from '../components/BackButton';
 import LoadingLogo from '../components/LoadingLogo';
 import HallLayoutPreview from '../components/HallLayoutPreview';
 import { API_BASE_URL } from '../utils/api';
-import { getCart } from '../utils/cart';
+import { getCart, addTicketsToCart } from '../utils/cart';
 
 export default function BookShowtime() {
   const showtimeId = window.location.pathname.split('/')[2];
@@ -263,7 +263,7 @@ export default function BookShowtime() {
                   <div className="text-sm text-text-secondary mt-1">Grand Total:</div>
                   <div className="text-2xl font-bold text-secondary-300">{new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(Number(ticketsTotal + cartTotal))}</div>
 
-                  <div className="mt-3 flex gap-3">
+                  <div className="mt-3 flex flex-wrap gap-3">
                     <button
                       onClick={() => navigate(`/snacks?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}&showtimeId=${showtimeId}&cinemaId=${cinemaQueryId}`)}
                       className="px-4 py-2 bg-primary-500 text-white rounded"
@@ -271,6 +271,32 @@ export default function BookShowtime() {
                       Add Snacks
                     </button>
                     <button onClick={() => navigate('/cart')} className="px-4 py-2 bg-secondary-500 text-white rounded">View Cart ({cartItemsCount})</button>
+                    <button
+                      onClick={() => {
+                        try {
+                          addTicketsToCart({
+                            showtimeId: showtime._id || showtime.id || showtimeId,
+                            movieTitle: showtime.movieId?.title || 'Tickets',
+                            cinemaName: cinema?.name || showtime.cinemaId?.name || '',
+                            seats: selectedSeats,
+                            adultCount: selectedAdult,
+                            childCount: selectedChild,
+                            pricePerAdult: showtime.price,
+                          });
+                          const cart = getCart();
+                          setCartItemsCount(cart.reduce((s, i) => s + (i.qty || 0), 0));
+                          setCartTotal(cart.reduce((s, i) => s + (Number(i.price || 0) * (i.qty || 0)), 0));
+                          toast.success('Tickets added to cart');
+                          navigate('/cart');
+                        } catch (e) {
+                          console.error('Add tickets to cart failed', e);
+                          toast.error('Failed to add tickets to cart');
+                        }
+                      }}
+                      className="px-4 py-2 bg-accent-blue text-white rounded"
+                    >
+                      Add Tickets to Cart
+                    </button>
                   </div>
                 </div>
               </div>

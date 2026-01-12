@@ -43,40 +43,50 @@ export default function Cart() {
       setTimeout(() => navigate('/login'), 600);
       return;
     }
-
     try {
-      const body = { items: items.map(i => ({ productId: i.id, quantity: i.qty })) };
-      // Try cookie auth first
-      let res = await fetch(`${API_BASE_URL}/purchases`, {
+      // call unified checkout endpoint
+      const res = await fetch(`${API_BASE_URL}/checkout`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ items }),
       });
 
+      // fallback to token if cookie-auth fails
+      let finalRes = res;
       if (!res.ok) {
-        // fallback to token
         const token = localStorage.getItem('token');
-        if (!token) throw new Error('Auth required');
-        res = await fetch(`${API_BASE_URL}/purchases`, {
+        if (!token) throw new Error('Authentication required');
+        finalRes = await fetch(`${API_BASE_URL}/checkout`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify(body),
+          body: JSON.stringify({ items }),
         });
       }
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Purchase failed');
+      if (!finalRes.ok) {
+        const err = await finalRes.json().catch(() => ({}));
+        throw new Error(err.message || 'Checkout failed');
       }
 
-      toast.success('Purchase successful');
+      const data = await finalRes.json();
+      // data: { bookings, purchase, receipt: base64 }
+      toast.success('Checkout completed');
+      if (data.receipt) {
+        try {
+          const { downloadBase64Pdf } = await import('../utils/receipt');
+          downloadBase64Pdf(data.receipt, `enimate_receipt_${Date.now()}.pdf`);
+        } catch (e) {
+          console.error('Receipt download failed', e);
+        }
+      }
+
       clearCart();
       setItems([]);
       navigate('/profile');
     } catch (err) {
-      console.error('Purchase error:', err);
-      toast.error(err.message || 'Purchase failed');
+      console.error('Checkout error:', err);
+      toast.error(err.message || 'Checkout failed');
     }
   };
 
@@ -92,14 +102,32 @@ export default function Cart() {
             {items.map(it => (
               <div key={it.id} className="flex flex-col sm:flex-row sm:items-center justify-between bg-surface-600 p-4 rounded gap-3">
                 <div className="flex-1">
-                  <div className="font-medium">{it.name}</div>
-                  <div className="text-sm text-text-secondary">{new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(it.price)}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="font-medium">{it.name}</div>
+                    {it.type === 'ticket' && (
+                      <span className="text-xs bg-accent-blue/20 text-accent-blue px-2 py-0.5 rounded">Ticket</span>
+                    )}
+                  </div>
+                  <div className="text-sm text-text-secondary">
+                    {it.type === 'ticket' && it.meta?.seats && it.meta.seats.length > 0 ? (
+                      <span>Seats: {it.meta.seats.join(', ')}</span>
+                    ) : (
+                      new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(it.price)
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <button onClick={() => handleQty(it.id, Math.max(1, it.qty - 1))} className="px-3 py-2 bg-surface-500 rounded">-</button>
-                  <div className="w-10 text-center font-medium">{it.qty}</div>
-                  <button onClick={() => handleQty(it.id, it.qty + 1)} className="px-3 py-2 bg-surface-500 rounded">+</button>
-                  <div className="w-28 text-right font-semibold">{new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(it.price * it.qty)}</div>
+                  {it.type === 'ticket' ? (
+                    // tickets are stored as grouped entries (qty = 1)
+                    <div className="w-28 text-right font-semibold">{new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(it.price)}</div>
+                  ) : (
+                    <>
+                      <button onClick={() => handleQty(it.id, Math.max(1, it.qty - 1))} className="px-3 py-2 bg-surface-500 rounded">-</button>
+                      <div className="w-10 text-center font-medium">{it.qty}</div>
+                      <button onClick={() => handleQty(it.id, it.qty + 1)} className="px-3 py-2 bg-surface-500 rounded">+</button>
+                      <div className="w-28 text-right font-semibold">{new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(it.price * it.qty)}</div>
+                    </>
+                  )}
                   <button onClick={() => handleRemove(it.id)} className="ml-2 px-3 py-2 bg-red-600 text-white rounded">Remove</button>
                 </div>
               </div>
