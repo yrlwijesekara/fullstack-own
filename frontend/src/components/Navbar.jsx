@@ -124,6 +124,16 @@ export default function Navbar() {
             >
               Snacks
             </button>
+            <button
+              onClick={() => navigate('/orders')}
+              className={`font-medium transition uppercase tracking-wide text-sm ${
+                isActive('/orders') 
+                  ? 'text-secondary-300 border-b-2 border-secondary-300 pb-1' 
+                  : 'text-text-primary hover:text-purple-400'
+              }`}
+            >
+              Orders
+            </button>
             {user && user.role === 'admin' && (
               <button
                 onClick={() => navigate('/admin-dashboard')}
@@ -230,6 +240,12 @@ export default function Navbar() {
               className={`w-full text-left font-medium transition uppercase tracking-wide text-sm ${isActive('/snacks') ? 'text-secondary-300' : 'text-text-primary hover:text-purple-400'}`}
             >
               Snacks
+            </button>
+            <button
+              onClick={() => navTo('/orders')}
+              className={`w-full text-left font-medium transition uppercase tracking-wide text-sm ${isActive('/orders') ? 'text-secondary-300' : 'text-text-primary hover:text-purple-400'}`}
+            >
+              Orders
             </button>
             {user && user.role === 'admin' && (
               <button

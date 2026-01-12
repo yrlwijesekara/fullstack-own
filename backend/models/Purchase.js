@@ -12,6 +12,7 @@ const purchaseSchema = new mongoose.Schema({
     },
   ],
   totalPrice: { type: Number, required: true },
+  canceled: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 

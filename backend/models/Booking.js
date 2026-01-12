@@ -7,6 +7,7 @@ const bookingSchema = new mongoose.Schema({
   adultCount: { type: Number, default: 0 },
   childCount: { type: Number, default: 0 },
   totalPrice: { type: Number, required: true },
+  canceled: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 

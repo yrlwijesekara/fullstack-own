@@ -5,6 +5,8 @@ import { toast } from 'react-toastify';
 import Modal from '../components/Modal';
 import BackButton from '../components/BackButton';
 import LoadingLogo from '../components/LoadingLogo';
+import { API_BASE_URL } from '../utils/api';
+import { useEffect } from 'react';
 
 export default function Profile() {
   const { user, logout, updateProfile } = useContext(AuthContext);
@@ -22,14 +24,6 @@ export default function Profile() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [message, setMessage] = useState('');
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <div>Please login to view your profile.</div>
-      </div>
-    );
-  }
-
   const handleLogout = () => {
     setShowLogoutModal(true);
   };
@@ -40,6 +34,7 @@ export default function Profile() {
     toast.success('You have been successfully logged out.');
     navigate('/login');
   };
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -133,6 +128,8 @@ export default function Profile() {
             <p className="text-text-secondary text-lg">{user.email}</p>
           </div>
         </div>
+
+        {/* Orders moved to dedicated Orders page (use navbar link) */}
 
         {/* Profile Card */}
         <div className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl border border-purple-500/30 shadow-2xl">

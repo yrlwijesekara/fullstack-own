@@ -76,3 +76,51 @@ exports.getUserBookings = async (req, res) => {
     res.status(500).json({ message: 'Server error fetching bookings' });
   }
 };
+
+// Cancel a booking (protected)
+exports.cancelBooking = async (req, res) => {
+  const bookingId = req.params.id;
+  if (!bookingId) return res.status(400).json({ message: 'Booking id required' });
+
+  const session = await Booking.startSession();
+  session.startTransaction();
+  try {
+    const booking = await Booking.findOne({ _id: bookingId, userId: req.user._id }).session(session);
+    if (!booking) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+    if (booking.canceled) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: 'Booking already canceled' });
+    }
+
+    const showtime = await Showtime.findById(booking.showtimeId).session(session);
+    if (!showtime) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: 'Associated showtime not found' });
+    }
+
+    // Remove seats from bookedSeats
+    const seatsToRelease = booking.seats || [];
+    showtime.bookedSeats = showtime.bookedSeats.filter(s => !seatsToRelease.includes(s));
+    showtime.seatsAvailable = (showtime.seatsAvailable || 0) + seatsToRelease.length;
+    await showtime.save({ session });
+
+    booking.canceled = true;
+    await booking.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({ success: true, message: 'Booking canceled', booking });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Cancel booking error:', err);
+    res.status(500).json({ message: 'Server error canceling booking' });
+  }
+};

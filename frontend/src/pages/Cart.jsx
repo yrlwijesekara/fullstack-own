@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import LoadingLogo from '../components/LoadingLogo';
 import Navbar from '../components/Navbar';
+import Modal from '../components/Modal';
 import { getCart, updateQty, removeFromCart, clearCart } from '../utils/cart';
 import { API_BASE_URL } from '../utils/api';
 import toast from 'react-hot-toast';
@@ -10,6 +11,9 @@ import { useNavigate } from '../hooks/useNavigate';
 export default function Cart() {
   const { user, loading: authLoading } = useContext(AuthContext);
   const [items, setItems] = useState([]);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [receiptData, setReceiptData] = useState(null);
+  const [successInfo, setSuccessInfo] = useState({ bookings: [], purchase: null });
   const navigate = useNavigate();
 
   if (authLoading) {
@@ -72,18 +76,13 @@ export default function Cart() {
       const data = await finalRes.json();
       // data: { bookings, purchase, receipt: base64 }
       toast.success('Checkout completed');
-      if (data.receipt) {
-        try {
-          const { downloadBase64Pdf } = await import('../utils/receipt');
-          downloadBase64Pdf(data.receipt, `enimate_receipt_${Date.now()}.pdf`);
-        } catch (e) {
-          console.error('Receipt download failed', e);
-        }
-      }
-
+      // navigate to receipt page and pass data via location state; also save to sessionStorage as fallback
+      const receiptPayload = { receipt: data.receipt || null, bookings: data.bookings || [], purchase: data.purchase || null };
+      try { sessionStorage.setItem('lastReceipt', JSON.stringify(receiptPayload)); } catch (e) { /* ignore */ }
+      // clear client cart and navigate to receipt
       clearCart();
       setItems([]);
-      navigate('/profile');
+      navigate('/receipt', { state: receiptPayload });
     } catch (err) {
       console.error('Checkout error:', err);
       toast.error(err.message || 'Checkout failed');
@@ -160,6 +159,7 @@ export default function Cart() {
           </div>
         )}
       </div>
+        {/* Receipt page replaces the old modal flow; navigation handled after successful checkout */}
     </div>
   );
 }

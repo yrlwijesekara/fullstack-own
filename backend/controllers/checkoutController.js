@@ -17,36 +17,53 @@ function generateReceiptBase64({ user, bookings = [], purchase = null }) {
         resolve(result.toString('base64'));
       });
 
-      doc.fontSize(20).text('Enimate Receipt', { align: 'center' });
+      // Header
+      doc.fontSize(22).fillColor('#000000').text('Enimate', { align: 'center' });
+      doc.moveDown(0.3);
+      doc.fontSize(12).fillColor('#444444').text('Receipt', { align: 'center' });
       doc.moveDown();
+
       if (user) {
-        doc.fontSize(10).text(`User: ${user.name || user.email || user._id}`);
+        doc.fontSize(10).fillColor('#000').text(`Customer: ${user.name || user.email || user._id}`);
       }
-      doc.text(`Date: ${new Date().toLocaleString()}`);
+      doc.fontSize(10).text(`Date: ${new Date().toLocaleString()}`);
       doc.moveDown();
 
       let grandTotal = 0;
 
       if (bookings && bookings.length) {
-        doc.fontSize(14).text('Bookings', { underline: true });
+        doc.fontSize(14).fillColor('#000').text('Bookings', { underline: true });
+        doc.moveDown(0.3);
         bookings.forEach((b, idx) => {
-          doc.fontSize(11).text(`${idx + 1}. Movie: ${b.showtimeId?.movieTitle || (b.showtimeId?.title || b.showtimeId)}\n   Showtime: ${new Date(b.showtimeId?.startTime || b.createdAt || Date.now()).toLocaleString()}\n   Seats: ${b.seats?.join(', ') || ''}\n   Price: ${b.totalPrice}`);
-          doc.moveDown(0.3);
+          const showInfo = b.showtimeInfo || {};
+          doc.fontSize(11).fillColor('#000').text(`${idx + 1}. Booking ID: ${b._id}`);
+          doc.fontSize(11).fillColor('#333').text(`   Movie: ${showInfo.movieTitle || ''}`);
+          doc.fontSize(11).fillColor('#333').text(`   Showtime: ${new Date(showInfo.startTime || b.createdAt || Date.now()).toLocaleString()}`);
+          if (b.seats && b.seats.length) doc.fontSize(11).fillColor('#333').text(`   Seats: ${b.seats.join(', ')}`);
+          doc.fontSize(11).fillColor('#000').text(`   Price: ${Number(b.totalPrice || 0)}`);
+          doc.moveDown(0.4);
           grandTotal += Number(b.totalPrice || 0);
         });
         doc.moveDown();
       }
 
       if (purchase) {
-        doc.fontSize(14).text('Snacks / Purchases', { underline: true });
+        doc.fontSize(14).fillColor('#000').text('Snacks / Purchases', { underline: true });
+        doc.moveDown(0.3);
         purchase.items.forEach((it, idx) => {
-          doc.fontSize(11).text(`${idx + 1}. ${it.name} x${it.quantity} — ${it.price * it.quantity}`);
-          grandTotal += Number(it.price || 0) * Number(it.quantity || 0);
+          const lineTotal = Number(it.price || 0) * Number(it.quantity || 0);
+          doc.fontSize(11).fillColor('#333').text(`${idx + 1}. ${it.name} x${it.quantity} — ${lineTotal}`);
+          grandTotal += lineTotal;
         });
+        if (purchase._id) {
+          doc.moveDown(0.2);
+          doc.fontSize(11).fillColor('#000').text(`Purchase ID: ${purchase._id}`);
+        }
         doc.moveDown();
       }
 
-      doc.fontSize(12).text(`Grand Total: ${grandTotal}`, { align: 'right' });
+      doc.moveDown(0.5);
+      doc.fontSize(12).fillColor('#000').text(`Grand Total: ${grandTotal}`, { align: 'right' });
       doc.end();
     } catch (err) {
       reject(err);
@@ -79,7 +96,8 @@ exports.checkout = async (req, res) => {
         return res.status(400).json({ message: 'ticket missing showtimeId' });
       }
 
-      const showtime = await Showtime.findById(showtimeId).session(session);
+      // populate movie for receipt display
+      const showtime = await Showtime.findById(showtimeId).populate('movieId').session(session);
       if (!showtime) {
         await session.abortTransaction();
         return res.status(404).json({ message: 'Showtime not found' });
@@ -123,8 +141,15 @@ exports.checkout = async (req, res) => {
           totalPrice,
         },
       ], { session });
-
-      createdBookings.push(bookingDocs[0]);
+      // attach showtime/movie info for receipt
+      const bd = bookingDocs[0].toObject();
+      bd.showtimeInfo = {
+        startTime: showtime.startTime,
+        movieTitle: showtime.movieId?.title || showtime.movieId || '',
+        hallName: showtime.hallId || '',
+        cinemaName: showtime.cinemaId || '',
+      };
+      createdBookings.push(bd);
     }
 
     let purchaseDoc = null;
@@ -132,8 +157,20 @@ exports.checkout = async (req, res) => {
       let total = 0;
       const processedItems = [];
       for (const it of snackItems) {
-        // find by snackId or productId
-        const snack = it.snackId ? await Snack.findById(it.snackId).session(session) : (it.productId ? await Snack.findOne({ ProductId: it.productId }).session(session) : null);
+        // find by snackId, productId or id (cart uses `id`)
+        const identifier = it.snackId || it.productId || it.id;
+        let snack = null;
+        if (identifier) {
+          // if looks like a Mongo ObjectId (24 hex chars) try findById first
+          const maybeObjectId = typeof identifier === 'string' && /^[0-9a-fA-F]{24}$/.test(identifier);
+          if (maybeObjectId) {
+            snack = await Snack.findById(identifier).session(session);
+          }
+          // fallback to ProductId match
+          if (!snack) {
+            snack = await Snack.findOne({ ProductId: identifier }).session(session);
+          }
+        }
         if (!snack) {
           await session.abortTransaction();
           return res.status(404).json({ message: `Snack not found: ${it.productId || it.snackId}` });

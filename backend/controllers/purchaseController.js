@@ -78,3 +78,49 @@ exports.getUserPurchases = async (req, res) => {
     res.status(500).json({ message: 'Server error fetching purchases' });
   }
 };
+
+// Cancel a purchase and restock items
+exports.cancelPurchase = async (req, res) => {
+  const purchaseId = req.params.id;
+  if (!purchaseId) return res.status(400).json({ message: 'Purchase id required' });
+
+  const session = await Purchase.startSession();
+  session.startTransaction();
+  try {
+    const purchase = await Purchase.findOne({ _id: purchaseId, userId: req.user._id }).session(session);
+    if (!purchase) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: 'Purchase not found' });
+    }
+    if (purchase.canceled) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: 'Purchase already canceled' });
+    }
+
+    // Restock snacks
+    for (const it of purchase.items || []) {
+      if (it.snackId) {
+        const snack = await Snack.findById(it.snackId).session(session);
+        if (snack) {
+          snack.ProductQuantity = (snack.ProductQuantity || 0) + (it.quantity || 0);
+          await snack.save({ session });
+        }
+      }
+    }
+
+    purchase.canceled = true;
+    await purchase.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({ success: true, message: 'Purchase canceled', purchase });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Cancel purchase error:', err);
+    res.status(500).json({ message: 'Server error canceling purchase' });
+  }
+};
