@@ -95,7 +95,16 @@ export default function ShowtimeManagement() {
       });
       if (response.ok) {
         const data = await response.json();
-        setHalls(data.data || []);
+        // Backend may return halls as a plain array or wrapped in an object
+        if (Array.isArray(data)) {
+          setHalls(data);
+        } else if (Array.isArray(data.data)) {
+          setHalls(data.data);
+        } else if (Array.isArray(data.halls)) {
+          setHalls(data.halls);
+        } else {
+          setHalls([]);
+        }
       }
     } catch (err) {
       console.error("Failed to fetch halls:", err);
