@@ -41,7 +41,10 @@ export default function AdminDashboard() {
       const res = await fetch(`${API_BASE_URL}/halls`);
       if (!res.ok) return;
       const data = await res.json();
-      setHalls(data.data || []);
+      // API may return an array or an object with a `data` field
+      if (Array.isArray(data)) setHalls(data);
+      else if (Array.isArray(data.data)) setHalls(data.data);
+      else setHalls([]);
     } catch (err) {
       console.error('Failed to fetch halls', err);
     }
@@ -204,7 +207,7 @@ export default function AdminDashboard() {
 
               <div className="bg-surface-500 p-6 rounded-xl border border-secondary-400/40 hover:border-primary-500 transition-colors">
                 <h3 className="text-xl font-semibold text-text-primary mb-2">Manage Halls</h3>
-                <p className="text-text-secondary mb-4">Configure cinema halls and seating arrangements.</p>
+                <p className="text-text-secondary mb-4">Configure cinema halls and seating arrangements. <span className="font-semibold">{halls.length} {halls.length === 1 ? 'hall' : 'halls'}</span></p>
                 <button onClick={() => navigate('/admin-dashboard/halls')} className="w-full py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-lg transition-colors">Go to Halls</button>
               </div>
 
