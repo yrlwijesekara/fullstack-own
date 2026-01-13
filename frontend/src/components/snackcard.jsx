@@ -19,7 +19,7 @@ export default function SnackCard({ snack }) {
     if (isLoading) {
         return (
             <div className="bg-gradient-to-br from-background-900 via-background-800 to-background-900 border border-secondary-400/50 rounded-xl shadow-lg overflow-hidden h-96 flex items-center justify-center">
-                <LoadingLogo size={60} text="Loading..." />
+                <LoadingLogo size={60} />
             </div>
         );
     }

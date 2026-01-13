@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import SnackImageSlider from "../components/snackimageslider";
 import Navbar from "../components/Navbar";
 import BackButton from "../components/BackButton";
+import LoadingLogo from "../components/LoadingLogo";
 import { addToCart as addToCartUtil, getCart as getCartUtil } from "../utils/cart";
 import { API_BASE_URL } from "../utils/api";
 
@@ -45,7 +46,7 @@ export default function SnackOverviewPage() {
     }, [status, params.snackid]);
 
     if (status === 'loading') {
-        return <div className="w-full h-screen flex justify-center items-center text-text-primary">Loading...</div>;
+        return <div className="w-full h-screen flex justify-center items-center"><LoadingLogo /></div>;
     }
 
     if (status === 'error') {
