@@ -8,8 +8,8 @@ export default function SnackImageSlider(props) {
     // Safety check for images array
     if (!images || images.length === 0) {
         return (
-            <div className="w-full max-w-[250px] h-[250px] flex justify-center items-center bg-gray-800 rounded-lg">
-                <div className="text-white text-center">
+            <div className="w-full max-w-[250px] h-[250px] flex justify-center items-center bg-background-800 rounded-lg">
+                <div className="text-text-primary text-center">
                     <div className="text-2xl mb-2">📷</div>
                     <p className="text-sm">No images available</p>
                 </div>
@@ -30,7 +30,7 @@ export default function SnackImageSlider(props) {
                         src={image}
                         key={index}
                         alt={`Thumbnail ${index + 1}`}
-                        className={`w-[35px] h-[35px] object-cover border-2 rounded cursor-pointer transition-all duration-200 shadow-md ${activeIndex === index ? 'border-purple-500 scale-110 shadow-purple-500/50' : 'border-transparent hover:border-gray-400 hover:scale-105'}`}
+                        className={`w-[35px] h-[35px] object-cover border-2 rounded cursor-pointer transition-all duration-200 shadow-md ${activeIndex === index ? 'border-primary-500 scale-110 shadow-primary-500/50' : 'border-transparent hover:border-secondary-400 hover:scale-105'}`}
                         onClick={() => setActiveIndex(index)}
                     />
                 ))}

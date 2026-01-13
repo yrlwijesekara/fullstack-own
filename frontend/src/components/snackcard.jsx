@@ -18,7 +18,7 @@ export default function SnackCard({ snack }) {
 
     if (isLoading) {
         return (
-            <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700/50 rounded-xl shadow-lg overflow-hidden h-96 flex items-center justify-center">
+            <div className="bg-gradient-to-br from-background-900 via-background-800 to-background-900 border border-secondary-400/50 rounded-xl shadow-lg overflow-hidden h-96 flex items-center justify-center">
                 <LoadingLogo size={60} text="Loading..." />
             </div>
         );
@@ -27,7 +27,7 @@ export default function SnackCard({ snack }) {
     return (
         <div
             onClick={handleClick}
-            className="group relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700/50 rounded-xl shadow-lg overflow-hidden transition-all duration-700 ease-out hover:shadow-2xl hover:shadow-purple-500/20 hover:border-purple-500/50 hover:-translate-y-2 cursor-pointer"
+            className="group relative bg-gradient-to-br from-background-900 via-background-800 to-background-900 border border-secondary-400/50 rounded-xl shadow-lg overflow-hidden transition-all duration-700 ease-out hover:shadow-2xl hover:shadow-primary-500/20 hover:border-primary-500/50 hover:-translate-y-2 cursor-pointer"
         >
             {/* Image Container with Overlay */}
             <div className="relative overflow-hidden">
@@ -42,14 +42,14 @@ export default function SnackCard({ snack }) {
 
                 {/* Discount Badge */}
                 {hasDiscount && (
-                    <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                    <div className="absolute top-3 right-3 bg-semantic-error text-text-primary text-xs font-bold px-2 py-1 rounded-full shadow-lg">
                         {Math.round(((snack.labelledPrice - snack.ProductPrice) / snack.labelledPrice) * 100)}% OFF
                     </div>
                 )}
 
                 {/* Hover Overlay Content */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out">
-                    <div className="bg-purple-600/90 backdrop-blur-sm text-white px-4 py-2 rounded-full font-semibold text-sm transform translate-y-4 group-hover:translate-y-0 transition-transform duration-700 ease-out">
+                    <div className="bg-primary-500/90 backdrop-blur-sm text-text-primary px-4 py-2 rounded-full font-semibold text-sm transform translate-y-4 group-hover:translate-y-0 transition-transform duration-700 ease-out">
                         View Details
                     </div>
                 </div>
@@ -59,13 +59,13 @@ export default function SnackCard({ snack }) {
             <div className="p-5 flex flex-col flex-grow">
                 {/* Category Badge */}
                 <div className="mb-3">
-                    <span className="inline-block bg-purple-600/20 text-purple-300 text-xs font-medium px-3 py-1 rounded-full border border-purple-500/30">
+                    <span className="inline-block bg-secondary-500/20 text-secondary-300 text-xs font-medium px-3 py-1 rounded-full border border-secondary-400/30">
                         {snack.ProductCategory}
                     </span>
                 </div>
 
                 {/* Title */}
-                <h3 className="text-white text-lg font-bold mb-3 line-clamp-2 group-hover:text-purple-300 transition-colors duration-700 ease-out">
+                <h3 className="text-text-primary text-lg font-bold mb-3 line-clamp-2 group-hover:text-secondary-300 transition-colors duration-700 ease-out">
                     {snack.ProductName}
                 </h3>
 
@@ -75,15 +75,15 @@ export default function SnackCard({ snack }) {
                         <div className="flex flex-col">
                             {hasDiscount ? (
                                 <>
-                                    <span className="text-gray-400 text-sm line-through">
+                                    <span className="text-text-secondary text-sm line-through">
                                         Rs {snack.labelledPrice.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
-                                    <span className="text-purple-400 font-bold text-xl">
+                                    <span className="text-secondary-400 font-bold text-xl">
                                         Rs {snack.ProductPrice.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
                                 </>
                             ) : (
-                                <span className="text-purple-400 font-bold text-xl">
+                                <span className="text-secondary-400 font-bold text-xl">
                                     Rs {snack.ProductPrice.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </span>
                             )}
@@ -93,10 +93,10 @@ export default function SnackCard({ snack }) {
                         <div className="flex flex-col items-end">
                             <span className={`text-xs font-medium px-2 py-1 rounded-full ${
                                 snack.ProductQuantity > 20
-                                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                    ? 'bg-semantic-success/20 text-semantic-success border border-semantic-success/30'
                                     : snack.ProductQuantity > 5
-                                    ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                                    : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                    ? 'bg-semantic-warning/20 text-semantic-warning border border-semantic-warning/30'
+                                    : 'bg-semantic-error/20 text-semantic-error border border-semantic-error/30'
                             }`}>
                                 {snack.ProductQuantity > 20 ? 'In Stock' : snack.ProductQuantity > 5 ? 'Low Stock' : 'Limited'}
                             </span>
@@ -106,7 +106,7 @@ export default function SnackCard({ snack }) {
             </div>
 
             {/* Subtle Border Animation */}
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/0 via-purple-500/20 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out pointer-events-none"></div>
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/0 via-primary-500/20 to-primary-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out pointer-events-none"></div>
         </div>
     );
 }
