@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../utils/api';
 import { toast } from 'react-toastify';
+import Modal from '../../components/Modal';
 
 export default function CinemasManagement() {
   const navigate = useNavigate();
   const [cinemas, setCinemas] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [cinemaToDelete, setCinemaToDelete] = useState(null);
 
   useEffect(() => {
     fetchCinemas();
@@ -35,11 +38,21 @@ export default function CinemasManagement() {
     navigate(`/admin-dashboard/cinemas/${cinema._id}/edit`);
   };
 
-  const deleteCinema = async (cinemaId) => {
-    if (!confirm('Are you sure you want to delete this cinema?')) return;
+  const openDeleteModal = (cinema) => {
+    setCinemaToDelete(cinema);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setCinemaToDelete(null);
+  };
+
+  const confirmDeleteCinema = async () => {
+    if (!cinemaToDelete) return;
 
     try {
-      const res = await fetch(`${API_BASE_URL}/cinemas/${cinemaId}`, {
+      const res = await fetch(`${API_BASE_URL}/cinemas/${cinemaToDelete._id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -53,6 +66,8 @@ export default function CinemasManagement() {
     } catch (err) {
       console.error('Error deleting cinema:', err);
       toast.error('Error deleting cinema');
+    } finally {
+      closeDeleteModal();
     }
   };
 
@@ -90,7 +105,7 @@ export default function CinemasManagement() {
                 Edit
               </button>
               <button
-                onClick={() => deleteCinema(cinema._id)}
+                onClick={() => openDeleteModal(cinema)}
                 className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
               >
                 Delete
@@ -103,6 +118,16 @@ export default function CinemasManagement() {
       {cinemas.length === 0 && !loading && (
         <p className="text-text-muted text-center py-8">No cinemas found.</p>
       )}
+
+      <Modal
+        isOpen={showDeleteModal}
+        title="Delete Cinema"
+        message={`Are you sure you want to delete "${cinemaToDelete?.name}"? This action cannot be undone.`}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDeleteCinema}
+        confirmText="Delete"
+        theme="default"
+      />
     </div>
   );
 }
