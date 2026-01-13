@@ -53,82 +53,105 @@ export default function SnackOverviewPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-900">
+        <div className="min-h-screen bg-gray-900/95 backdrop-blur-sm">
             <Navbar />
             <div className="pt-2 sm:pt-4 px-2 sm:px-4">
                 <BackButton to="/snacks" showText={true} text="Back to Snacks" />
             </div>
-            <div className="p-6 ">
-            <div className="w-full min-h-screen flex flex-col lg:flex-row justify-center items-center lg:items-start bg-gray-900 px-2 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8"> 
-        
-            <div className="w-full lg:w-[49%] xl:w-[45%] flex justify-center items-center mb-6 lg:mb-0">
-                <SnackImageSlider images={snack.ProductImage || []} />
-            </div>
-            <div className="w-full lg:w-[49%] xl:w-[50%] flex flex-col justify-start items-start p-2 sm:p-4 md:p-6 lg:p-8 text-white">
-                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 md:mb-4">{snack.ProductName}</h1>
-                <div className="mb-4">
-                    <span className="inline-block bg-purple-600/20 text-purple-300 text-sm sm:text-base md:text-lg font-medium px-4 py-2 rounded-full border border-purple-500/30">
-                        {snack.ProductCategory}
-                    </span>
-                </div>
 
+            {/* Main Content Container - Compact Window */}
+            <div className="flex items-center justify-center min-h-[calc(100vh-200px)] p-4">
+                <div className="bg-gray-800/90 backdrop-blur-md rounded-2xl border border-gray-700/50 shadow-2xl max-w-4xl w-full mx-4 overflow-hidden">
 
-                <div className="mb-6 sm:mb-8">
-                    {snack.labelledPrice > snack.ProductPrice ? (
-                        <div className="flex flex-col gap-2">
-                            <span className="text-gray-400 text-lg sm:text-xl md:text-2xl line-through">
-                                Rs {snack.labelledPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </span>
-                            <div className="flex items-center gap-3">
-                                <span className="text-purple-400 font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
-                                    Rs {snack.ProductPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </span>
-                                <span className="bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">
-                                    {Math.round(((snack.labelledPrice - snack.ProductPrice) / snack.labelledPrice) * 100)}% OFF
-                                </span>
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 border-b border-gray-700/50 p-4 sm:p-6">
+                        <h1 className="text-xl sm:text-2xl font-bold text-white text-center">{snack.ProductName}</h1>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-4 sm:p-6">
+                        <div className="flex flex-col lg:flex-row gap-6">
+
+                            {/* Image Section - Smaller */}
+                            <div className="w-full lg:w-1/3 flex justify-center">
+                                <div className="w-full max-w-sm">
+                                    <SnackImageSlider images={snack.ProductImage || []} />
+                                </div>
+                            </div>
+
+                            {/* Details Section - More Compact */}
+                            <div className="w-full lg:w-2/3 flex flex-col text-white">
+
+                                {/* Category Badge */}
+                                <div className="mb-4">
+                                    <span className="inline-block bg-purple-600/20 text-purple-300 text-sm font-medium px-3 py-1 rounded-full border border-purple-500/30">
+                                        {snack.ProductCategory}
+                                    </span>
+                                </div>
+
+                                {/* Price Section - Smaller */}
+                                <div className="mb-4">
+                                    {snack.labelledPrice > snack.ProductPrice ? (
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-gray-400 text-lg line-through">
+                                                Rs {snack.labelledPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-purple-400 font-bold text-2xl">
+                                                    Rs {snack.ProductPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </span>
+                                                <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                                    {Math.round(((snack.labelledPrice - snack.ProductPrice) / snack.labelledPrice) * 100)}% OFF
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <span className="text-purple-400 font-bold text-2xl">
+                                            Rs {snack.ProductPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Description - Smaller */}
+                                <div className="mb-4">
+                                    <h3 className="text-gray-300 font-medium mb-2 text-sm">Description</h3>
+                                    <p className="text-gray-300 text-sm leading-relaxed">{snack.ProductDescription || 'No description available'}</p>
+                                </div>
+
+                                {/* Stock Info - Smaller */}
+                                <div className="mb-6">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-400 text-sm">Stock:</span>
+                                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                                            snack.ProductQuantity > 20
+                                                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                                : snack.ProductQuantity > 5
+                                                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                                                : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                        }`}>
+                                            {snack.ProductQuantity} items available
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Action Buttons - Smaller */}
+                                <div className="flex flex-col sm:flex-row gap-3 w-full">
+                                    <button
+                                        onClick={handleAddToCart}
+                                        className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-purple-500/25 text-sm w-full sm:w-auto border border-purple-500/30">
+                                        Add to Cart
+                                    </button>
+                                    <button
+                                        onClick={handleBuyNow}
+                                        className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-green-500/25 text-sm w-full sm:w-auto border border-green-500/30">
+                                        Buy Now
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    ) : (
-                        <span className="text-purple-400 font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
-                            Rs {snack.ProductPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                    )}
-                </div>
-                
-                <p className="text-gray-300 mb-4 sm:mb-5 lg:mb-6 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed break-words word-wrap overflow-wrap-anywhere hyphens-auto max-w-full">{snack.ProductDescription || 'No description available'}</p>
-                
-                <div className="mb-6 sm:mb-8">
-                    <div className="flex items-center gap-3">
-                        <span className="text-gray-400 text-sm sm:text-base">Stock:</span>
-                        <span className={`text-sm font-medium px-3 py-1 rounded-full ${
-                            snack.ProductQuantity > 20
-                                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                : snack.ProductQuantity > 5
-                                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                                : 'bg-red-500/20 text-red-400 border border-red-500/30'
-                        }`}>
-                            {snack.ProductQuantity} items available
-                        </span>
                     </div>
                 </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full">
-                    <button
-                        onClick={handleAddToCart}
-                        className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple-500/25 hover:scale-105 text-sm sm:text-base lg:text-lg w-full sm:w-auto border border-purple-500/30">
-                        Add to Cart
-                    </button>
-                    <button
-                        onClick={handleBuyNow}
-                        className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-green-500/25 hover:scale-105 text-sm sm:text-base lg:text-lg w-full sm:w-auto border border-green-500/30">
-                        Buy Now
-                    </button>
-                </div>
-                
-            </div>
-            </div>
             </div>
         </div>
-
     );
 }
