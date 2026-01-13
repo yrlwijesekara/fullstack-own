@@ -4,6 +4,15 @@ import { API_BASE_URL } from '../../utils/api';
 import { toast } from 'react-toastify';
 import Modal from '../../components/Modal';
 
+// Helper function to get the correct image URL
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  // If it's already a full URL (B2), return as is
+  if (imagePath.startsWith('http')) return imagePath;
+  // Otherwise, prepend API_BASE_URL for local images
+  return `${API_BASE_URL}${imagePath}`;
+};
+
 export default function CinemasManagement() {
   const navigate = useNavigate();
   const [cinemas, setCinemas] = useState([]);
@@ -88,7 +97,7 @@ export default function CinemasManagement() {
           <div key={cinema._id} className="bg-surface-500 p-4 rounded-lg border border-surface-400/30">
             {cinema.image && (
               <img
-                src={`${API_BASE_URL}${cinema.image}`}
+                src={getImageUrl(cinema.image)}
                 alt={cinema.name}
                 className="w-full h-32 object-cover rounded mb-3"
               />

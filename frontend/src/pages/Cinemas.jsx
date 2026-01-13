@@ -3,6 +3,15 @@ import { API_BASE_URL } from '../utils/api';
 import LoadingLogo from '../components/LoadingLogo';
 import Navbar from '../components/Navbar';
 
+// Helper function to get the correct image URL
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return '/uploads/movies/placeholder-cinema.jpg';
+  // If it's already a full URL (B2), return as is
+  if (imagePath.startsWith('http')) return imagePath;
+  // Otherwise, prepend API_BASE_URL for local images
+  return `${API_BASE_URL}${imagePath}`;
+};
+
 export default function Cinemas() {
   const [cinemas, setCinemas] = useState(null);
 
@@ -47,7 +56,7 @@ export default function Cinemas() {
               >
                 <div className="relative h-44 w-full overflow-hidden bg-gray-800">
                   <img
-                    src={c.image || '/uploads/movies/placeholder-cinema.jpg'}
+                    src={getImageUrl(c.image)}
                     alt={c.name}
                     className="w-full h-full object-cover"
                   />

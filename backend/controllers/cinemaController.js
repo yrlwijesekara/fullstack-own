@@ -7,8 +7,8 @@ exports.createCinema = async (req, res) => {
     if (!name || !city) return res.status(400).json({ message: 'Name and city are required' });
 
     let imagePath = '';
-    if (req.file && req.file.filename) {
-      imagePath = `/uploads/movies/${req.file.filename}`;
+    if (req.file && req.file.b2Url) {
+      imagePath = req.file.b2Url;
     }
 
     const cinema = new Cinema({ name, city, address, description, image: imagePath || undefined });
@@ -39,8 +39,8 @@ exports.updateCinema = async (req, res) => {
 
     let updateData = { name, city, address, description };
 
-    if (req.file && req.file.filename) {
-      updateData.image = `/uploads/movies/${req.file.filename}`;
+    if (req.file && req.file.b2Url) {
+      updateData.image = req.file.b2Url;
     }
 
     const cinema = await Cinema.findByIdAndUpdate(id, updateData, { new: true });
@@ -62,6 +62,12 @@ exports.deleteCinema = async (req, res) => {
     const cinema = await Cinema.findByIdAndDelete(id);
     if (!cinema) {
       return res.status(404).json({ message: 'Cinema not found' });
+    }
+
+    // Delete the image from B2 storage if it exists
+    if (cinema.image && cinema.image.startsWith('https://')) {
+      const { deleteFromB2 } = require('../config/b2Storage');
+      await deleteFromB2(cinema.image);
     }
 
     res.status(200).json({ message: 'Cinema deleted successfully' });

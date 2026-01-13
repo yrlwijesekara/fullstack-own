@@ -38,7 +38,7 @@ const upload = multer({
  * Middleware to upload file to B2 after multer processes it
  * Replaces the file object with B2 URL
  */
-const uploadToB2Middleware = async (req, res, next) => {
+const uploadToB2Middleware = (folder = 'movies') => async (req, res, next) => {
   try {
     if (!req.file) {
       return next();
@@ -51,7 +51,8 @@ const uploadToB2Middleware = async (req, res, next) => {
     const publicUrl = await uploadToB2(
       req.file.buffer,
       uniqueFileName,
-      req.file.mimetype
+      req.file.mimetype,
+      folder
     );
 
     // Replace file object with B2 URL for controller to use
@@ -100,9 +101,10 @@ const handleUploadError = (err, req, res, next) => {
  * Single file upload middleware with B2 upload
  * Use for uploading a single movie poster
  * @param {string} fieldName - The name of the form field (default: 'posterImage')
+ * @param {string} folder - The B2 folder to store the file in (default: 'movies')
  */
-const uploadSingle = (fieldName = 'posterImage') => {
-  return [upload.single(fieldName), handleUploadError, uploadToB2Middleware];
+const uploadSingle = (fieldName = 'posterImage', folder = 'movies') => {
+  return [upload.single(fieldName), handleUploadError, uploadToB2Middleware(folder)];
 };
 
 /**
@@ -110,19 +112,21 @@ const uploadSingle = (fieldName = 'posterImage') => {
  * Use for uploading multiple movie posters or images
  * @param {string} fieldName - The name of the form field (default: 'images')
  * @param {number} maxCount - Maximum number of files (default: 10)
+ * @param {string} folder - The B2 folder to store the files in (default: 'movies')
  */
-const uploadMultiple = (fieldName = 'images', maxCount = 10) => {
-  return [upload.array(fieldName, maxCount), handleUploadError, uploadToB2Middleware];
+const uploadMultiple = (fieldName = 'images', maxCount = 10, folder = 'movies') => {
+  return [upload.array(fieldName, maxCount), handleUploadError, uploadToB2Middleware(folder)];
 };
 
 /**
  * Multiple fields upload middleware with B2 upload
  * Use for uploading different types of files in different fields
  * @param {Array} fields - Array of field configurations
+ * @param {string} folder - The B2 folder to store the files in (default: 'movies')
  * Example: [{ name: 'poster', maxCount: 1 }, { name: 'stills', maxCount: 5 }]
  */
-const uploadFields = (fields) => {
-  return [upload.fields(fields), handleUploadError, uploadToB2Middleware];
+const uploadFields = (fields, folder = 'movies') => {
+  return [upload.fields(fields), handleUploadError, uploadToB2Middleware(folder)];
 };
 
 module.exports = {

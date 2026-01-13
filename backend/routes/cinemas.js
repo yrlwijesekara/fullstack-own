@@ -9,10 +9,10 @@ router.get('/', cinemaController.listCinemas);
 
 // Create - protect for admins if auth middleware available
 // Use field name 'image' for upload
-router.post('/', uploadSingle('image'), cinemaController.createCinema);
+router.post('/', uploadSingle('image', 'cinemas'), cinemaController.createCinema);
 
 // Update cinema
-router.put('/:id', uploadSingle('image'), cinemaController.updateCinema);
+router.put('/:id', uploadSingle('image', 'cinemas'), cinemaController.updateCinema);
 
 // Delete cinema
 router.delete('/:id', cinemaController.deleteCinema);

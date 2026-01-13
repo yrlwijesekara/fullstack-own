@@ -3,6 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../utils/api';
 import { toast } from 'react-toastify';
 
+// Helper function to get the correct image URL
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  // If it's already a full URL (B2), return as is
+  if (imagePath.startsWith('http')) return imagePath;
+  // Otherwise, prepend API_BASE_URL for local images
+  return `${API_BASE_URL}${imagePath}`;
+};
+
 export default function EditCinema() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -157,7 +166,7 @@ export default function EditCinema() {
             {currentImage && (
               <div className="mb-3">
                 <img
-                  src={`${API_BASE_URL}${currentImage}`}
+                  src={getImageUrl(currentImage)}
                   alt="Current cinema"
                   className="w-32 h-32 object-cover rounded-lg border border-surface-400"
                 />

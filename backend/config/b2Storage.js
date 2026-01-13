@@ -21,13 +21,14 @@ const b2Client = new S3Client({
  * @param {Buffer} fileBuffer - The file buffer to upload
  * @param {string} fileName - The name for the file in B2
  * @param {string} mimeType - The MIME type of the file
+ * @param {string} folder - The folder to store the file in (default: 'movies')
  * @returns {Promise<string>} The public URL of the uploaded file
  */
-const uploadToB2 = async (fileBuffer, fileName, mimeType) => {
+const uploadToB2 = async (fileBuffer, fileName, mimeType, folder = 'movies') => {
   try {
     const params = {
       Bucket: process.env.B2_BUCKET_NAME,
-      Key: `movies/${fileName}`, // Store all movie posters in 'movies' folder
+      Key: `${folder}/${fileName}`, // Store files in specified folder
       Body: fileBuffer,
       ContentType: mimeType,
       // Make the file publicly accessible
@@ -38,7 +39,7 @@ const uploadToB2 = async (fileBuffer, fileName, mimeType) => {
     await b2Client.send(command);
 
     // Construct the public URL
-    const publicUrl = `https://${process.env.B2_BUCKET_NAME}.${process.env.B2_ENDPOINT}/movies/${fileName}`;
+    const publicUrl = `https://${process.env.B2_BUCKET_NAME}.${process.env.B2_ENDPOINT}/${folder}/${fileName}`;
     
     return publicUrl;
   } catch (error) {
@@ -56,15 +57,25 @@ const deleteFromB2 = async (fileUrl) => {
   try {
     // Extract the file key from the URL
     let fileKey;
-    if (fileUrl.includes('movies/')) {
-      fileKey = fileUrl.split('movies/')[1];
-      if (fileKey.includes('?')) {
-        fileKey = fileKey.split('?')[0];
+    if (fileUrl.includes('/')) {
+      // Extract everything after the bucket name
+      const urlParts = fileUrl.split('/');
+      const bucketIndex = urlParts.findIndex(part => part.includes(process.env.B2_BUCKET_NAME));
+      if (bucketIndex !== -1) {
+        fileKey = urlParts.slice(bucketIndex + 1).join('/');
+      } else {
+        // Fallback: assume it's just the path after the domain
+        const domainPattern = new RegExp(`https://${process.env.B2_BUCKET_NAME}\.${process.env.B2_ENDPOINT}/`);
+        fileKey = fileUrl.replace(domainPattern, '');
       }
-      fileKey = `movies/${fileKey}`;
     } else {
       // If it's just a filename, assume it's in the movies folder
       fileKey = `movies/${fileUrl}`;
+    }
+
+    // Remove query parameters if any
+    if (fileKey.includes('?')) {
+      fileKey = fileKey.split('?')[0];
     }
 
     const params = {
