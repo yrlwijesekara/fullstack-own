@@ -35,29 +35,49 @@ const upload = multer({
 });
 
 /**
- * Middleware to upload file to B2 after multer processes it
- * Replaces the file object with B2 URL
+ * Middleware to upload file(s) to B2 after multer processes it
+ * Replaces the file object(s) with B2 URL(s)
  */
 const uploadToB2Middleware = (folder = 'movies') => async (req, res, next) => {
   try {
-    if (!req.file) {
-      return next();
+    // Handle single file upload
+    if (req.file) {
+      // Generate unique filename
+      const uniqueFileName = generateUniqueFileName(req.file.originalname);
+
+      // Upload to B2
+      const publicUrl = await uploadToB2(
+        req.file.buffer,
+        uniqueFileName,
+        req.file.mimetype,
+        folder
+      );
+
+      // Replace file object with B2 URL for controller to use
+      req.file.b2Url = publicUrl;
+      req.file.b2FileName = uniqueFileName;
     }
 
-    // Generate unique filename
-    const uniqueFileName = generateUniqueFileName(req.file.originalname);
+    // Handle multiple files upload
+    if (req.files && Array.isArray(req.files)) {
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        // Generate unique filename
+        const uniqueFileName = generateUniqueFileName(file.originalname);
 
-    // Upload to B2
-    const publicUrl = await uploadToB2(
-      req.file.buffer,
-      uniqueFileName,
-      req.file.mimetype,
-      folder
-    );
+        // Upload to B2
+        const publicUrl = await uploadToB2(
+          file.buffer,
+          uniqueFileName,
+          file.mimetype,
+          folder
+        );
 
-    // Replace file object with B2 URL for controller to use
-    req.file.b2Url = publicUrl;
-    req.file.b2FileName = uniqueFileName;
+        // Add B2 URL to file object
+        file.b2Url = publicUrl;
+        file.b2FileName = uniqueFileName;
+      }
+    }
 
     next();
   } catch (error) {

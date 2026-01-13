@@ -89,42 +89,25 @@ export default function UpdateSnacks() {
                 return;
             }
 
-            toast.loading("Processing images...");
+            toast.loading("Updating snack...");
 
-            // Upload each image file and collect URLs
-            const promisesArray = [];
+            // Create FormData to send files and data
+            const formData = new FormData();
+            formData.append('ProductId', productId.trim());
+            formData.append('ProductName', productName.trim());
+            formData.append('labelledPrice', parseFloat(labelledPrice));
+            formData.append('ProductPrice', parseFloat(productPrice));
+            formData.append('ProductQuantity', parseInt(productQuantity));
+            formData.append('ProductCategory', productCategory);
+            formData.append('ProductDescription', productDescription.trim());
+            formData.append('isAvailable', isAvailable);
 
+            // Append new image files (if any)
             for (let i = 0; i < productImage.length; i++) {
-                if (!productImage[i]) continue; // Skip null or undefined files
-                promisesArray.push(MediaUpload(productImage[i]));
+                if (productImage[i]) {
+                    formData.append('images', productImage[i]);
+                }
             }
-
-            let finalImages = [];
-
-            if (promisesArray.length > 0) {
-                // Upload new images
-                const responses = await Promise.all(promisesArray);
-                finalImages = responses;
-                toast.dismiss();
-                console.log("Uploaded new image URLs:", responses);
-            } else {
-                // No new images to upload, use existing images
-                finalImages = location.state?.ProductImage || [];
-                toast.dismiss();
-                console.log("Using existing images:", finalImages);
-            }
-
-            const snackData = {
-                ProductId: productId.trim(),
-                ProductName: productName.trim(),
-                labelledPrice: parseFloat(labelledPrice),
-                ProductPrice: parseFloat(productPrice),
-                ProductQuantity: parseInt(productQuantity),
-                ProductCategory: productCategory,
-                ProductImage: finalImages,
-                ProductDescription: productDescription.trim(),
-                isAvailable: isAvailable,
-            };
 
             // Loading toast for API call
             const loadingToast = toast.loading('Updating snack...');
@@ -136,10 +119,7 @@ export default function UpdateSnacks() {
                 response = await fetch(`${API_BASE_URL}/snacks/${id}`, {
                     method: 'PUT',
                     credentials: "include",
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(snackData),
+                    body: formData, // Send FormData instead of JSON
                 });
                 
                 if (!response.ok) {
@@ -159,10 +139,9 @@ export default function UpdateSnacks() {
                     return;
                 }
                 
-                response = await axios.put(`${API_BASE_URL}/snacks/${id}`, snackData, {
+                response = await axios.put(`${API_BASE_URL}/snacks/${id}`, formData, {
                     headers: {
                         Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
                     },
                 });
                 

@@ -79,37 +79,25 @@ export default function AddSnacks() {
                 return;
             }
 
-            toast.loading("Uploading images...");
+            toast.loading("Creating snack...");
 
-            // Upload each image file and collect URLs
-            const promisesArray = [];
+            // Create FormData to send files and data
+            const formData = new FormData();
+            formData.append('ProductId', productId.trim());
+            formData.append('ProductName', productName.trim());
+            formData.append('labelledPrice', parseFloat(labelledPrice));
+            formData.append('ProductPrice', parseFloat(productPrice));
+            formData.append('ProductQuantity', parseInt(productQuantity));
+            formData.append('ProductCategory', productCategory);
+            formData.append('ProductDescription', productDescription.trim());
+            formData.append('isAvailable', isAvailable === 'true');
 
+            // Append image files
             for (let i = 0; i < productImage.length; i++) {
-                if (!productImage[i]) continue; // Skip null or undefined files
-                promisesArray.push(MediaUpload(productImage[i]));
+                if (productImage[i]) {
+                    formData.append('images', productImage[i]);
+                }
             }
-
-            if (promisesArray.length === 0) {
-                toast.error("No valid images to upload");
-                setUploading(false);
-                return;
-            }
-
-            const responses = await Promise.all(promisesArray);
-            toast.dismiss();
-            console.log("Uploaded image URLs:", responses);
-
-            const snackData = {
-                ProductId: productId.trim(),
-                ProductName: productName.trim(),
-                labelledPrice: parseFloat(labelledPrice),
-                ProductPrice: parseFloat(productPrice),
-                ProductQuantity: parseInt(productQuantity),
-                ProductCategory: productCategory,
-                ProductImage: responses, // Use the array of image URLs from uploads
-                ProductDescription: productDescription.trim(),
-                isAvailable: isAvailable === 'true',
-            };
 
             // Loading toast for API call
             const loadingToast = toast.loading('Adding snack...');
@@ -121,10 +109,7 @@ export default function AddSnacks() {
                 response = await fetch(`${API_BASE_URL}/snacks`, {
                     method: 'POST',
                     credentials: "include",
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(snackData),
+                    body: formData, // Send FormData instead of JSON
                 });
                 
                 if (!response.ok) {
@@ -144,14 +129,14 @@ export default function AddSnacks() {
                     return;
                 }
                 
-                response = await axios.post(`${API_BASE_URL}/snacks`, snackData, {
+                response = await fetch(`${API_BASE_URL}/snacks`, {
+                    method: 'POST',
+                    credentials: "include",
                     headers: {
                         Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
                     },
+                    body: formData,
                 });
-                
-                console.log("Snack added successfully with token");
             }
 
             toast.dismiss(loadingToast);
