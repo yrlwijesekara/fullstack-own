@@ -6,6 +6,7 @@ import SnackImageSlider from "../components/snackimageslider";
 import Navbar from "../components/Navbar";
 import BackButton from "../components/BackButton";
 import { addToCart as addToCartUtil, getCart as getCartUtil } from "../utils/cart";
+import { API_BASE_URL } from "../utils/api";
 
 export default function SnackOverviewPage() {
     const params = useParams();
@@ -23,18 +24,17 @@ export default function SnackOverviewPage() {
 
     const handleBuyNow = () => {
         addToCartUtil(snack, 1);
-        navigate('/checkout', { state: { items: getCartUtil() } });
+        navigate('/cart');
     };
 
     useEffect(() => {
         if (status === 'loading') {
-            const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5008';
-            const apiUrl = `${apiBaseUrl}/api/snacks/${params.snackid}`;
+            const apiUrl = `${API_BASE_URL}/snacks/${params.snackid}`;
             console.log('API URL:', apiUrl);
             axios.get(apiUrl)
                 .then((response) => {
                     console.log('Snack data:', response.data); // Debug log
-                    setSnack(response.data.snack); // Extract snack from nested response
+                    setSnack(response.data.snack || response.data); // Handle both nested and direct response
                     setStatus('loaded');
                 }).catch((error) => {
                     console.error('Error fetching snack details:', error);
@@ -66,35 +66,61 @@ export default function SnackOverviewPage() {
             </div>
             <div className="w-full lg:w-[49%] xl:w-[50%] flex flex-col justify-start items-start p-2 sm:p-4 md:p-6 lg:p-8 text-white">
                 <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 md:mb-4">{snack.ProductName}</h1>
-                <p className="text-gray-400 text-sm sm:text-base md:text-lg lg:text-xl mb-1 sm:mb-2">{snack.ProductCategory}</p>
-                
-                
-                <div className="mb-3 sm:mb-4 lg:mb-6">
+                <div className="mb-4">
+                    <span className="inline-block bg-purple-600/20 text-purple-300 text-sm sm:text-base md:text-lg font-medium px-4 py-2 rounded-full border border-purple-500/30">
+                        {snack.ProductCategory}
+                    </span>
+                </div>
+
+
+                <div className="mb-6 sm:mb-8">
                     {snack.labelledPrice > snack.ProductPrice ? (
-                        <>
-                            <span className="line-through text-gray-500 text-sm sm:text-base md:text-lg lg:text-xl">Rs {snack.labelledPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> 
-                            <span className="text-purple-400 ml-2 sm:ml-3 font-semibold text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl">Rs {snack.ProductPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        </>
+                        <div className="flex flex-col gap-2">
+                            <span className="text-gray-400 text-lg sm:text-xl md:text-2xl line-through">
+                                Rs {snack.labelledPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </span>
+                            <div className="flex items-center gap-3">
+                                <span className="text-purple-400 font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
+                                    Rs {snack.ProductPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </span>
+                                <span className="bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">
+                                    {Math.round(((snack.labelledPrice - snack.ProductPrice) / snack.labelledPrice) * 100)}% OFF
+                                </span>
+                            </div>
+                        </div>
                     ) : (
-                        <span className="text-purple-400 font-semibold text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl">Rs {snack.ProductPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span className="text-purple-400 font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
+                            Rs {snack.ProductPrice?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
                     )}
                 </div>
                 
                 <p className="text-gray-300 mb-4 sm:mb-5 lg:mb-6 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed break-words word-wrap overflow-wrap-anywhere hyphens-auto max-w-full">{snack.ProductDescription || 'No description available'}</p>
                 
-                <div className="mb-4 sm:mb-5 lg:mb-6">
-                    <p className="text-gray-400 text-xs sm:text-sm md:text-base">Stock: <span className="text-white font-semibold">{snack.ProductQuantity} items</span></p>
+                <div className="mb-6 sm:mb-8">
+                    <div className="flex items-center gap-3">
+                        <span className="text-gray-400 text-sm sm:text-base">Stock:</span>
+                        <span className={`text-sm font-medium px-3 py-1 rounded-full ${
+                            snack.ProductQuantity > 20
+                                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                : snack.ProductQuantity > 5
+                                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                                : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                        }`}>
+                            {snack.ProductQuantity} items available
+                        </span>
+                    </div>
                 </div>
-               
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-6 w-full">
-                    <button 
+
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full">
+                    <button
                         onClick={handleAddToCart}
-                        className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 lg:py-3 lg:px-8 rounded-lg transition-colors text-sm sm:text-base lg:text-lg w-full sm:w-auto">
+                        className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple-500/25 hover:scale-105 text-sm sm:text-base lg:text-lg w-full sm:w-auto border border-purple-500/30">
                         Add to Cart
                     </button>
-                    <button 
+                    <button
                         onClick={handleBuyNow}
-                        className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 lg:py-3 lg:px-8 rounded-lg transition-colors text-sm sm:text-base lg:text-lg w-full sm:w-auto">
+                        className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-green-500/25 hover:scale-105 text-sm sm:text-base lg:text-lg w-full sm:w-auto border border-green-500/30">
                         Buy Now
                     </button>
                 </div>

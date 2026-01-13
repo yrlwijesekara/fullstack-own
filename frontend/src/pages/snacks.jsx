@@ -121,45 +121,9 @@ export default function Snacks() {
           </div>
         ) : (
           Array.isArray(filteredSnacks) && filteredSnacks.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8 p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 sm:gap-8 p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 max-w-7xl mx-auto">
               {filteredSnacks.map((snack) => (
-                <div key={snack._id || snack.ProductId} className="bg-surface-600 p-4 rounded-lg">
-                  <div className="flex flex-col items-center">
-                    {snack.ProductImage && snack.ProductImage[0] ? (
-                      <img src={snack.ProductImage[0]} alt={snack.ProductName} className="w-full h-48 object-cover rounded mb-3" />
-                    ) : (
-                      <div className="w-full h-48 bg-surface-500 rounded mb-3 flex items-center justify-center">No Image</div>
-                    )}
-                    <div className="w-full">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-bold">{snack.ProductName}</h3>
-                        <div className="text-sm text-text-secondary">{snack.ProductCategory}</div>
-                      </div>
-                      <div className="mt-2 flex items-center justify-between">
-                        <div>
-                          {snack.labelledPrice > snack.ProductPrice ? (
-                            <div>
-                              <span className="line-through text-gray-400">Rs {snack.labelledPrice}</span>
-                              <span className="ml-2 font-semibold">Rs {snack.ProductPrice}</span>
-                            </div>
-                          ) : (
-                            <div className="font-semibold">Rs {snack.ProductPrice}</div>
-                          )}
-                        </div>
-                        <div>
-                          <button onClick={() => {
-                            addToCart(snack, 1);
-                            if (returnTo) {
-                              navigate(returnTo);
-                            } else {
-                              toast.success('Added to cart');
-                            }
-                          }} className="bg-primary-500 text-white px-3 py-1 rounded">Add to cart</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <SnackCard key={snack._id || snack.ProductId} snack={snack} />
               ))}
             </div>
           ) : searchTerm ? (

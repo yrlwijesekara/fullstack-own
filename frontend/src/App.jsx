@@ -32,6 +32,7 @@ import Snacks from './pages/snacks';
 import Cart from './pages/Cart';
 import Receipt from './pages/Receipt';
 import Orders from './pages/Orders';
+import SnackOverviewPage from './pages/snackoverviewpage';
 import { AdminOnlyRoute } from './components/ProtectedRoute';
 import { Navigate } from 'react-router-dom';
 
@@ -61,6 +62,7 @@ function AppContent() {
       <Route path="/movies/:id/showtimes" element={<MovieShowtimes />} />
       <Route path="/showtimes/:id/book" element={<BookShowtime />} />
       <Route path="/snacks" element={<Snacks />} />
+      <Route path="/snacksoverview/:snackid" element={<SnackOverviewPage />} />
       <Route path="/concessions" element={<Navigate to="/snacks" replace />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/receipt" element={<Receipt />} />
