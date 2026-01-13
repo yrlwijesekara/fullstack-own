@@ -74,10 +74,10 @@ export default function Cart() {
       }
 
       const data = await finalRes.json();
-      // data: { bookings, purchase, receipt: base64 }
+      // data: { order, receipt: base64 }
       toast.success('Checkout completed');
       // navigate to receipt page and pass data via location state; also save to sessionStorage as fallback
-      const receiptPayload = { receipt: data.receipt || null, bookings: data.bookings || [], purchase: data.purchase || null };
+      const receiptPayload = { order: data.order, receipt: data.receipt || null };
       try { sessionStorage.setItem('lastReceipt', JSON.stringify(receiptPayload)); } catch (e) { /* ignore */ }
       // clear client cart and navigate to receipt
       clearCart();

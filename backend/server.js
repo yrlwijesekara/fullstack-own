@@ -18,6 +18,7 @@ const seatRoutes = require("./routes/SeatRoutes");
 const cinemaRoutes = require("./routes/cinemas");
 const purchaseRoutes = require("./routes/purchaseRoute");
 const checkoutRoutes = require("./routes/checkout");
+const ordersRoutes = require("./routes/orders");
 
 // Import models
 const Show = require("./models/Show");
@@ -61,6 +62,7 @@ app.use('/api/cinemas', cinemaRoutes);
 app.use('/api/snacks', snackRoutes);
 app.use('/api/purchases', purchaseRoutes);
 app.use('/api/checkout', checkoutRoutes);
+app.use('/api/orders', ordersRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

@@ -6,8 +6,7 @@ import toast from 'react-hot-toast';
 import { useNavigate } from '../hooks/useNavigate';
 
 export default function OrdersPage() {
-  const [bookings, setBookings] = useState([]);
-  const [purchases, setPurchases] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -16,13 +15,9 @@ export default function OrdersPage() {
     async function fetchOrders() {
       setLoading(true);
       try {
-        const resB = await fetch(`${API_BASE_URL}/bookings/me`, { credentials: 'include' });
-        const dataB = resB.ok ? await resB.json() : null;
-        if (mounted && dataB && dataB.bookings) setBookings(dataB.bookings);
-
-        const resP = await fetch(`${API_BASE_URL}/purchases`, { credentials: 'include' });
-        const dataP = resP.ok ? await resP.json() : null;
-        if (mounted && dataP && dataP.purchases) setPurchases(dataP.purchases);
+        const res = await fetch(`${API_BASE_URL}/orders`, { credentials: 'include' });
+        const data = res.ok ? await res.json() : null;
+        if (mounted && data && data.orders) setOrders(data.orders);
       } catch (err) {
         console.error('Fetch orders error:', err);
       } finally {
@@ -39,7 +34,10 @@ export default function OrdersPage() {
       const res = await fetch(`${API_BASE_URL}/bookings/${id}`, { method: 'DELETE', credentials: 'include' });
       if (!res.ok) throw new Error('Failed to cancel booking');
       toast.success('Booking canceled');
-      setBookings((prev) => prev.map(b => (b._id === id ? { ...b, canceled: true } : b)));
+      setOrders((prev) => prev.map(o => ({
+        ...o,
+        bookings: (o.bookings || []).map(b => (b._id === id ? { ...b, canceled: true } : b)),
+      })));
     } catch (err) {
       console.error(err);
       toast.error(err.message || 'Cancel failed');
@@ -52,7 +50,7 @@ export default function OrdersPage() {
       const res = await fetch(`${API_BASE_URL}/purchases/${id}`, { method: 'DELETE', credentials: 'include' });
       if (!res.ok) throw new Error('Failed to cancel purchase');
       toast.success('Purchase canceled and items restocked');
-      setPurchases((prev) => prev.map(p => (p._id === id ? { ...p, canceled: true } : p)));
+      setOrders((prev) => prev.map(o => (o.purchase && o.purchase._id === id ? { ...o, purchase: { ...o.purchase, canceled: true } } : o)));
     } catch (err) {
       console.error(err);
       toast.error(err.message || 'Cancel failed');
@@ -67,50 +65,64 @@ export default function OrdersPage() {
         {loading ? (
           <div className="p-6 bg-surface-600 rounded"><LoadingLogo size={40} text="Loading orders..." /></div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-surface-600 p-4 rounded">
-              <h3 className="font-semibold mb-2">Bookings</h3>
-              {bookings.length === 0 ? (
-                <div className="text-text-secondary">No bookings yet.</div>
-              ) : (
-                <ul className="space-y-3">
-                  {bookings.map(b => (
-                    <li key={b._id} className="p-3 bg-background-800 rounded flex justify-between items-center">
+          <div className="space-y-4">
+            {orders.length === 0 ? (
+              <div className="p-4 bg-surface-600 rounded">No orders yet.</div>
+            ) : (
+              <ul className="space-y-4">
+                {orders.map(o => (
+                  <li key={o._id} className="p-4 bg-surface-600 rounded">
+                    <div className="flex justify-between items-start">
                       <div>
-                        <div className="font-medium">{b.showtimeId?.movieTitle || (b.showtimeInfo?.movieTitle) || 'Showtime'}</div>
-                        <div className="text-text-secondary text-sm">Seats: {b.seats?.join(', ')}</div>
-                        <div className="text-text-secondary text-sm">{b.canceled ? 'Canceled' : new Date(b.createdAt).toLocaleString()}</div>
+                        <div className="font-semibold">Order {o._id}</div>
+                        <div className="text-text-secondary text-sm">{new Date(o.createdAt).toLocaleString()}</div>
+                        <div className="text-text-secondary text-sm">Total: {o.totalPrice}</div>
                       </div>
-                      <div className="flex flex-col items-end gap-2">
-                        {!b.canceled && <button onClick={() => cancelBooking(b._id)} className="px-3 py-1 bg-red-600 text-white rounded">Cancel</button>}
+                      <div className="text-right">
+                        {/* could add order-level actions here */}
                       </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+                    </div>
 
-            <div className="bg-surface-600 p-4 rounded">
-              <h3 className="font-semibold mb-2">Purchases</h3>
-              {purchases.length === 0 ? (
-                <div className="text-text-secondary">No purchases yet.</div>
-              ) : (
-                <ul className="space-y-3">
-                  {purchases.map(p => (
-                    <li key={p._id} className="p-3 bg-background-800 rounded flex justify-between items-center">
+                    <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <div className="font-medium">Purchase {p._id}</div>
-                        <div className="text-text-secondary text-sm">Items: {p.items?.map(i => `${i.name} x${i.quantity}`).join(', ')}</div>
-                        <div className="text-text-secondary text-sm">{p.canceled ? 'Canceled' : new Date(p.createdAt).toLocaleString()}</div>
+                        <div className="font-medium mb-1">Bookings</div>
+                        {(!o.bookings || o.bookings.length === 0) ? (
+                          <div className="text-text-secondary">No bookings in this order.</div>
+                        ) : (
+                          <ul className="space-y-2">
+                            {o.bookings.map(b => (
+                              <li key={b._id} className="p-2 bg-background-800 rounded flex justify-between items-center">
+                                <div>
+                                  <div className="font-medium">{b.showtimeId?.movieId?.title || b.showtimeInfo?.movieTitle || 'Showtime'}</div>
+                                  <div className="text-text-secondary text-sm">Seats: {b.seats?.join(', ')}</div>
+                                  <div className="text-text-secondary text-sm">{b.canceled ? 'Canceled' : new Date(b.createdAt).toLocaleString()}</div>
+                                </div>
+                                <div>
+                                  {!b.canceled && <button onClick={() => cancelBooking(b._id)} className="px-3 py-1 bg-red-600 text-white rounded">Cancel</button>}
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
-                      <div className="flex flex-col items-end gap-2">
-                        {!p.canceled && <button onClick={() => cancelPurchase(p._id)} className="px-3 py-1 bg-red-600 text-white rounded">Cancel</button>}
+
+                      <div>
+                        <div className="font-medium mb-1">Snacks / Purchases</div>
+                        {(!o.purchase) ? (
+                          <div className="text-text-secondary">No snacks in this order.</div>
+                        ) : (
+                          <div className="p-2 bg-background-800 rounded">
+                            <div className="text-text-secondary text-sm">Items: {o.purchase.items?.map(i => `${i.name} x${i.quantity}`).join(', ')}</div>
+                            <div className="text-text-secondary text-sm">{o.purchase.canceled ? 'Canceled' : new Date(o.purchase.createdAt).toLocaleString()}</div>
+                            {!o.purchase.canceled && <div className="mt-2"><button onClick={() => cancelPurchase(o.purchase._id)} className="px-3 py-1 bg-red-600 text-white rounded">Cancel Purchase</button></div>}
+                          </div>
+                        )}
                       </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 

@@ -11,7 +11,7 @@ export default function ReceiptPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (location.state && (location.state.receipt || location.state.bookings)) {
+    if (location.state && (location.state.receipt || location.state.order)) {
       setPayload(location.state);
       setLoading(false);
       return;
@@ -51,8 +51,8 @@ export default function ReceiptPage() {
     );
   }
 
-  const { bookings = [], purchase = null, receipt } = payload;
-  const total = purchase ? purchase.totalPrice : bookings.reduce((s, b) => s + (b.total || 0), 0);
+  const { order = null, receipt } = payload;
+  const total = order ? order.totalPrice : 0;
 
   return (
     <div className="min-h-screen bg-background-900 text-text-primary">
@@ -62,26 +62,34 @@ export default function ReceiptPage() {
         <p className="text-text-secondary mb-4">Your booking and purchase were created successfully. Download your receipt below.</p>
 
         <div className="bg-surface-600 p-4 rounded mb-4">
+          <h2 className="font-semibold mb-2">Order Details</h2>
+          <div>Order ID: {order._id}</div>
+          <div className="text-lg font-bold">Total: {new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(order.totalPrice)}</div>
+        </div>
+
+        <div className="bg-surface-600 p-4 rounded mb-4">
           <h2 className="font-semibold mb-2">Bookings</h2>
-          {bookings.length === 0 ? (
-            <div className="text-text-secondary">No bookings found.</div>
+          {(!order.bookings || order.bookings.length === 0) ? (
+            <div className="text-text-secondary">No bookings in this order.</div>
           ) : (
             <ul className="list-disc list-inside space-y-2">
-              {bookings.map((b) => (
+              {order.bookings.map((b) => (
                 <li key={b._id} className="text-sm">
                   <div><strong>Booking {b._id}</strong></div>
-                  <div className="text-text-secondary">{b.showtimeInfo?.movieTitle || ''} — Seats: {b.seats?.join(', ')}</div>
+                  <div className="text-text-secondary">{b.showtimeId?.movieId?.title || ''} — Seats: {b.seats?.join(', ')}</div>
                 </li>
               ))}
             </ul>
           )}
         </div>
 
-        {purchase && (
+        {order.purchase && (
           <div className="bg-surface-600 p-4 rounded mb-4">
-            <h2 className="font-semibold mb-2">Purchase</h2>
-            <div>Purchase ID: {purchase._id}</div>
-            <div className="text-lg font-bold">Total: {new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(purchase.totalPrice)}</div>
+            <h2 className="font-semibold mb-2">Snacks Purchase</h2>
+            <div>Purchase ID: {order.purchase._id}</div>
+            <div className="text-text-secondary">
+              Items: {order.purchase.items?.map(i => `${i.name} x${i.quantity}`).join(', ')}
+            </div>
           </div>
         )}
 

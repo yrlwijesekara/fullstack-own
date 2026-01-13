@@ -4,6 +4,7 @@ const Booking = require('../models/Booking');
 const Showtime = require('../models/Showtime');
 const Snack = require('../models/Snack');
 const Purchase = require('../models/Purchase');
+const Order = require('../models/Order');
 
 // Helper to render a PDF receipt into base64
 function generateReceiptBase64({ user, bookings = [], purchase = null }) {
@@ -86,6 +87,8 @@ exports.checkout = async (req, res) => {
     const snackItems = items.filter(i => i.type !== 'ticket');
 
     const createdBookings = [];
+    const createdBookingIds = [];
+    let bookingsTotal = 0;
 
     // Process tickets: validate showtime and seats, reserve seats, create bookings
     for (const t of ticketItems) {
@@ -150,6 +153,8 @@ exports.checkout = async (req, res) => {
         cinemaName: showtime.cinemaId || '',
       };
       createdBookings.push(bd);
+      createdBookingIds.push(bookingDocs[0]._id);
+      bookingsTotal += Number(totalPrice || 0);
     }
 
     let purchaseDoc = null;
@@ -202,6 +207,17 @@ exports.checkout = async (req, res) => {
       ], { session });
       purchaseDoc = purchaseDocs[0];
     }
+    // Create Order linking bookings and purchase within the same transaction
+    const orderTotal = bookingsTotal + (purchaseDoc ? Number(purchaseDoc.totalPrice || 0) : 0);
+    const orderDocs = await Order.create([
+      {
+        userId: user._id,
+        bookings: createdBookingIds,
+        purchase: purchaseDoc ? purchaseDoc._id : null,
+        totalPrice: orderTotal,
+      },
+    ], { session });
+    const orderDoc = orderDocs[0];
 
     await session.commitTransaction();
     session.endSession();
@@ -209,7 +225,10 @@ exports.checkout = async (req, res) => {
     // Generate PDF receipt
     const receiptBase64 = await generateReceiptBase64({ user, bookings: createdBookings, purchase: purchaseDoc });
 
-    res.status(201).json({ success: true, bookings: createdBookings, purchase: purchaseDoc, receipt: receiptBase64 });
+    // Populate order for response
+    const populatedOrder = await Order.findById(orderDoc._id).populate({ path: 'bookings', populate: { path: 'showtimeId', populate: { path: 'movieId' } } }).populate('purchase');
+
+    res.status(201).json({ success: true, order: populatedOrder, receipt: receiptBase64 });
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
