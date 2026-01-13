@@ -21,6 +21,7 @@ import CreateShowtime from './pages/admin/CreateShowtime';
 import UserManagement from './pages/admin/UserManagement';
 import SnackManagement from './pages/admin/snackmanagement';
 import AddSnacks from './pages/admin/addsnacks';
+import UpdateSnacks from './pages/admin/updatesnacks';
 import OrderManagement from './pages/admin/OrderManagement';
 import AdminLayout from './pages/admin/AdminLayout';
 import Cinemas from './pages/Cinemas';
@@ -78,6 +79,7 @@ function AppContent() {
         <Route path="user-management" element={<UserManagement />} />
         <Route path="snack-management" element={<SnackManagement />} />
         <Route path="addsnack" element={<AddSnacks />} />
+        <Route path="updatesnack/:id" element={<UpdateSnacks />} />
         <Route path="order-management" element={<OrderManagement />} />
       </Route>
 

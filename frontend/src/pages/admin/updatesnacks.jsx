@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -26,8 +26,46 @@ export default function UpdateSnacks() {
     const [productDescription, setProductDescription] = useState(location.state?.ProductDescription );
     const [isAvailable, setIsAvailable] = useState(location.state?.isAvailable);
     const [uploading, setUploading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     
+    // Fetch snack data if not available in location state
+    useEffect(() => {
+        const fetchSnackData = async () => {
+            if (!location.state && id) {
+                setLoading(true);
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await axios.get(`${API_BASE_URL}/snacks/${id}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                    
+                    const snack = response.data;
+                    setProductId(snack.ProductId);
+                    setProductName(snack.ProductName);
+                    setLabelledPrice(snack.labelledPrice);
+                    setProductPrice(snack.ProductPrice);
+                    setProductQuantity(snack.ProductQuantity);
+                    setProductCategory(snack.ProductCategory);
+                    setProductDescription(snack.ProductDescription);
+                    setIsAvailable(snack.isAvailable);
+                    setProductImage(snack.ProductImage || []);
+                    
+                } catch (error) {
+                    console.error('Error fetching snack data:', error);
+                    toast.error('Failed to load snack data');
+                    navigate('/admin-dashboard/snack-management');
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+        
+        fetchSnackData();
+    }, [id, location.state, navigate]);
 
   
 
@@ -188,6 +226,17 @@ export default function UpdateSnacks() {
     }
 
 
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-background-900 text-text-primary flex justify-center items-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500 mb-4 mx-auto"></div>
+                    <p className="text-text-secondary text-lg">Loading snack data...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-background-900 text-text-primary flex justify-center items-center">
             
@@ -270,12 +319,89 @@ export default function UpdateSnacks() {
                 </div>
                 
                 <div className="flex justify-end gap-4">
+                    <button 
+                        onClick={async () => {
+                            const confirmDelete = window.confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`);
+                            if (!confirmDelete) return;
+
+                            if (!user) {
+                                toast.error('Please login to delete snacks');
+                                navigate('/login');
+                                return;
+                            }
+
+                            try {
+                                const deleteEndpoint = id ? 
+                                    `${API_BASE_URL}/snacks/${id}` : 
+                                    `${API_BASE_URL}/snacks/${productId}`;
+                                
+                                console.log('Deleting snack:', deleteEndpoint);
+                                
+                                let response;
+                                
+                                // Try with credentials first (httpOnly cookies)
+                                try {
+                                    response = await fetch(deleteEndpoint, {
+                                        method: 'DELETE',
+                                        credentials: "include",
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                    });
+                                    
+                                    if (!response.ok) {
+                                        throw new Error('Cookie auth failed');
+                                    }
+                                    
+                                    console.log("Snack deleted successfully with cookies");
+                                } catch (cookieError) {
+                                    console.log('Cookie auth failed, trying with token:', cookieError.message);
+                                    
+                                    // Fallback to localStorage token
+                                    const token = localStorage.getItem('token');
+                                    if (!token) {
+                                        toast.error('Authentication required. Please log in again.');
+                                        navigate('/login');
+                                        return;
+                                    }
+                                    
+                                    response = await axios.delete(deleteEndpoint, {
+                                        headers: {
+                                            Authorization: `Bearer ${token}`,
+                                        },
+                                    });
+                                    
+                                    console.log("Snack deleted successfully with token");
+                                }
+                                
+                                toast.success('Snack deleted successfully');
+                                navigate('/admin-dashboard/snack-management');
+                                
+                            } catch (error) {
+                                console.error("Error deleting snack:", error);
+                                
+                                if (error.response?.status === 401 || error.status === 401) {
+                                    toast.error('Authentication failed. Please login again.');
+                                    navigate('/login');
+                                } else if (error.response?.status === 404 || error.status === 404) {
+                                    toast.error('Snack not found.');
+                                } else if (error.response?.data?.message) {
+                                    toast.error(error.response.data.message);
+                                } else {
+                                    toast.error('Error deleting snack. Please try again.');
+                                }
+                            }
+                        }}
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                    >
+                        Delete Snack
+                    </button>
                     <Link to="/admin-dashboard/snack-management" className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
                         Cancel
                     </Link>
-                    <Link onClick={handleSubmit} className="bg-primary-500 hover:bg-primary-600 text-white font-bold py-2 px-4 rounded">
-                        Update Snack
-                    </Link>
+                    <button onClick={handleSubmit} disabled={uploading} className="bg-primary-500 hover:bg-primary-600 disabled:bg-primary-300 text-white font-bold py-2 px-4 rounded">
+                        {uploading ? 'Updating...' : 'Update Snack'}
+                    </button>
                 </div>
                 
                 

@@ -50,7 +50,6 @@ export default function SnackManagement() {
                             console.log('Unexpected response structure:', axiosResponse.data);
                         }
                         
-                        toast.success('Snacks loaded from database');
                         setIsLoading(false);
                         return;
                     }
@@ -68,8 +67,6 @@ export default function SnackManagement() {
                 } else {
                     console.log('Unexpected response structure:', data);
                 }
-                
-                toast.success('Snacks loaded from database');
                 
             } catch (error) {
                 console.error('Error fetching snacks:', error);
@@ -193,7 +190,7 @@ export default function SnackManagement() {
                                         <button 
                                             onClick={() => {
                                                 const snackId = snack._id || snack.ProductId;
-                                                navigate(`/admin/updatesnack/${snackId}`, {
+                                                navigate(`/admin-dashboard/updatesnack/${snackId}`, {
                                                     state: snack 
                                                 });
                                             }}
@@ -203,6 +200,10 @@ export default function SnackManagement() {
                                         </button>
                                         <button 
                                             onClick={async () => {
+                                                // Add confirmation dialog
+                                                const confirmDelete = window.confirm(`Are you sure you want to delete "${snack.ProductName}"? This action cannot be undone.`);
+                                                if (!confirmDelete) return;
+
                                                 if (!user) {
                                                     toast.error('Please login to delete snacks');
                                                     navigate('/login');
@@ -291,7 +292,7 @@ export default function SnackManagement() {
             </div>
          </div>
 
-         <Link to="/admin/addsnack" className="fixed right-[60px] bottom-[60px] bg-primary-500 hover:bg-primary-600 text-white font-bold p-4 rounded-full shadow-lg ">
+         <Link to="/admin-dashboard/addsnack" className="fixed right-[60px] bottom-[60px] bg-primary-500 hover:bg-primary-600 text-white font-bold p-4 rounded-full shadow-lg ">
              Add New Snack
          </Link>
         </div>
