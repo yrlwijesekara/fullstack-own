@@ -131,13 +131,7 @@ export default function MovieShowtimes() {
       return;
     }
 
-    // If only one cinema exists, use it automatically
-    if (cinemas.length === 1) {
-      window.location.href = `/showtimes/${showtimeId}/book?cinemaId=${cinemas[0]._id}`;
-      return;
-    }
-
-    // Otherwise prompt the user to choose a cinema before booking
+    // Always prompt the user to choose a cinema before booking
     setBookingShowtimeId(showtimeId);
     setTempCinemaSelection("");
     setShowCinemaPicker(true);
@@ -145,7 +139,11 @@ export default function MovieShowtimes() {
 
   const confirmCinemaAndBook = () => {
     if (!bookingShowtimeId) return setShowCinemaPicker(false);
-    const suffix = tempCinemaSelection ? `?cinemaId=${tempCinemaSelection}` : "";
+    if (!tempCinemaSelection) {
+      alert('Please select a cinema to proceed with booking');
+      return;
+    }
+    const suffix = `?cinemaId=${tempCinemaSelection}`;
     window.location.href = `/showtimes/${bookingShowtimeId}/book${suffix}`;
     setShowCinemaPicker(false);
   };
@@ -370,6 +368,7 @@ export default function MovieShowtimes() {
         onClose={() => setShowCinemaPicker(false)}
         onConfirm={confirmCinemaAndBook}
         confirmText="Book"
+        confirmDisabled={!tempCinemaSelection}
       >
         <div className="mb-4 text-text-secondary">Please choose a cinema to continue booking.</div>
         <div>

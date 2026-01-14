@@ -21,6 +21,9 @@ const hallSchema = new mongoose.Schema(
     cinemaId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Cinema',
+      required: function() {
+        return this.isNew; // Only require for new documents
+      },
       index: true,
     },
     name: {

@@ -25,12 +25,12 @@ const generateSeatGrid = (rows, cols) => {
 // @access  Private/Admin
 exports.createHall = async (req, res) => {
   try {
-    const { name, description, status, layout } = req.body;
+    const { name, description, status, layout, cinemaId } = req.body;
 
     // Validate required fields
-    if (!name || !layout || !layout.rows || !layout.cols) {
+    if (!name || !layout || !layout.rows || !layout.cols || !cinemaId) {
       return res.status(400).json({ 
-        message: 'Name, rows, and columns are required' 
+        message: 'Name, rows, columns, and cinema are required' 
       });
     }
 
@@ -44,6 +44,7 @@ exports.createHall = async (req, res) => {
     // Create hall with partitions
     const hall = await Hall.create({
       name,
+      cinemaId,
       description,
       status: status || 'active',
       layout: {

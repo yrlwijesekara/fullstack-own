@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Showtime = require("../models/Showtime");
 const Movie = require("../models/Movie");
 const Hall = require("../models/Hall");
+const Cinema = require("../models/Cinema");
 const { MongoMemoryServer } = require("mongodb-memory-server");
 
 let mongoServer;
@@ -21,11 +22,12 @@ beforeEach(async () => {
   await Showtime.deleteMany({});
   await Movie.deleteMany({});
   await Hall.deleteMany({});
+  await Cinema.deleteMany({});
 });
 
 describe("Showtime Model", () => {
   test("should create a showtime successfully", async () => {
-    // Create test movie and hall
+    // Create test movie, hall, and cinema
     const movie = await Movie.create({
       title: "Test Movie",
       description: "This is a test movie description used in unit tests. It is sufficiently long.",
@@ -34,15 +36,23 @@ describe("Showtime Model", () => {
       language: "English",
     });
 
+    const cinema = await Cinema.create({
+      name: "Test Cinema",
+      city: "Test City",
+      address: "123 Test St",
+    });
+
     const hall = await Hall.create({
       name: "Test Hall",
       layout: { rows: 10, cols: 10 },
       totalSeats: 100,
+      cinemaId: cinema._id,
     });
 
     const showtimeData = {
       movieId: movie._id,
       hallId: hall._id,
+      cinemaId: cinema._id,
       startTime: new Date("2024-12-25T18:00:00Z"),
       endTime: new Date("2024-12-25T20:00:00Z"),
       date: new Date("2024-12-25"),
@@ -72,15 +82,23 @@ describe("Showtime Model", () => {
       language: "English",
     });
 
+    const cinema = await Cinema.create({
+      name: "Test Cinema",
+      city: "Test City",
+      address: "123 Test St",
+    });
+
     const hall = await Hall.create({
       name: "Test Hall",
       layout: { rows: 10, cols: 10 },
       totalSeats: 100,
+      cinemaId: cinema._id,
     });
 
     const showtimeData = {
       movieId: movie._id,
       hallId: hall._id,
+      cinemaId: cinema._id,
       startTime: new Date("2024-12-25T18:00:00Z"),
       endTime: new Date("2024-12-25T20:00:00Z"),
       date: new Date("2024-12-25"),
@@ -105,16 +123,24 @@ describe("Showtime Model", () => {
       language: "English",
     });
 
+    const cinema = await Cinema.create({
+      name: "Test Cinema",
+      city: "Test City",
+      address: "123 Test St",
+    });
+
     const hall = await Hall.create({
       name: "Test Hall",
       layout: { rows: 10, cols: 10 },
       totalSeats: 100,
+      cinemaId: cinema._id,
     });
 
     // Create first showtime
     await Showtime.create({
       movieId: movie._id,
       hallId: hall._id,
+      cinemaId: cinema._id,
       startTime: new Date("2024-12-25T18:00:00Z"),
       endTime: new Date("2024-12-25T20:00:00Z"),
       date: new Date("2024-12-25"),
@@ -142,16 +168,24 @@ describe("Showtime Model", () => {
       language: "English",
     });
 
+    const cinema = await Cinema.create({
+      name: "Test Cinema",
+      city: "Test City",
+      address: "123 Test St",
+    });
+
     const hall = await Hall.create({
       name: "Test Hall",
       layout: { rows: 10, cols: 10 },
       totalSeats: 100,
+      cinemaId: cinema._id,
     });
 
     const startTime = new Date("2024-12-25T18:00:00Z");
     const showtime = await Showtime.create({
       movieId: movie._id,
       hallId: hall._id,
+      cinemaId: cinema._id,
       startTime: startTime,
       date: new Date("2024-12-25"),
       price: 12.99,

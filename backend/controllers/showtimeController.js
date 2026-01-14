@@ -34,6 +34,7 @@ exports.createShowtime = async (req, res) => {
     const missingFields = [];
     if (!movieId) missingFields.push("movieId");
     if (!hallId) missingFields.push("hallId");
+    if (!cinemaId) missingFields.push("cinemaId");
     if (!startTime) missingFields.push("startTime");
     if (!price) missingFields.push("price");
     if (!totalSeats) missingFields.push("totalSeats");
@@ -103,17 +104,14 @@ exports.createShowtime = async (req, res) => {
       });
     }
 
-    // Validate cinema if provided
-    let cinema = null;
-    if (cinemaId) {
-      cinema = await Cinema.findById(cinemaId);
-      if (!cinema) {
-        return res.status(404).json({
-          success: false,
-          message: "Cinema not found",
-          code: "CINEMA_NOT_FOUND",
-        });
-      }
+    // Validate cinema
+    const cinema = await Cinema.findById(cinemaId);
+    if (!cinema) {
+      return res.status(404).json({
+        success: false,
+        message: "Cinema not found",
+        code: "CINEMA_NOT_FOUND",
+      });
     }
 
     // Validate hall capacity

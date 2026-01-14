@@ -185,6 +185,11 @@ exports.checkout = async (req, res) => {
         return res.status(404).json({ message: 'Showtime not found' });
       }
 
+      if (!showtime.cinemaId) {
+        await session.abortTransaction();
+        return res.status(400).json({ message: 'Showtime is missing cinema information. Please contact support.' });
+      }
+
       const seats = meta.seats || [];
       const totalTickets = Number(meta.adultCount || 0) + Number(meta.childCount || 0);
       if (seats.length !== totalTickets) {

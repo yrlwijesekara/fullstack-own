@@ -100,6 +100,14 @@ export default function BookShowtime() {
     }
   };
 
+  // Validate cinema selection after showtime is loaded
+  useEffect(() => {
+    if (showtime && !cinemaQueryId && !showtime.cinemaId) {
+      toast.error('Cinema selection is required for booking');
+      navigate(`/movies/${showtime.movieId?._id || ''}/showtimes`);
+    }
+  }, [showtime, cinemaQueryId, navigate]);
+
   if (loading) return (
     <div className="min-h-screen bg-background-900 flex items-center justify-center">
       <LoadingLogo size={80} text="Loading booking..." />
@@ -148,10 +156,16 @@ export default function BookShowtime() {
     }
 
     try {
+      const cinemaName = cinema?.name || showtime.cinemaId?.name || '';
+      if (!cinemaName || cinemaName === 'N/A') {
+        toast.error('Cinema information is required for booking');
+        return;
+      }
+
       addTicketsToCart({
         showtimeId: showtime._id || showtime.id || showtimeId,
         movieTitle: showtime.movieId?.title || 'Tickets',
-        cinemaName: cinema?.name || showtime.cinemaId?.name || '',
+        cinemaName,
         seats: selectedSeats,
         adultCount: selectedAdult,
         childCount: selectedChild,

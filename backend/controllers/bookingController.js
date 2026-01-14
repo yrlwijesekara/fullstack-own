@@ -24,6 +24,11 @@ exports.createBooking = async (req, res) => {
       return res.status(404).json({ message: 'Showtime not found' });
     }
 
+    if (!showtime.cinemaId) {
+      await session.abortTransaction();
+      return res.status(400).json({ message: 'Showtime is missing cinema information. Please contact support.' });
+    }
+
     // Check seat conflicts
     const conflict = seats.find((s) => showtime.bookedSeats.includes(s));
     if (conflict) {

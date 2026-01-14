@@ -14,10 +14,28 @@ const HallForm = () => {
     status: 'active',
     rows: 5,
     cols: 10,
+    cinemaId: '',
   });
   const [partitions, setPartitions] = useState([]); // Array of column indices where partitions exist
   const [loading, setLoading] = useState(isEdit);
   const [error, setError] = useState('');
+  const [cinemas, setCinemas] = useState([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Fetch cinemas
+        const cinemasRes = await fetch('/api/cinemas', { credentials: 'include' });
+        if (cinemasRes.ok) {
+          const cinemasData = await cinemasRes.json();
+          setCinemas(cinemasData.data || []);
+        }
+      } catch (err) {
+        console.error('Failed to load cinemas:', err);
+      }
+    };
+    loadData();
+  }, []);
 
   useEffect(() => {
     const loadHall = async () => {
@@ -30,6 +48,7 @@ const HallForm = () => {
           status: hall.status || 'active',
           rows: hall.layout?.rows || 5,
           cols: hall.layout?.cols || 10,
+          cinemaId: hall.cinemaId?._id || hall.cinemaId || '',
         });
         // Load existing partitions if any
         setPartitions(hall.layout?.partitions || []);
@@ -63,6 +82,7 @@ const HallForm = () => {
 
     const payload = {
       name: form.name,
+      cinemaId: form.cinemaId,
       description: form.description,
       status: form.status,
       layout: {
@@ -184,6 +204,26 @@ const HallForm = () => {
                   <option value="active">Active</option>
                   <option value="maintenance">Maintenance</option>
                   <option value="closed">Closed</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2 text-text-secondary uppercase tracking-wide">
+                  Cinema
+                </label>
+                <select
+                  name="cinemaId"
+                  value={form.cinemaId}
+                  onChange={handleChange}
+                  className="w-full border border-secondary-400 rounded px-4 py-3 bg-surface-500 text-text-primary focus:outline-none focus:ring-2 focus:ring-secondary-300"
+                  required
+                >
+                  <option value="">Select a cinema</option>
+                  {cinemas.map((cinema) => (
+                    <option key={cinema._id} value={cinema._id}>
+                      {cinema.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
