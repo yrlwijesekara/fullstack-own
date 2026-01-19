@@ -5,7 +5,7 @@ exports.getUserOrders = async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.user._id })
       .sort({ createdAt: -1 })
-      .populate({ path: 'bookings', populate: { path: 'showtimeId', populate: { path: 'movieId' } } })
+      .populate({ path: 'bookings', populate: { path: 'showtimeId', populate: [{ path: 'movieId' }, { path: 'cinemaId' }, { path: 'hallId' }] } })
       .populate('purchase');
     res.status(200).json({ success: true, orders });
   } catch (err) {

@@ -125,6 +125,11 @@ export default function OrdersPage() {
                               <li key={b._id} className="p-2 bg-background-800 rounded flex justify-between items-center">
                                 <div>
                                   <div className="font-medium">{b.showtimeId?.movieId?.title || b.showtimeInfo?.movieTitle || 'Showtime'}</div>
+                                  <div className="text-text-secondary text-sm">
+                                    Cinema: {b.showtimeId?.cinemaId?.name || b.showtimeInfo?.cinemaName || 'N/A'}
+                                    {b.showtimeId?.cinemaId?.city ? ` - ${b.showtimeId.cinemaId.city}` : ''}
+                                  </div>
+                                  <div className="text-text-secondary text-sm">Hall: {b.showtimeId?.hallId?.name || b.showtimeInfo?.hallName || 'N/A'}</div>
                                   <div className="text-text-secondary text-sm">Seats: {b.seats?.join(', ')}</div>
                                   <div className="text-text-secondary text-sm">{b.canceled ? 'Canceled' : new Date(b.createdAt).toLocaleString()}</div>
                                 </div>

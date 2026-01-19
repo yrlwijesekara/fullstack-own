@@ -315,6 +315,9 @@ export default function MovieShowtimes() {
 
                   <div className="mb-4">
                     <div className="text-sm text-text-secondary mb-1">
+                      Cinema: {showtime.cinemaId?.name}{showtime.cinemaId?.city ? ` - ${showtime.cinemaId.city}` : ''}
+                    </div>
+                    <div className="text-sm text-text-secondary mb-1">
                       Hall: {showtime.hallId?.name}
                     </div>
                     <div className="text-sm text-text-secondary">
