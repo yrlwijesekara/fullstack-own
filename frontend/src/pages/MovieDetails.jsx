@@ -332,8 +332,8 @@ export default function MovieDetails() {
                     <span className="text-sm text-accent-gold">★</span>
                     <div className="flex-1 h-4 bg-surface-500 border border-secondary-400 rounded">
                       <div
-                        className="h-full bg-primary-500 transition-all rounded"
-                        style={{ width: `${percentage}%` }}
+                        className="h-full bg-accent-gold transition-all rounded-l"
+                        style={{ width: `${percentage}%`, minWidth: percentage > 0 && percentage < 6 ? '6px' : undefined }}
                       />
                     </div>
                     <span className="text-sm text-text-muted w-12 text-right">{percentage}%</span>
