@@ -121,7 +121,7 @@ export default function Snacks() {
           </div>
         ) : (
           Array.isArray(filteredSnacks) && filteredSnacks.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 sm:gap-8 p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 sm:gap-8 p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 max-w-7xl mx-auto place-items-center">
               {filteredSnacks.map((snack) => (
                 <SnackCard key={snack._id || snack.ProductId} snack={snack} />
               ))}

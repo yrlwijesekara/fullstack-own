@@ -27,7 +27,7 @@ export default function SnackCard({ snack }) {
     return (
         <div
             onClick={handleClick}
-            className="group relative bg-gradient-to-br from-background-900 via-background-800 to-background-900 border border-secondary-400/50 rounded-xl shadow-lg overflow-hidden transition-all duration-700 ease-out hover:shadow-2xl hover:shadow-primary-500/20 hover:border-primary-500/50 hover:-translate-y-2 cursor-pointer"
+            className="group relative bg-gradient-to-br from-background-900 via-background-800 to-background-900 border border-secondary-400/50 rounded-xl shadow-lg overflow-hidden transition-all duration-700 ease-out hover:shadow-2xl hover:shadow-primary-500/20 hover:border-primary-500/50 hover:-translate-y-2 cursor-pointer h-full flex flex-col"
         >
             {/* Image Container with Overlay */}
             <div className="relative overflow-hidden">
@@ -70,7 +70,7 @@ export default function SnackCard({ snack }) {
                 </h3>
 
                 {/* Price Section */}
-                <div className="mt-auto">
+                <div className="mt-auto pt-3 border-t border-secondary-400/20">
                     <div className="flex items-center justify-between">
                         <div className="flex flex-col">
                             {hasDiscount ? (
