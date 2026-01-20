@@ -83,14 +83,23 @@ export default function OrdersPage() {
             ) : (
               <ul className="space-y-4">
                 {orders.map(o => (
-                  <li key={o._id} className="p-4 bg-surface-600 rounded">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="font-semibold">Order {o._id}</div>
-                        <div className="text-text-secondary text-sm">{new Date(o.createdAt).toLocaleString()}</div>
-                        <div className="text-text-secondary text-sm">Total: {new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(o.totalPrice)}</div>
+                  <li key={o._id} className="p-6 bg-surface-600 rounded shadow-md">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <div className="font-semibold text-sm">Order</div>
+                          <div className="font-mono text-xs text-text-secondary break-all">{o._id}</div>
+                          <div className="ml-3">
+                            <span className={`inline-block text-xs font-semibold px-2 py-1 rounded-full ${
+                              o.bookings?.some(b => !b.canceled) || (o.purchase && !o.purchase.canceled) ? 'bg-semantic-success/20 text-semantic-success border border-semantic-success/30' : 'bg-surface-500 text-text-secondary border border-secondary-400'
+                            }`}>{o.bookings?.some(b => !b.canceled) || (o.purchase && !o.purchase.canceled) ? 'Active' : 'Canceled'}</span>
+                          </div>
+                        </div>
+                        <div className="text-text-secondary text-sm mt-2">{new Date(o.createdAt).toLocaleString()}</div>
+                        <div className="text-text-secondary text-sm mt-1">Total: <span className="font-semibold">{new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(o.totalPrice)}</span></div>
                       </div>
-                      <div className="text-right">
+
+                      <div className="flex items-center gap-2">
                         {(() => {
                           const hasActiveBookings = o.bookings?.some(b => !b.canceled);
                           const hasActivePurchase = o.purchase && !o.purchase.canceled;
@@ -99,9 +108,9 @@ export default function OrdersPage() {
                           return hasAnyActiveItems ? (
                             <button
                               onClick={() => downloadReceipt(o._id)}
-                              className="px-3 py-1 bg-primary-500 text-white rounded text-sm mb-2 block"
+                              className="px-3 py-2 bg-primary-500 text-white rounded text-sm flex items-center gap-2"
                             >
-                              Download Receipt
+                              📄 Receipt
                             </button>
                           ) : (
                             <div className="text-text-secondary text-sm mb-2">
@@ -109,29 +118,29 @@ export default function OrdersPage() {
                             </div>
                           );
                         })()}
+                        {/* Details button removed per UI preference */}
                       </div>
                     </div>
 
-                    <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <div className="font-medium mb-1">Bookings</div>
+                        <div className="font-medium mb-2">Bookings</div>
                         {(!o.bookings || o.bookings.length === 0) ? (
                           <div className="text-text-secondary">No bookings in this order.</div>
                         ) : (
                           <ul className="space-y-2">
                             {o.bookings.map(b => (
-                              <li key={b._id} className="p-2 bg-background-800 rounded flex justify-between items-center">
-                                <div>
+                              <li key={b._id} className="p-3 bg-background-800 rounded flex justify-between items-start">
+                                <div className="flex-1">
                                   <div className="font-medium">{b.showtimeId?.movieId?.title || b.showtimeInfo?.movieTitle || 'Showtime'}</div>
-                                  <div className="text-text-secondary text-sm">
-                                    Cinema: {b.showtimeId?.cinemaId?.name || b.showtimeInfo?.cinemaName || 'N/A'}
-                                    {b.showtimeId?.cinemaId?.city ? ` - ${b.showtimeId.cinemaId.city}` : ''}
+                                  <div className="text-text-secondary text-sm mt-1">
+                                    {b.showtimeId?.cinemaId?.name || b.showtimeInfo?.cinemaName || 'N/A'}{b.showtimeId?.cinemaId?.city ? ` — ${b.showtimeId.cinemaId.city}` : ''}
                                   </div>
                                   <div className="text-text-secondary text-sm">Hall: {b.showtimeId?.hallId?.name || b.showtimeInfo?.hallName || 'N/A'}</div>
                                   <div className="text-text-secondary text-sm">Seats: {b.seats?.join(', ')}</div>
-                                  <div className="text-text-secondary text-sm">{b.canceled ? 'Canceled' : new Date(b.createdAt).toLocaleString()}</div>
+                                  <div className="text-text-secondary text-sm mt-1">{b.canceled ? <span className="text-red-400">Canceled</span> : new Date(b.createdAt).toLocaleString()}</div>
                                 </div>
-                                <div>
+                                <div className="ml-4 flex-shrink-0">
                                   {!b.canceled && <button onClick={() => cancelBooking(b._id)} className="px-3 py-1 bg-red-600 text-white rounded">Cancel</button>}
                                   {b.canceled && <span className="text-red-400 text-sm">Canceled</span>}
                                 </div>
@@ -142,14 +151,14 @@ export default function OrdersPage() {
                       </div>
 
                       <div>
-                        <div className="font-medium mb-1">Snacks</div>
+                        <div className="font-medium mb-2">Snacks</div>
                         {(!o.purchase) ? (
                           <div className="text-text-secondary">No snacks in this order.</div>
                         ) : (
-                          <div className="p-2 bg-background-800 rounded">
+                          <div className="p-3 bg-background-800 rounded">
                             <div className="text-text-secondary text-sm">Items: {o.purchase.items?.map(i => `${i.name} x${i.quantity}`).join(', ')}</div>
-                            {!o.purchase.canceled && <div className="text-text-secondary text-sm">{new Date(o.purchase.createdAt).toLocaleString()}</div>}
-                            {!o.purchase.canceled && <div className="mt-2"><button onClick={() => cancelPurchase(o.purchase._id)} className="px-3 py-1 bg-red-600 text-white rounded">Cancel Purchase</button></div>}
+                            {!o.purchase.canceled && <div className="text-text-secondary text-sm mt-1">{new Date(o.purchase.createdAt).toLocaleString()}</div>}
+                            {!o.purchase.canceled && <div className="mt-3"><button onClick={() => cancelPurchase(o.purchase._id)} className="px-3 py-1 bg-red-600 text-white rounded">Cancel Purchase</button></div>}
                             {o.purchase.canceled && <div className="mt-2 text-red-400 text-sm">Purchase Canceled</div>}
                           </div>
                         )}
