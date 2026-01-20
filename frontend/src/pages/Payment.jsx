@@ -111,12 +111,12 @@ function PaymentForm({ items, total }) {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
+    <div className="max-w-md mx-auto bg-surface-500 p-6 rounded-lg shadow-lg text-text-primary">
       <h2 className="text-2xl font-bold mb-6 text-center">Enter Card Details</h2>
       
       <div className="mb-6">
         <div className="text-lg font-semibold mb-2">Total Amount</div>
-        <div className="text-2xl font-bold text-primary-600">
+        <div className="text-3xl font-bold text-accent-gold">
           {new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(total)}
         </div>
       </div>
@@ -124,19 +124,19 @@ function PaymentForm({ items, total }) {
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Card Information</label>
-          <div className="p-3 border border-gray-300 rounded-md bg-gray-50">
+          <div className="p-3 border border-surface-400 rounded-md bg-surface-600">
             <CardElement 
               options={{
                 style: {
                   base: {
                     fontSize: '16px',
-                    color: '#424770',
+                    color: '#FFFFFF',
                     '::placeholder': {
-                      color: '#aab7c4',
+                      color: '#CFCFD7',
                     },
                   },
                   invalid: {
-                    color: '#9e2146',
+                    color: '#E63946',
                   },
                 },
               }}
@@ -148,7 +148,7 @@ function PaymentForm({ items, total }) {
           <button
             type="button"
             onClick={() => navigate('/cart')}
-            className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+            className="flex-1 px-4 py-2 bg-surface-600 text-text-primary rounded-md hover:bg-surface-700 transition-colors"
           >
             Back to Cart
           </button>
