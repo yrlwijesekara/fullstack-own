@@ -3,6 +3,8 @@ const { protect } = require('../middleware/auth');
 const Review = require('../models/Review');
 // Order import kept for backward-compatibility if needed in future flows
 const Order = require('../models/Order');
+const adminMiddleware = require('../middleware/adminMiddleware');
+const Movie = require('../models/Movie');
 
 const router = express.Router();
 
@@ -87,6 +89,78 @@ router.delete('/:reviewId', protect, async (req, res) => {
     }
 
     res.json({ message: 'Review deleted' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Admin routes
+// Get all reviews with movie information and overall ratings
+router.get('/admin/all', protect, adminMiddleware, async (req, res) => {
+  try {
+    const reviews = await Review.find({})
+      .populate('userId', 'firstName lastName email')
+      .populate('movieId', 'title')
+      .sort({ createdAt: -1 });
+
+    // Get movie ratings summary
+    const movieRatings = await Review.aggregate([
+      {
+        $group: {
+          _id: '$movieId',
+          averageRating: { $avg: '$rating' },
+          totalReviews: { $sum: 1 },
+          ratings: { $push: '$rating' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'movies',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'movie'
+        }
+      },
+      {
+        $unwind: '$movie'
+      },
+      {
+        $project: {
+          movieId: '$_id',
+          title: '$movie.title',
+          averageRating: { $round: ['$averageRating', 1] },
+          totalReviews: 1,
+          ratings: 1
+        }
+      },
+      {
+        $sort: { averageRating: -1 }
+      }
+    ]);
+
+    res.json({
+      reviews,
+      movieRatings,
+      totalReviews: reviews.length,
+      totalMovies: movieRatings.length
+    });
+  } catch (error) {
+    console.error('Admin reviews fetch error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Delete review by admin
+router.delete('/admin/:reviewId', protect, adminMiddleware, async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+
+    const review = await Review.findByIdAndDelete(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
+
+    res.json({ message: 'Review deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }

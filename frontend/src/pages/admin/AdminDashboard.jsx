@@ -17,6 +17,8 @@ export default function AdminDashboard() {
   const [usersCount, setUsersCount] = useState(0);
   const [snacksCount, setSnacksCount] = useState(0);
   const [cinemasCount, setCinemasCount] = useState(0);
+  const [reviewsCount, setReviewsCount] = useState(0);
+  const [averageRating, setAverageRating] = useState(0);
 
   // Showtime create state
   const [showCreateShowtimeModal, setShowCreateShowtimeModal] = useState(false);
@@ -35,6 +37,7 @@ export default function AdminDashboard() {
     fetchMoviesOverview();
     fetchHalls();
     fetchSummaryCounts();
+    fetchReviewsSummary();
   }, []);
 
   async function fetchHalls() {
@@ -125,6 +128,26 @@ export default function AdminDashboard() {
     }
   }
 
+  async function fetchReviewsSummary() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/reviews/admin/all`, {
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setReviewsCount(data.totalReviews);
+
+        if (data.movieRatings.length > 0) {
+          const avgRating = data.movieRatings.reduce((acc, movie) => acc + movie.averageRating, 0) / data.movieRatings.length;
+          setAverageRating(avgRating.toFixed(1));
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch reviews summary', err);
+    }
+  }
+
   const handleLogout = () => setShowLogoutModal(true);
 
   const confirmLogout = async () => {
@@ -207,6 +230,10 @@ export default function AdminDashboard() {
                   <div className="text-sm text-text-secondary">Snacks</div>
                   <div className="text-2xl font-bold">{snacksCount}</div>
                 </div>
+                <div className="bg-surface-500 p-4 rounded-xl border border-secondary-400/40">
+                  <div className="text-sm text-text-secondary">Reviews</div>
+                  <div className="text-2xl font-bold">{reviewsCount}</div>
+                </div>
               </div>
 
               {/* Admin function cards */}
@@ -244,6 +271,12 @@ export default function AdminDashboard() {
                 <h3 className="text-xl font-semibold text-text-primary mb-2">Manage Snacks</h3>
                 <p className="text-text-secondary mb-4">Add and manage snack items and inventory.</p>
                 <button onClick={() => navigate('/admin-dashboard/snack-management')} className="w-full py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-lg transition-colors">Go to Snacks</button>
+              </div>
+
+              <div className="bg-surface-500 p-4 md:p-6 rounded-xl border border-secondary-400/40 hover:border-primary-500 transition-colors">
+                <h3 className="text-xl font-semibold text-text-primary mb-2">Manage Reviews</h3>
+                <p className="text-text-secondary mb-4">View and manage user reviews. Average rating: <span className="font-semibold text-yellow-400">{averageRating}★</span></p>
+                <button onClick={() => navigate('/admin-dashboard/reviews')} className="w-full py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-lg transition-colors">Go to Reviews</button>
               </div>
 
               {/* Reports and Settings removed per admin request */}

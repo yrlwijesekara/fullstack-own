@@ -23,6 +23,7 @@ import SnackManagement from './pages/admin/snackmanagement';
 import AddSnacks from './pages/admin/addsnacks';
 import UpdateSnacks from './pages/admin/updatesnacks';
 import OrderManagement from './pages/admin/OrderManagement';
+import ReviewsManagement from './pages/admin/ReviewsManagement';
 import AdminLayout from './pages/admin/AdminLayout';
 import Cinemas from './pages/Cinemas';
 import CinemasManagement from './pages/admin/CinemasManagement';
@@ -86,6 +87,7 @@ function AppContent() {
         <Route path="snack-management" element={<SnackManagement />} />
         <Route path="addsnack" element={<AddSnacks />} />
         <Route path="updatesnack/:id" element={<UpdateSnacks />} />
+        <Route path="reviews" element={<ReviewsManagement />} />
         <Route path="order-management" element={<OrderManagement />} />
       </Route>
 
