@@ -1,5 +1,4 @@
 const Movie = require('../models/Movie');
-const Showtime = require('../models/Showtime');
 const { deleteFromB2 } = require('../config/b2Storage');
 
 /**
@@ -171,13 +170,9 @@ exports.getAllMovies = async (req, res) => {
       query.status = req.query.status;
     }
 
-    // Filter for now showing movies (movies with upcoming showtimes)
+    // Filter for now showing movies (movies with status 'now_showing' or 'Now Showing')
     if (req.query.nowShowing === 'true') {
-      const upcomingShowtimes = await Showtime.find({
-        startTime: { $gt: new Date() },
-        status: { $ne: 'cancelled' }
-      }).distinct('movieId');
-      query._id = { $in: upcomingShowtimes };
+      query.status = { $in: ['now_showing', 'Now Showing'] };
     }
 
     // Sorting
