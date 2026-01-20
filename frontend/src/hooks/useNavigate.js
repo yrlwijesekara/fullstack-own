@@ -7,7 +7,7 @@ import { useNavigate as useRouterNavigate } from 'react-router-dom';
 export function useNavigate() {
   const navigate = useRouterNavigate();
   
-  return (path) => {
-    navigate(path);
+  return (path, options) => {
+    navigate(path, options);
   };
 }
