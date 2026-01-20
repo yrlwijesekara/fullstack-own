@@ -1,6 +1,7 @@
 const express = require('express');
 const { protect } = require('../middleware/auth');
 const Review = require('../models/Review');
+const Order = require('../models/Order');
 
 const router = express.Router();
 
@@ -18,11 +19,26 @@ router.get('/movie/:movieId', async (req, res) => {
   }
 });
 
-// Add a review
+// Add a review — require an orderId proving the user purchased/watched the movie
 router.post('/', protect, async (req, res) => {
   try {
-    const { movieId, rating, comment } = req.body;
+    const { movieId, rating, comment, orderId } = req.body;
     const userId = req.user._id;
+
+    if (!orderId) {
+      return res.status(400).json({ message: 'orderId is required to submit a review' });
+    }
+
+    // Ensure the order belongs to the user and contains a booking for this movie
+    const order = await Order.findOne({ _id: orderId, userId }).populate({ path: 'bookings', populate: { path: 'showtimeId', populate: { path: 'movieId' } } });
+    if (!order) {
+      return res.status(403).json({ message: 'Order not found or does not belong to user' });
+    }
+
+    const bookingForMovie = order.bookings.find(b => String(b.showtimeId?.movieId?._id || b.showtimeId?.movieId) === String(movieId));
+    if (!bookingForMovie) {
+      return res.status(403).json({ message: 'You can only review movies you purchased in this order' });
+    }
 
     // Check if user already reviewed this movie
     const existingReview = await Review.findOne({ userId, movieId });
@@ -45,6 +61,7 @@ router.post('/', protect, async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({ message: 'You have already reviewed this movie' });
     }
+    console.error('Review post error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

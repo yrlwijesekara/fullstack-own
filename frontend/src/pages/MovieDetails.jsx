@@ -337,17 +337,7 @@ export default function MovieDetails() {
             </div>
           </div>
 
-          {/* Write Review Button */}
-          {user && (
-            <div className="mb-8">
-              <button
-                onClick={() => navigate(`/review/movie/${movie._id}`)}
-                className="px-8 py-3 bg-primary-500 text-text-primary font-bold uppercase tracking-wider hover:bg-primary-600 border border-secondary-400 rounded-lg shadow-lg"
-              >
-                Write a Review
-              </button>
-            </div>
-          )}
+          {/* Reviews are only accepted via order links — no direct review button here */}
 
           {/* User Reviews */}
           <div className="space-y-6 mb-8">

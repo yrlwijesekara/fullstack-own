@@ -71,7 +71,6 @@ function AppContent() {
       <Route path="/receipt" element={<Receipt />} />
       <Route path="/orders" element={<Orders />} />
       <Route path="/review/:orderId" element={<ReviewForm />} />
-      <Route path="/review/movie/:movieId" element={<ReviewForm />} />
 
       {/* Nested admin routes under /admin-dashboard to ensure admin lands in dashboard layout */}
       <Route path="/admin-dashboard" element={<AdminOnlyRoute><AdminLayout /></AdminOnlyRoute>}>
