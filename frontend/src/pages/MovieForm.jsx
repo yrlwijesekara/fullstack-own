@@ -142,8 +142,13 @@ export default function MovieForm() {
         });
 
         // Set existing poster URL for display
-        if (movieData.posterUrl) {
+        // Handle both posterUrl and posterImage field names for backward compatibility
+        if (movieData.posterImage) {
+          setExistingPosterUrl(movieData.posterImage);
+          console.log('Existing poster URL:', movieData.posterImage);
+        } else if (movieData.posterUrl) {
           setExistingPosterUrl(movieData.posterUrl);
+          console.log('Existing poster URL:', movieData.posterUrl);
         }
 
         // Set YouTube preview if trailer URL exists
@@ -394,9 +399,11 @@ export default function MovieForm() {
       errors.trailerUrl = 'Please enter a valid YouTube URL';
     }
 
-    // Poster image validation (required for new movies)
+    // Poster image validation (required for new movies, optional for edits if there's an existing poster)
     if (!isEditMode && !formData.posterImage) {
       errors.posterImage = 'Poster image is required for new movies';
+    } else if (isEditMode && !formData.posterImage && !existingPosterUrl) {
+      errors.posterImage = 'Please upload a poster image';
     }
 
     setValidationErrors(errors);

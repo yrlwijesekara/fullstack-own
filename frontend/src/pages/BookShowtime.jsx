@@ -192,9 +192,9 @@ export default function BookShowtime() {
         {/* Movie & Showtime Info */}
         <div className="mt-6 mb-6 bg-surface-600 p-6 rounded-lg border border-secondary-400">
           <div className="flex gap-4 items-start">
-            {showtime.movieId?.posterUrl && (
+            {showtime.movieId?.posterImage && (
               <img
-                src={showtime.movieId.posterUrl}
+                src={showtime.movieId.posterImage}
                 alt={showtime.movieId.title}
                 className="w-24 h-36 object-cover rounded-lg"
               />

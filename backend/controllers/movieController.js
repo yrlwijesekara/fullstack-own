@@ -8,6 +8,10 @@ const { deleteFromB2 } = require('../config/b2Storage');
  */
 exports.createMovie = async (req, res) => {
   try {
+    console.log('=== Creating New Movie ===');
+    console.log('Request files:', req.files ? Object.keys(req.files) : 'none');
+    console.log('Request file:', req.file ? 'single file present' : 'none');
+    
     const {
       title,
       description,
@@ -35,6 +39,13 @@ exports.createMovie = async (req, res) => {
     if (req.file && req.file.b2Url) {
       // Use B2 URL from upload middleware
       posterImage = req.file.b2Url;
+      console.log('Poster uploaded to B2:', posterImage);
+    } else if (req.files && req.files.posterImage && req.files.posterImage[0]) {
+      // Handle case where posterImage comes from uploadFields
+      posterImage = req.files.posterImage[0].b2Url;
+      console.log('Poster uploaded to B2 (from fields):', posterImage);
+    } else {
+      console.log('No poster image uploaded, using placeholder');
     }
 
     // Handle cast images if uploaded (from req.files.castImages)
@@ -263,6 +274,11 @@ exports.getMovieById = async (req, res) => {
  */
 exports.updateMovie = async (req, res) => {
   try {
+    console.log('=== Updating Movie ===');
+    console.log('Movie ID:', req.params.id);
+    console.log('Request files:', req.files ? Object.keys(req.files) : 'none');
+    console.log('Request file:', req.file ? 'single file present' : 'none');
+    
     const {
       title,
       description,
@@ -288,18 +304,27 @@ exports.updateMovie = async (req, res) => {
     }
 
     // Handle new poster image upload
+    let newPosterUrl = null;
     if (req.file && req.file.b2Url) {
+      newPosterUrl = req.file.b2Url;
+    } else if (req.files && req.files.posterImage && req.files.posterImage[0]) {
+      // Handle case where posterImage comes from uploadFields
+      newPosterUrl = req.files.posterImage[0].b2Url;
+    }
+
+    if (newPosterUrl) {
+      console.log('New poster uploaded to B2:', newPosterUrl);
       // Delete old poster image from B2 if it exists and is not the placeholder
       if (movie.posterImage && !movie.posterImage.includes('placeholder')) {
         try {
           await deleteFromB2(movie.posterImage);
-          console.log('Deleted old poster from B2');
+          console.log('Deleted old poster from B2:', movie.posterImage);
         } catch (err) {
           console.error('Error deleting old image from B2:', err);
         }
       }
       // Update with new B2 URL
-      movie.posterImage = req.file.b2Url;
+      movie.posterImage = newPosterUrl;
     }
 
     // Handle cast images update
