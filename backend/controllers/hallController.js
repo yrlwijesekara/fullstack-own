@@ -76,7 +76,7 @@ exports.getAllHalls = async (req, res) => {
       const arr = String(cinemaIds).split(',').map((s) => s.trim()).filter(Boolean);
       if (arr.length) query.cinemaId = { $in: arr };
     }
-    const halls = await Hall.find(query).sort({ createdAt: -1 });
+    const halls = await Hall.find(query).populate('cinemaId', 'name city').sort({ createdAt: -1 });
     res.json(halls);
   } catch (error) {
     console.error('Get halls error:', error);
@@ -91,7 +91,7 @@ exports.getAllHalls = async (req, res) => {
 // @access  Public
 exports.getHallById = async (req, res) => {
   try {
-    const hall = await Hall.findById(req.params.id);
+    const hall = await Hall.findById(req.params.id).populate('cinemaId', 'name city');
     if (!hall) {
       return res.status(404).json({ message: 'Hall not found' });
     }

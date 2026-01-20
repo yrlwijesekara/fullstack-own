@@ -95,12 +95,21 @@ exports.createShowtime = async (req, res) => {
     }
 
     // Check if hall exists
-    const hall = await Hall.findById(hallId);
+    const hall = await Hall.findById(hallId).populate('cinemaId');
     if (!hall) {
       return res.status(404).json({
         success: false,
         message: "Hall not found",
         code: "HALL_NOT_FOUND",
+      });
+    }
+
+    // Check if hall has a cinemaId
+    if (!hall.cinemaId) {
+      return res.status(400).json({
+        success: false,
+        message: `Hall '${hall.name}' does not belong to any cinema. Please assign this hall to a cinema first.`,
+        code: "HALL_NO_CINEMA",
       });
     }
 
@@ -111,6 +120,15 @@ exports.createShowtime = async (req, res) => {
         success: false,
         message: "Cinema not found",
         code: "CINEMA_NOT_FOUND",
+      });
+    }
+
+    // Validate that hall belongs to the cinema
+    if (hall.cinemaId._id.toString() !== cinemaId.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: `Hall '${hall.name}' belongs to cinema '${hall.cinemaId.name || hall.cinemaId}' but you selected cinema '${cinema.name}'. Please select a hall that belongs to the chosen cinema.`,
+        code: "CINEMA_HALL_MISMATCH",
       });
     }
 
@@ -521,6 +539,16 @@ exports.updateShowtime = async (req, res) => {
           });
         }
 
+        // Validate that new hall belongs to the current cinema
+        const currentCinemaId = updates.cinemaId || existingShowtime.cinemaId;
+        if (newHall.cinemaId._id.toString() !== currentCinemaId.toString()) {
+          return res.status(400).json({
+            success: false,
+            message: "Cinema not found this show",
+            code: "CINEMA_HALL_MISMATCH",
+          });
+        }
+
         const totalSeats = updates.totalSeats || existingShowtime.totalSeats;
         if (totalSeats > newHall.capacity) {
           return res.status(400).json({
@@ -561,6 +589,16 @@ exports.updateShowtime = async (req, res) => {
           success: false,
           message: "Cinema not found",
           code: "CINEMA_NOT_FOUND",
+        });
+      }
+
+      // Validate that current hall belongs to the new cinema
+      const currentHall = await Hall.findById(existingShowtime.hallId);
+      if (currentHall && currentHall.cinemaId._id.toString() !== updates.cinemaId.toString()) {
+        return res.status(400).json({
+          success: false,
+          message: "Cinema not found this show",
+          code: "CINEMA_HALL_MISMATCH",
         });
       }
     }

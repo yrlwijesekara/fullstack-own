@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createHall, getHall, updateHall } from '../../services/hallService';
 import { useNavigate, useParams } from 'react-router-dom';
+import { API_BASE_URL } from '../../utils/api';
 import LoadingLogo from '../../components/LoadingLogo';
 
 const HallForm = () => {
@@ -14,7 +15,7 @@ const HallForm = () => {
     status: 'active',
     rows: 5,
     cols: 10,
-    cinemaId: '',
+    cinemaIds: [], // Changed from cinemaId to cinemaIds
   });
   const [partitions, setPartitions] = useState([]); // Array of column indices where partitions exist
   const [loading, setLoading] = useState(isEdit);
@@ -25,7 +26,7 @@ const HallForm = () => {
     const loadData = async () => {
       try {
         // Fetch cinemas
-        const cinemasRes = await fetch('/api/cinemas', { credentials: 'include' });
+        const cinemasRes = await fetch(`${API_BASE_URL}/cinemas`, { credentials: 'include' });
         if (cinemasRes.ok) {
           const cinemasData = await cinemasRes.json();
           setCinemas(cinemasData.data || []);
@@ -48,7 +49,7 @@ const HallForm = () => {
           status: hall.status || 'active',
           rows: hall.layout?.rows || 5,
           cols: hall.layout?.cols || 10,
-          cinemaId: hall.cinemaId?._id || hall.cinemaId || '',
+          cinemaIds: hall.cinemaId ? [hall.cinemaId._id || hall.cinemaId] : [], // Single cinema for editing
         });
         // Load existing partitions if any
         setPartitions(hall.layout?.partitions || []);
@@ -63,7 +64,19 @@ const HallForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
+    if (name === 'cinemaIds') {
+      if (isEdit) {
+        // Single select for editing
+        setForm((f) => ({ ...f, [name]: [value] }));
+      } else {
+        // Multi select for creating
+        const options = Array.from(e.target.selectedOptions || []);
+        const ids = options.map(option => option.value);
+        setForm((f) => ({ ...f, [name]: ids }));
+      }
+    } else {
+      setForm((f) => ({ ...f, [name]: value }));
+    }
   };
 
   const togglePartition = (colIndex) => {
@@ -80,25 +93,56 @@ const HallForm = () => {
     e.preventDefault();
     setError('');
 
-    const payload = {
+    if (!Array.isArray(form.cinemaIds) || form.cinemaIds.length === 0) {
+      setError('Please select at least one cinema');
+      return;
+    }
+
+    // For editing, only allow one cinema
+    if (isEdit && form.cinemaIds.length > 1) {
+      setError('A hall can only belong to one cinema. Please select only one cinema when editing.');
+      return;
+    }
+
+    const payloadBase = {
       name: form.name,
-      cinemaId: form.cinemaId,
       description: form.description,
       status: form.status,
       layout: {
         rows: Number(form.rows),
         cols: Number(form.cols),
-        partitions: partitions, // Include partitions in the payload
+        partitions: partitions,
       },
     };
 
     try {
+      const createdHalls = [];
+      const errors = [];
+
       if (isEdit) {
+        // For editing, update the single hall
+        const payload = { ...payloadBase, cinemaId: form.cinemaIds[0] };
         await updateHall(id, payload);
+        createdHalls.push(`Updated hall for cinema ${form.cinemaIds[0]}`);
       } else {
-        await createHall(payload);
+        // For creating, create multiple halls
+        for (const cinemaId of form.cinemaIds) {
+          try {
+            const payload = { ...payloadBase, cinemaId };
+            await createHall(payload);
+            createdHalls.push(`Created hall for cinema ${cinemaId}`);
+          } catch (err) {
+            errors.push(`Failed for cinema ${cinemaId}: ${err.message}`);
+          }
+        }
       }
-      navigate('/admin-dashboard/halls');
+
+      if (createdHalls.length > 0) {
+        setError(''); // Clear any previous errors
+        navigate('/admin-dashboard/halls');
+      } else if (errors.length > 0) {
+        setError(`Errors: ${errors.join('; ')}`);
+      }
     } catch (err) {
       setError(err.message || 'Failed to save hall');
     }
@@ -209,22 +253,39 @@ const HallForm = () => {
 
               <div>
                 <label className="block text-sm font-medium mb-2 text-text-secondary uppercase tracking-wide">
-                  Cinema
+                  {isEdit ? 'Cinema' : 'Cinemas (Multi-select)'}
                 </label>
                 <select
-                  name="cinemaId"
-                  value={form.cinemaId}
+                  name="cinemaIds"
+                  value={isEdit ? (form.cinemaIds[0] || '') : (form.cinemaIds || [])}
                   onChange={handleChange}
-                  className="w-full border border-secondary-400 rounded px-4 py-3 bg-surface-500 text-text-primary focus:outline-none focus:ring-2 focus:ring-secondary-300"
+                  multiple={!isEdit}
+                  className={`w-full border border-secondary-400 rounded px-4 py-3 bg-surface-500 text-text-primary focus:outline-none focus:ring-2 focus:ring-secondary-300 ${isEdit ? '' : 'min-h-[120px]'}`}
                   required
                 >
-                  <option value="">Select a cinema</option>
                   {cinemas.map((cinema) => (
                     <option key={cinema._id} value={cinema._id}>
-                      {cinema.name}
+                      {cinema.name} {cinema.city ? `(${cinema.city})` : ''}
                     </option>
                   ))}
                 </select>
+                {Array.isArray(form.cinemaIds) && form.cinemaIds.length > 0 && (
+                  <div className="mt-3 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
+                    <p className="text-sm text-green-400 font-medium mb-2">
+                      ✓ {form.cinemaIds.length} cinema{form.cinemaIds.length > 1 ? 's' : ''} selected:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {form.cinemaIds.map(cinemaId => {
+                        const cinema = cinemas.find(c => c._id === cinemaId);
+                        return cinema ? (
+                          <span key={cinemaId} className="inline-flex items-center px-2 py-1 bg-green-600/20 text-green-300 text-xs rounded-full border border-green-500/30">
+                            {cinema.name} {cinema.city ? `(${cinema.city})` : ''}
+                          </span>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

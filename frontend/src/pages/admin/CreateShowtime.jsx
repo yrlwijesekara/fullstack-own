@@ -88,10 +88,10 @@ export default function CreateShowtime() {
     fetchHallsByCinemaIds(ids);
   };
 
-  // Select all halls helper (uses modalHalls if present otherwise all halls)
+  // Select all halls helper (only from selected cinemas)
   const selectAllHalls = () => {
-    const source = (Array.isArray(modalHalls) && modalHalls.length > 0) ? modalHalls : halls;
-    const ids = (Array.isArray(source) ? source : []).map(h => h._id);
+    if (!Array.isArray(modalHalls) || modalHalls.length === 0) return;
+    const ids = modalHalls.map(h => h._id);
     setFormData(prev => ({ ...prev, hallIds: ids }));
   };
 
@@ -146,15 +146,20 @@ export default function CreateShowtime() {
 
     try {
       const payloadBase = { ...formData };
+      // Remove fields that are not needed for individual showtime creation
+      delete payloadBase.cinemaId; // Will be set per hall
+      delete payloadBase.cinemaIds; // Not needed
+      delete payloadBase.hallIds; // Will be processed individually
+
       if (!payloadBase.movieId || !payloadBase.startTime) {
         setError('Please select a movie and start time');
         return;
       }
 
-      const hallIds = Array.isArray(payloadBase.hallIds)
-        ? payloadBase.hallIds
-        : payloadBase.hallId
-        ? [payloadBase.hallId]
+      const hallIds = Array.isArray(formData.hallIds)
+        ? formData.hallIds
+        : formData.hallId
+        ? [formData.hallId]
         : [];
 
       if (hallIds.length === 0) {
@@ -169,8 +174,17 @@ export default function CreateShowtime() {
         try {
           const payload = { ...payloadBase };
           payload.hallId = hallId;
-          const hallObj = modalHalls.find(h => String(h._id) === String(hallId)) || halls.find(h => String(h._id) === String(hallId));
-          if (hallObj && hallObj.cinemaId) payload.cinemaId = hallObj.cinemaId._id || hallObj.cinemaId;
+          const hallObj = modalHalls.find(h => String(h._id) === String(hallId));
+          if (!hallObj) {
+            errors.push({ hallId, message: 'Hall not found in selected cinemas' });
+            continue;
+          }
+          if (hallObj && hallObj.cinemaId) {
+            payload.cinemaId = hallObj.cinemaId._id || hallObj.cinemaId;
+          } else {
+            errors.push({ hallId, message: 'Hall does not belong to a cinema' });
+            continue;
+          }
           try { payload.startTime = new Date(payload.startTime).toISOString(); } catch (err) { console.debug('Invalid startTime for create', err); }
           if (!payload.totalSeats || Number(payload.totalSeats) <= 0) {
             let capacity = null;
@@ -249,16 +263,18 @@ export default function CreateShowtime() {
                 <label className="block text-sm font-medium text-text-secondary">Hall * (multi-select)</label>
                 <button type="button" onClick={selectAllHalls} className="text-xs px-2 py-1 bg-surface-600 border rounded hover:bg-surface-500">Select all halls</button>
               </div>
-              <select name="hallIds" value={formData.hallIds||[]} onChange={handleFormChange} multiple required className="w-full h-40 px-2 py-2 bg-surface-500 border rounded">
-                {modalHalls.length>0 ? modalHalls.map(h => (
-                  <option key={h._id} value={h._id}>
-                    {h.name} ({h.totalSeats || (h.layout?.rows && h.layout?.cols ? `${h.layout.rows*h.layout.cols}` : '0')} seats){resolveCinemaName(h) ? ` — ${resolveCinemaName(h)}` : ''}
-                  </option>
-                )) : halls.map(h => (
-                  <option key={h._id} value={h._id}>
-                    {h.name} ({h.totalSeats || (h.layout?.rows && h.layout?.cols ? `${h.layout.rows*h.layout.cols}` : '0')} seats){resolveCinemaName(h) ? ` — ${resolveCinemaName(h)}` : ''}
-                  </option>
-                ))}
+              <select name="hallIds" value={formData.hallIds||[]} onChange={handleFormChange} multiple required disabled={!formData.cinemaIds || formData.cinemaIds.length === 0} className="w-full h-40 px-2 py-2 bg-surface-500 border rounded disabled:opacity-50 disabled:cursor-not-allowed">
+                {formData.cinemaIds && formData.cinemaIds.length > 0 ? (
+                  modalHalls.length > 0 ? modalHalls.map(h => (
+                    <option key={h._id} value={h._id}>
+                      {h.name} ({h.totalSeats || (h.layout?.rows && h.layout?.cols ? `${h.layout.rows*h.layout.cols}` : '0')} seats){resolveCinemaName(h) ? ` — ${resolveCinemaName(h)}` : ''}
+                    </option>
+                  )) : (
+                    <option value="" disabled>Loading halls...</option>
+                  )
+                ) : (
+                  <option value="" disabled>Please select cinemas first</option>
+                )}
               </select>
             </div>
           </div>

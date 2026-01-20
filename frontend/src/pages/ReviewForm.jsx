@@ -11,7 +11,6 @@ export default function ReviewForm() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
-  const [movie, setMovie] = useState(null); // <-- keep for movie details usage
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [reviews, setReviews] = useState({});
@@ -48,14 +47,13 @@ export default function ReviewForm() {
         if (!response.ok) throw new Error('Movie not found');
 
         const movieData = await response.json();
-        setMovie(movieData);
 
         // Initialize review for this single movie
         setReviews({
           [movieId]: { rating: 5, comment: '', movie: movieData }
         });
       }
-    } catch (err) {
+    } catch {
       toast.error('Failed to load details');
       navigate('/');
     } finally {
