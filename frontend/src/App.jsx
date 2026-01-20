@@ -34,6 +34,7 @@ import Payment from './pages/Payment';
 import Receipt from './pages/Receipt';
 import Orders from './pages/Orders';
 import SnackOverviewPage from './pages/snackoverviewpage';
+import ReviewForm from './pages/ReviewForm';
 import { AdminOnlyRoute } from './components/ProtectedRoute';
 import { Navigate } from 'react-router-dom';
 
@@ -69,6 +70,8 @@ function AppContent() {
       <Route path="/payment" element={<Payment />} />
       <Route path="/receipt" element={<Receipt />} />
       <Route path="/orders" element={<Orders />} />
+      <Route path="/review/:orderId" element={<ReviewForm />} />
+      <Route path="/review/movie/:movieId" element={<ReviewForm />} />
 
       {/* Nested admin routes under /admin-dashboard to ensure admin lands in dashboard layout */}
       <Route path="/admin-dashboard" element={<AdminOnlyRoute><AdminLayout /></AdminOnlyRoute>}>

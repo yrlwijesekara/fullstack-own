@@ -19,6 +19,7 @@ const cinemaRoutes = require("./routes/cinemas");
 const purchaseRoutes = require("./routes/purchaseRoute");
 const checkoutRoutes = require("./routes/checkout");
 const ordersRoutes = require("./routes/orders");
+const reviewsRoutes = require("./routes/reviews");
 
 // Import middleware
 const { protect } = require("./middleware/auth");
@@ -67,6 +68,7 @@ app.use('/api/snacks', snackRoutes);
 app.use('/api/purchases', purchaseRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/orders', ordersRoutes);
+app.use('/api/reviews', reviewsRoutes);
 
 // General upload route for any file uploads
 app.post('/api/upload', protect, uploadSingle('file', 'uploads'), (req, res) => {

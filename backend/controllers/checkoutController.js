@@ -3,11 +3,102 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { sendEmail } = require('../config/email');
 const Booking = require('../models/Booking');
 const Showtime = require('../models/Showtime');
 const Snack = require('../models/Snack');
 const Purchase = require('../models/Purchase');
 const Order = require('../models/Order');
+
+// Generate HTML email receipt
+function generateEmailReceipt(user, order, receiptBase64) {
+  const orderId = order._id.toString().slice(-8);
+  const reviewUrl = `${process.env.FRONTEND_URL}/review/${order._id}`;
+
+  let html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9f9f9; padding: 20px;">
+      <div style="background-color: #35003B; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="margin: 0; font-size: 24px;">ENIMATE Cinema</h1>
+        <p style="margin: 5px 0 0 0; font-size: 14px;">Your Ultimate Movie Experience</p>
+      </div>
+      
+      <div style="background-color: white; padding: 20px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h2 style="color: #35003B; margin-top: 0;">Order Receipt #${orderId}</h2>
+        
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #35003B;">Customer Information</h3>
+          <p><strong>Name:</strong> ${user.name || 'N/A'}</p>
+          <p><strong>Email:</strong> ${user.email}</p>
+          <p><strong>Order Date:</strong> ${new Date().toLocaleDateString()}</p>
+          <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
+        </div>`;
+
+  let totalAmount = 0;
+
+  if (order.bookings && order.bookings.length > 0) {
+    html += `
+        <div style="margin: 20px 0;">
+          <h3 style="color: #35003B;">Movie Tickets</h3>`;
+    
+    order.bookings.forEach(booking => {
+      const showtime = booking.showtimeId;
+      const movie = showtime?.movieId;
+      totalAmount += booking.totalPrice || 0;
+      
+      html += `
+          <div style="border: 1px solid #e9ecef; border-radius: 5px; padding: 15px; margin: 10px 0; background-color: #f8f9fa;">
+            <h4 style="margin-top: 0; color: #35003B;">${movie?.title || 'Movie'}</h4>
+            <p><strong>Cinema:</strong> ${showtime?.cinemaId?.name || 'N/A'}</p>
+            <p><strong>Hall:</strong> ${showtime?.hallId?.name || 'N/A'}</p>
+            <p><strong>Showtime:</strong> ${showtime ? new Date(showtime.startTime).toLocaleString() : 'N/A'}</p>
+            <p><strong>Seats:</strong> ${booking.seats?.join(', ') || 'N/A'}</p>
+            <p><strong>Tickets:</strong> ${booking.adultCount || 0} Adult${(booking.adultCount || 0) !== 1 ? 's' : ''}, ${booking.childCount || 0} Child${(booking.childCount || 0) !== 1 ? 'ren' : ''}</p>
+            <p style="font-weight: bold; color: #35003B;">Price: LKR ${booking.totalPrice?.toLocaleString() || '0'}</p>
+          </div>`;
+    });
+  }
+
+  if (order.purchase && order.purchase.items && order.purchase.items.length > 0) {
+    html += `
+        <div style="margin: 20px 0;">
+          <h3 style="color: #35003B;">Concessions</h3>`;
+    
+    order.purchase.items.forEach(item => {
+      totalAmount += (item.price || 0) * (item.quantity || 0);
+      
+      html += `
+          <div style="border: 1px solid #e9ecef; border-radius: 5px; padding: 15px; margin: 10px 0; background-color: #f8f9fa;">
+            <h4 style="margin-top: 0; color: #35003B;">${item.name || 'Snack'}</h4>
+            <p><strong>Quantity:</strong> ${item.quantity || 0}</p>
+            <p><strong>Price per item:</strong> LKR ${(item.price || 0).toLocaleString()}</p>
+            <p style="font-weight: bold; color: #35003B;">Subtotal: LKR ${((item.price || 0) * (item.quantity || 0)).toLocaleString()}</p>
+          </div>`;
+    });
+  }
+
+  html += `
+        <div style="background-color: #35003B; color: white; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center;">
+          <h3 style="margin: 0;">Total Amount: LKR ${totalAmount.toLocaleString()}</h3>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${reviewUrl}" style="background-color: #F4C95D; color: #35003B; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Write a Review</a>
+        </div>
+        
+        <div style="background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 20px 0; font-size: 12px; color: #6c757d;">
+          <p><strong>Important:</strong> Please keep this receipt for your records. Show this receipt at the cinema entrance for movie tickets.</p>
+          <p>For any inquiries, contact us at support@enimate.lk</p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef; color: #6c757d; font-size: 12px;">
+          <p>Thank you for choosing ENIMATE Cinema!</p>
+          <p>© 2024 ENIMATE. All rights reserved.</p>
+        </div>
+      </div>
+    </div>`;
+
+  return html;
+}
 
 // Helper to render a PDF receipt into base64
 function generateReceiptBase64({ user, bookings = [], purchase = null, paymentMethod = 'cash' }) {
@@ -320,6 +411,15 @@ exports.checkout = async (req, res) => {
 
     // Populate order for response
     const populatedOrder = await Order.findById(orderDoc._id).populate({ path: 'bookings', populate: { path: 'showtimeId', populate: { path: 'movieId' } } }).populate('purchase');
+
+    // Send email receipt
+    try {
+      const emailHtml = generateEmailReceipt(user, populatedOrder, receiptBase64);
+      await sendEmail(user.email, `ENIMATE - Order Receipt #${orderDoc._id.toString().slice(-8)}`, emailHtml);
+    } catch (emailError) {
+      console.error('Email send error:', emailError);
+      // Don't fail the order if email fails
+    }
 
     res.status(201).json({ success: true, order: populatedOrder, receipt: receiptBase64 });
   } catch (err) {

@@ -6,6 +6,7 @@ import BackButton from '../components/BackButton';
 import Modal from '../components/Modal';
 import LoadingLogo from '../components/LoadingLogo';
 import { fetchMovieById, deleteMovie } from '../services/movieService';
+import { API_BASE_URL } from '../utils/api';
 
 export default function MovieDetails() {
   // Get movie ID from URL path (e.g., /movies/123)
@@ -16,13 +17,17 @@ export default function MovieDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleteModal, setDeleteModal] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
   const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     if (movieId) {
       loadMovie();
+      loadReviews();
     }
+    // eslint-disable-next-line
   }, [movieId]);
 
   const loadMovie = async () => {
@@ -39,6 +44,21 @@ export default function MovieDetails() {
     }
   };
 
+  const loadReviews = async () => {
+    setReviewsLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/reviews/movie/${movieId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setReviews(data);
+      }
+    } catch (err) {
+      console.error('Error loading reviews:', err);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
   const handleDelete = async () => {
     try {
       await deleteMovie(movieId);
@@ -49,14 +69,14 @@ export default function MovieDetails() {
     }
   };
 
-  const handleBuyTickets = (showtime = null) => {
+  // Remove 'showtime' parameter as it is unused to fix lint error
+  const handleBuyTickets = () => {
     if (!user) {
       // Redirect to login if not authenticated
       alert('Please login to book tickets');
       navigate('/login');
       return;
     }
-    
     // Navigate to movie showtimes page
     navigate(`/movies/${movieId}/showtimes`);
   };
@@ -163,7 +183,7 @@ export default function MovieDetails() {
             {/* Buy Tickets Button - Primary CTA */}
             <div className="mb-8">
               <button
-                  onClick={() => handleBuyTickets()}
+                  onClick={handleBuyTickets}
                   className="w-full sm:w-auto px-6 sm:px-12 py-4 bg-primary-500 text-text-primary font-bold text-lg uppercase tracking-widest hover:bg-primary-600 transition border border-secondary-400 shadow-lg rounded-lg"
                 >
                   🎫 Buy Tickets
@@ -281,21 +301,26 @@ export default function MovieDetails() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             {/* Average Rating */}
             <div className="text-center p-8 border border-secondary-400 bg-surface-600 rounded-lg">
-              <div className="text-5xl font-bold mb-2 text-secondary-300">{movie.rating || '0.0'}</div>
+              <div className="text-5xl font-bold mb-2 text-secondary-300">
+                {reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : '0.0'}
+              </div>
               <div className="flex justify-center gap-1 mb-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <span key={star} className="text-2xl text-accent-gold">
-                    {star <= Math.round(movie.rating || 0) ? '★' : '☆'}
+                    {star <= Math.round(reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0) ? '★' : '☆'}
                   </span>
                 ))}
               </div>
-              <p className="text-sm text-text-muted uppercase tracking-wide">Based on 274 ratings</p>
+              <p className="text-sm text-text-muted uppercase tracking-wide">
+                Based on {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+              </p>
             </div>
 
             {/* Rating Distribution */}
             <div className="space-y-2">
               {[5, 4, 3, 2, 1].map((stars) => {
-                const percentage = stars === 5 ? 65 : stars === 4 ? 20 : stars === 3 ? 10 : stars === 2 ? 3 : 2;
+                const count = reviews.filter(r => r.rating === stars).length;
+                const percentage = reviews.length > 0 ? Math.round((count / reviews.length) * 100) : 0;
                 return (
                   <div key={stars} className="flex items-center gap-3">
                     <span className="text-sm font-bold w-4 text-text-secondary">{stars}</span>
@@ -316,7 +341,10 @@ export default function MovieDetails() {
           {/* Write Review Button */}
           {user && (
             <div className="mb-8">
-              <button className="px-8 py-3 bg-primary-500 text-text-primary font-bold uppercase tracking-wider hover:bg-primary-600 border border-secondary-400 rounded-lg shadow-lg">
+              <button
+                onClick={() => navigate(`/review/movie/${movie._id}`)}
+                className="px-8 py-3 bg-primary-500 text-text-primary font-bold uppercase tracking-wider hover:bg-primary-600 border border-secondary-400 rounded-lg shadow-lg"
+              >
                 Write a Review
               </button>
             </div>
@@ -324,85 +352,55 @@ export default function MovieDetails() {
 
           {/* User Reviews */}
           <div className="space-y-6 mb-8">
-            {/* Sample Review 1 */}
-            <div className="p-6 border border-secondary-400 bg-surface-600 rounded-lg">
-              <div className="flex items-start gap-4 mb-3">
-                <div className="w-12 h-12 rounded-full bg-surface-500 flex items-center justify-center border-2 border-secondary-400">
-                  <span className="text-xl text-secondary-300">👤</span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <p className="font-bold uppercase text-sm text-text-primary">JOHN MILLER</p>
-                      <div className="flex gap-1 text-sm text-accent-gold">
-                        {'★★★★★'.split('').map((star, i) => (
-                          <span key={i}>{star}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-xs text-text-muted">Dec 14, 2024</p>
-                  </div>
-                  <p className="text-sm text-text-secondary leading-relaxed">
-                    Absolutely amazing movie! The visuals were stunning and the story kept me engaged throughout. Highly recommend watching it in theaters.
-                  </p>
-                </div>
+            {reviewsLoading ? (
+              <div className="text-center py-8">
+                <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-text-secondary">Loading reviews...</p>
               </div>
-            </div>
-
-            {/* Sample Review 2 */}
-            <div className="p-6 border border-secondary-400 bg-surface-600 rounded-lg">
-              <div className="flex items-start gap-4 mb-3">
-                <div className="w-12 h-12 rounded-full bg-surface-500 flex items-center justify-center border-2 border-secondary-400">
-                  <span className="text-xl text-secondary-300">👤</span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <p className="font-bold uppercase text-sm text-text-primary">JANE SMITH</p>
-                      <div className="flex gap-1 text-sm text-accent-gold">
-                        {'★★★★☆'.split('').map((star, i) => (
-                          <span key={i}>{star}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-xs text-text-muted">Dec 11, 2024</p>
-                  </div>
-                  <p className="text-sm text-text-secondary leading-relaxed">
-                    Pretty good overall. Some pacing issues in the middle but the acting made up for it. Worth watching.
-                  </p>
-                </div>
+            ) : reviews.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">💬</div>
+                <h3 className="text-xl font-bold mb-2 text-text-primary">No Reviews Yet</h3>
+                <p className="text-text-secondary">Be the first to review this movie!</p>
               </div>
-            </div>
-
-            {/* Sample Review 3 */}
-            <div className="p-6 border border-secondary-400 bg-surface-600 rounded-lg">
-              <div className="flex items-start gap-4 mb-3">
-                <div className="w-12 h-12 rounded-full bg-surface-500 flex items-center justify-center border-2 border-secondary-400">
-                  <span className="text-xl text-secondary-300">👤</span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <p className="font-bold uppercase text-sm text-text-primary">BOB WILSON</p>
-                      <div className="flex gap-1 text-sm text-accent-gold">
-                        {'★★★☆☆'.split('').map((star, i) => (
-                          <span key={i}>{star}</span>
-                        ))}
-                      </div>
+            ) : (
+              reviews.map((review) => (
+                <div key={review._id} className="p-6 border border-secondary-400 bg-surface-600 rounded-lg">
+                  <div className="flex items-start gap-4 mb-3">
+                    <div className="w-12 h-12 rounded-full bg-surface-500 flex items-center justify-center border-2 border-secondary-400">
+                      <span className="text-xl text-secondary-300">👤</span>
                     </div>
-                    <p className="text-xs text-text-muted">Dec 9, 2024</p>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <p className="font-bold uppercase text-sm text-text-primary">
+                            {review.userId?.name || 'Anonymous'}
+                          </p>
+                          <div className="flex gap-1 text-sm text-accent-gold">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <span key={star}>
+                                {star <= review.rating ? '★' : '☆'}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-xs text-text-muted">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <p className="text-sm text-text-secondary leading-relaxed">
+                        {review.comment}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-sm text-text-secondary leading-relaxed">
-                    Great movie but nothing memorable. Worth a watch but don't go in with too high expectations.
-                  </p>
                 </div>
-              </div>
-            </div>
+              ))
+            )}
           </div>
 
           {/* Load More Button */}
           <div className="text-center">
-            <button className="px-8 py-3 border border-secondary-400 bg-surface-600 text-text-primary font-bold uppercase tracking-wider hover:bg-primary-500 hover:border-primary-500 transition rounded-lg">
+            <button className="px-8 py-3 border border-secondary-400 bg-surface-600 text-text-primary font-bold uppercase tracking-wider hover:bg-primary-500 transition rounded-lg">
               Load More Reviews
             </button>
           </div>
