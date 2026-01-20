@@ -15,6 +15,8 @@ function generateEmailReceipt(user, order, receiptBase64) {
   const orderId = order._id.toString().slice(-8);
   const reviewUrl = `${process.env.FRONTEND_URL}/review/${order._id}`;
 
+  const displayName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.name || user?.email || 'Customer';
+
   let html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9f9f9; padding: 20px;">
       <div style="background-color: #35003B; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
@@ -27,7 +29,7 @@ function generateEmailReceipt(user, order, receiptBase64) {
         
         <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
           <h3 style="margin-top: 0; color: #35003B;">Customer Information</h3>
-          <p><strong>Name:</strong> ${user.name || 'N/A'}</p>
+          <p><strong>Name:</strong> ${displayName}</p>
           <p><strong>Email:</strong> ${user.email}</p>
           <p><strong>Order Date:</strong> ${new Date().toLocaleDateString()}</p>
           <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
@@ -48,8 +50,8 @@ function generateEmailReceipt(user, order, receiptBase64) {
       html += `
           <div style="border: 1px solid #e9ecef; border-radius: 5px; padding: 15px; margin: 10px 0; background-color: #f8f9fa;">
             <h4 style="margin-top: 0; color: #35003B;">${movie?.title || 'Movie'}</h4>
-            <p><strong>Cinema:</strong> ${showtime?.cinemaId?.name || 'N/A'}</p>
-            <p><strong>Hall:</strong> ${showtime?.hallId?.name || 'N/A'}</p>
+            <p><strong>Cinema:</strong> ${showtime?.cinemaId?.name || showtime?.cinemaName || 'N/A'}</p>
+            <p><strong>Hall:</strong> ${showtime?.hallId?.name || showtime?.hallName || 'N/A'}</p>
             <p><strong>Showtime:</strong> ${showtime ? new Date(showtime.startTime).toLocaleString() : 'N/A'}</p>
             <p><strong>Seats:</strong> ${booking.seats?.join(', ') || 'N/A'}</p>
             <p><strong>Tickets:</strong> ${booking.adultCount || 0} Adult${(booking.adultCount || 0) !== 1 ? 's' : ''}, ${booking.childCount || 0} Child${(booking.childCount || 0) !== 1 ? 'ren' : ''}</p>
@@ -157,8 +159,9 @@ function generateReceiptBase64({ user, bookings = [], purchase = null, paymentMe
       doc.moveTo(50, yPos + 25).lineTo(doc.page.width - 50, yPos + 25).stroke(borderColor);
 
       if (user) {
+        const pdfName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.name || user.email || 'N/A';
         doc.fontSize(10).font('Helvetica').fillColor(textColor);
-        doc.text(`Name: ${user.name || 'N/A'}`, 60, yPos + 30);
+        doc.text(`Name: ${pdfName}`, 60, yPos + 30);
         doc.text(`Email: ${user.email || 'N/A'}`, 300, yPos + 30);
       }
       doc.text(`Date: ${new Date().toLocaleDateString()}`, 60, yPos + 45);
@@ -410,7 +413,20 @@ exports.checkout = async (req, res) => {
     session.endSession();
 
     // Populate order for response
-    const populatedOrder = await Order.findById(orderDoc._id).populate({ path: 'bookings', populate: { path: 'showtimeId', populate: { path: 'movieId' } } }).populate('purchase');
+    // Populate bookings -> showtimeId -> movieId, cinemaId and hallId so email/PDF have full info
+    const populatedOrder = await Order.findById(orderDoc._id)
+      .populate({
+        path: 'bookings',
+        populate: {
+          path: 'showtimeId',
+          populate: [
+            { path: 'movieId' },
+            { path: 'cinemaId' },
+            { path: 'hallId' }
+          ]
+        }
+      })
+      .populate('purchase');
 
     // Send email receipt
     try {
