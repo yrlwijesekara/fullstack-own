@@ -84,6 +84,11 @@ app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "Server is running" });
 });
 
+// Root route
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Backend is running successfully" });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
