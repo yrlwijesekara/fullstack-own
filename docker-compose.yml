@@ -20,7 +20,7 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: "http://backend:5008"
+        VITE_API_URL: "http://localhost:5008/api"
     ports:
       - "5173:80"
     restart: unless-stopped
