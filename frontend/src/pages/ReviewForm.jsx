@@ -27,7 +27,36 @@ export default function ReviewForm() {
           },
         });
 
-        if (!response.ok) throw new Error('Order not found');
+        if (!response.ok) {
+          // Handle specific error cases
+          if (response.status === 401) {
+            toast.error('Please log in to write a review');
+            // Store the intended destination to redirect after login
+            localStorage.setItem('redirectAfterLogin', `/review/${orderId}`);
+            navigate('/login');
+            return;
+          } else if (response.status === 403) {
+            // Order belongs to different account
+            const errorData = await response.json().catch(() => ({}));
+            const message = errorData.message || 'This order belongs to a different account';
+            toast.error(message, { duration: 5000 });
+            // Show additional helpful message
+            toast('Please check the email that received this review link and log in with that account', { 
+              duration: 6000,
+              icon: 'ℹ️'
+            });
+            setTimeout(() => {
+              localStorage.removeItem('redirectAfterLogin');
+              navigate('/login');
+            }, 2000);
+            return;
+          } else if (response.status === 404) {
+            throw new Error('Order not found');
+          } else {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to load order details');
+          }
+        }
 
         const data = await response.json();
         setOrder(data);
@@ -53,8 +82,8 @@ export default function ReviewForm() {
           [movieId]: { rating: 5, comment: '', movie: movieData }
         });
       }
-    } catch {
-      toast.error('Failed to load details');
+    } catch (error) {
+      toast.error(error.message || 'Failed to load details');
       navigate('/');
     } finally {
       setLoading(false);
@@ -63,11 +92,17 @@ export default function ReviewForm() {
 
   useEffect(() => {
     if (!user) {
+      // Store redirect path before navigating to login
+      if (orderId) {
+        localStorage.setItem('redirectAfterLogin', `/review/${orderId}`);
+      } else if (movieId) {
+        localStorage.setItem('redirectAfterLogin', `/review/movie/${movieId}`);
+      }
       navigate('/login');
       return;
     }
     fetchOrder();
-  }, [user, fetchOrder, navigate]);
+  }, [user, fetchOrder, navigate, orderId, movieId]);
 
   const handleReviewChange = (movieId, field, value) => {
     setReviews(prev => ({

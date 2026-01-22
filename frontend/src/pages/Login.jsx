@@ -49,9 +49,15 @@ export default function Login() {
       toast.success(`Welcome back${isAdmin ? ', Admin' : ''}, ${data.user.firstName}! You have successfully logged in.`);
       
       // Navigate back to previous page if available, otherwise based on role
+      const redirectAfterLogin = localStorage.getItem('redirectAfterLogin');
       const from = location.state?.from?.pathname;
+      
       setTimeout(() => {
-        if (from && from !== '/login' && from !== '/register') {
+        // First priority: redirect path stored by review link
+        if (redirectAfterLogin) {
+          localStorage.removeItem('redirectAfterLogin');
+          navigate(redirectAfterLogin);
+        } else if (from && from !== '/login' && from !== '/register') {
           navigate(from);
         } else if (data.user.role === 'admin') {
           navigate('/admin-dashboard');

@@ -17,16 +17,37 @@ exports.getUserOrders = async (req, res) => {
 // Get a single order for the current user (used by frontend when opening review link)
 exports.getOrderById = async (req, res) => {
   try {
+    console.log(`[Review] Fetching order ${req.params.id} for user ${req.user._id} (${req.user.email})`);
+    
+    // First, check if the order exists at all
+    const orderExists = await Order.findById(req.params.id).populate('userId', 'email firstName lastName');
+    
+    if (!orderExists) {
+      console.log(`[Review] Order ${req.params.id} does not exist in database`);
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    console.log(`[Review] Order exists, belongs to user ${orderExists.userId?._id} (${orderExists.userId?.email})`);
+
+    // Now check if it belongs to the current user
     const order = await Order.findOne({ _id: req.params.id, userId: req.user._id })
       .populate({ path: 'bookings', populate: { path: 'showtimeId', populate: [{ path: 'movieId' }, { path: 'cinemaId' }, { path: 'hallId' }] } })
       .populate('purchase');
 
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      // Order exists but doesn't belong to this user
+      console.log(`[Review] Order ${req.params.id} belongs to ${orderExists.userId?.email}, not ${req.user.email}`);
+      return res.status(403).json({ 
+        message: `This order belongs to a different account (${orderExists.userId?.email}). Please log in with the correct account.`,
+        wrongAccount: true,
+        correctEmail: orderExists.userId?.email
+      });
     }
+    
+    console.log(`[Review] Successfully fetched order for correct user`);
     res.status(200).json(order);
   } catch (err) {
-    console.error('Get order by id error:', err);
+    console.error('[Review] Get order by id error:', err);
     res.status(500).json({ message: 'Server error fetching order' });
   }
 };
